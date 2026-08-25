@@ -725,6 +725,49 @@
   box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
 }
 
+.wba-password-input-wrap {
+  position: relative;
+}
+
+.wba-password-input-wrap input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.wba-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #c084fc;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+}
+
+.wba-password-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.wba-password-toggle:hover,
+.wba-password-toggle:focus-visible {
+  color: #e2d9f3;
+}
+
+.wba-password-toggle:focus-visible {
+  outline: 2px solid #c084fc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .wba-form-meta {
   display: flex;
   justify-content: space-between;

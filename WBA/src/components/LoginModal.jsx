@@ -4,6 +4,7 @@ import Logo from './Logo';
 export default function LoginModal({ isOpen, onClose }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   if (!isOpen) return null;
@@ -60,14 +61,34 @@ export default function LoginModal({ isOpen, onClose }) {
 
             <div className="wba-form-group">
               <label htmlFor="modal-password">Password</label>
+              <div className="wba-password-input-wrap">
               <input
                 id="modal-password"
-                type="password"
+                type={isPasswordVisible ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+                <button
+                  type="button"
+                  className="wba-password-toggle"
+                  onClick={() => setIsPasswordVisible((visible) => !visible)}
+                  aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+                  aria-pressed={isPasswordVisible}
+                >
+                  {isPasswordVisible ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 8.3 4.1 9.5 6-0.6 1-1.7 2.5-3.2 3.8M6.2 6.2C4.1 7.6 2.8 9.4 2.5 10c1.2 1.9 4.5 6 9.5 6 1.2 0 2.4-.2 3.4-.7" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z" />
+                      <circle cx="12" cy="12" r="2.8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="wba-form-meta">
