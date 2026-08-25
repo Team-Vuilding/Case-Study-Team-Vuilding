@@ -34,8 +34,8 @@ export default function LoginModal({ isOpen, onClose }) {
 
         <div className="wba-modal-header">
           <Logo className="wba-modal-logo" />
-          <h2>Welcome Back</h2>
-          <p>Access your real-time inventory intelligence dashboard</p>
+          <h2>Welcome Back Team Vuilding!</h2>
+          <p>Login your credentials</p>
         </div>
 
         {isSubmitted ? (

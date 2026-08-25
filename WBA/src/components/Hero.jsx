@@ -22,7 +22,7 @@ export default function Hero({ onGetStarted }) {
               className="wba-cta-primary"
               onClick={onGetStarted}
             >
-              Get Started Free
+              Log in as Staff
             </button>
             <a href="#features" className="wba-cta-secondary">
               Explore Features &rarr;
