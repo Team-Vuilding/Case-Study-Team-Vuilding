@@ -15,7 +15,7 @@ function App() {
       {/* Background Ambient Glows */}
       <div className="wba-bg-ambient-top"></div>
       <div className="wba-bg-ambient-right"></div>
-      
+
       {/* Header / Navbar */}
       <Navbar
         onOpenLogin={() => setIsLoginOpen(true)}
@@ -26,9 +26,7 @@ function App() {
       {/* Main Content */}
       <main className="wba-main-content">
         {/* Exact Recreation Hero Section */}
-        <Hero
-          onGetStarted={() => setIsLoginOpen(true)}
-        />
+        <Hero onGetStarted={() => setIsLoginOpen(true)} />
 
         {/* Detailed Landing Sections */}
         <AboutSection />
