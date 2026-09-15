@@ -8,21 +8,48 @@ import AdminDashboard from './components/dashboard/AdminDashboard';
 import './App.css';
 
 function App() {
-  // Start on landing page — user must authenticate to access dashboard
-  const [currentView, setCurrentView] = useState('landing');
+  // Check localStorage for persisted user session across page refreshes
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('wba_auth_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [currentView, setCurrentView] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('wba_auth_user');
+      return savedUser ? 'dashboard' : 'landing';
+    } catch {
+      return 'landing';
+    }
+  });
+
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
-  const [currentUser, setCurrentUser] = useState(null);
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     setCurrentView('dashboard');
     setIsLoginOpen(false);
+    try {
+      localStorage.setItem('wba_auth_user', JSON.stringify(user));
+    } catch {
+      // ignore storage error
+    }
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentView('landing');
+    try {
+      localStorage.removeItem('wba_auth_user');
+      localStorage.removeItem('wba_active_tab');
+    } catch {
+      // ignore storage error
+    }
   };
 
   if (currentView === 'dashboard' && currentUser) {

@@ -10,9 +10,24 @@ import './dashboard.css';
 
 export default function AdminDashboard({ currentUser, onLogout }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      return localStorage.getItem('wba_active_tab') || 'dashboard';
+    } catch {
+      return 'dashboard';
+    }
+  });
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [liveLogs, setLiveLogs] = useState([]);
+
+  const handleSelectTab = (tab) => {
+    setActiveTab(tab);
+    try {
+      localStorage.setItem('wba_active_tab', tab);
+    } catch {
+      // ignore storage error
+    }
+  };
 
   const handleAddAuditLog = (newLog) => {
     setLiveLogs((prev) => [newLog, ...prev]);
@@ -96,8 +111,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       <DashboardSidebar
         isCollapsed={isSidebarCollapsed}
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        onOpenAddProduct={() => setActiveTab('inventory')}
+        onSelectTab={handleSelectTab}
+        onOpenAddProduct={() => handleSelectTab('inventory')}
       />
 
       {/* Main Content Area */}
