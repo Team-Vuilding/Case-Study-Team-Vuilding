@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LiveAuditTrail from './LiveAuditTrail';
+
 import { INITIAL_AUDIT_LOGS } from '../../data/mockInventoryData';
 
 const SEVERITY_LABELS = ['All', 'critical', 'warning', 'good', 'info'];
@@ -119,16 +119,7 @@ export default function AuditLogsSection({ externalLogs = [] }) {
         </div>
       </div>
 
-      {/* Live event trigger sub-section */}
-      <div className="wba-glow-card">
-        <div className="wba-card-heading" style={{ marginBottom: '14px' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-          </svg>
-          <span>Live Event Simulator</span>
-        </div>
-        <LiveAuditTrail externalLogs={externalLogs} />
-      </div>
+
     </div>
   );
 }
