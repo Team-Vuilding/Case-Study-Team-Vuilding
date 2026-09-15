@@ -31,13 +31,14 @@
 
 /* App View Container */
 .wba-dashboard-app {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: radial-gradient(circle at 50% 10%, #1c0836 0%, #08030f 50%, #05010a 100%);
   color: var(--wba-text-main);
   display: flex;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* Background Ambient Elements */
@@ -73,15 +74,19 @@
 .wba-dash-sidebar {
   width: 250px;
   min-width: 250px;
+  height: 100vh;
+  max-height: 100vh;
   background: #000000;
   border-right: 1px solid rgba(168, 85, 247, 0.18);
   display: flex;
   flex-direction: column;
   padding: 24px 20px 24px 24px;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
   box-sizing: border-box;
   transition: width 0.25s ease, min-width 0.25s ease;
+  flex-shrink: 0;
 }
 
 .wba-dash-sidebar.collapsed {
@@ -150,8 +155,15 @@
 .wba-dash-nav {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.wba-dash-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .wba-dash-nav-item {
@@ -222,8 +234,9 @@
   margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-top: 24px;
+  gap: 12px;
+  padding-top: 16px;
+  flex-shrink: 0;
 }
 
 .wba-dash-divider {
@@ -241,9 +254,14 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 20px 24px 20px;
   position: relative;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .wba-dashboard-frame {
