@@ -6,7 +6,6 @@ export default function DashboardHeader({
   currentRole = 'Admin',
   unreadAlertCount = 3,
   onOpenNotifications,
-  onOpenAddProduct,
   onViewLandingPage,
 }) {
   return (

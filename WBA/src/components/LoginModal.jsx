@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
 
-export default function LoginModal({ isOpen, onClose }) {
+export default function LoginModal({ isOpen, onClose, onSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -14,7 +14,11 @@ export default function LoginModal({ isOpen, onClose }) {
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     }, 1200);
   };
 

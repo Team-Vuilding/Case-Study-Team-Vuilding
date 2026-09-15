@@ -2,7 +2,6 @@ import React from 'react';
 
 export default function MetricKpiCard({
   title,
-  tag,
   value,
   subtext,
   meterPercent,
