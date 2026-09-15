@@ -9,10 +9,10 @@ export default function DashboardOverview() {
       {/* Top Row: 3 KPI Summary Cards */}
       <section className="wba-top-metrics-row" aria-label="Key Performance Indicators">
         <MetricKpiCard
-          title="Warehouse Capacity & Holding Cost"
-          badgeText="88% CAPACITY"
+          title="Monthly Storage Cost"
+          badgeText="88% FULL"
           value="₱84,200 /mo"
-          subtext={<>Excess fees: <strong>₱48,500</strong> — 340 off-peak AC units overstocked</>}
+          subtext={<>Excess storage fees: <strong>₱48,500</strong> from overstock</>}
           meterPercent={DASHBOARD_METRICS.holdingCosts.warehouseCapacityUsedPercent}
           status={DASHBOARD_METRICS.holdingCosts.severity}
           icon={
@@ -23,10 +23,10 @@ export default function DashboardOverview() {
           }
         />
         <MetricKpiCard
-          title="Real-Time Discrepancy Control"
-          badgeText="-33 UNITS VARIANCE"
-          value="12 vs 45 Units"
-          subtext={<>Smart Thermostats: <strong>12 Physical</strong> vs 45 on legacy paper record</>}
+          title="Stock Count Mismatch"
+          badgeText="NEEDS ATTENTION"
+          value="−33 Units"
+          subtext={<>Smart Thermostat: system shows <strong>45</strong>, actual count is <strong>12</strong></>}
           meterPercent={27}
           status={DASHBOARD_METRICS.shrinkageStatus.severity}
           icon={
@@ -38,10 +38,10 @@ export default function DashboardOverview() {
           }
         />
         <MetricKpiCard
-          title="Perishable Shelf-Life Risk"
-          badgeText="FIFO ENFORCED"
-          value="24 Days to Expiry"
-          subtext={<>Lot 2025-08-A (34 units): <strong>₱42,500</strong> write-off protected</>}
+          title="Nearest Product Expiry"
+          badgeText="24 DAYS LEFT"
+          value="₱42,500 At Risk"
+          subtext={<>Carbon Filter — Batch Aug 2025 (34 units) expiring soon</>}
           meterPercent={91}
           status={DASHBOARD_METRICS.expiryStatus.severity}
           icon={
@@ -53,18 +53,18 @@ export default function DashboardOverview() {
         />
       </section>
 
-      {/* Middle: Seasonal Demand & Dynamic ROP */}
-      <section className="wba-middle-row" aria-label="Demand Forecasting">
+      {/* Middle: Demand Chart */}
+      <section className="wba-middle-row" aria-label="Demand Overview">
         <SeasonalForecastChart />
       </section>
 
-      {/* Summary Cards Row — quick stats grid */}
-      <section className="wba-top-metrics-row" aria-label="Operational Quick Stats">
+      {/* Bottom Quick Stats */}
+      <section className="wba-top-metrics-row" aria-label="Quick Stats">
         <MetricKpiCard
-          title="Total SKUs Tracked"
-          badgeText="REAL-TIME"
-          value="4 Active SKUs"
-          subtext={<>Cat A: 2 · Cat B: 1 · Cat C: 1 perishable</>}
+          title="Products Being Tracked"
+          badgeText="ACTIVE"
+          value="4 Products"
+          subtext={<>3 non-perishable · 1 perishable with expiry tracking</>}
           meterPercent={65}
           status="info"
           icon={
@@ -74,10 +74,10 @@ export default function DashboardOverview() {
           }
         />
         <MetricKpiCard
-          title="Online Oversell Incidents Prevented"
-          badgeText="ATP ACTIVE"
-          value="14 Blocked"
-          subtext={<>Available-to-Promise engine active across <strong>all channels</strong></>}
+          title="Online Oversells Blocked"
+          badgeText="PROTECTED"
+          value="14 Prevented"
+          subtext={<>System automatically stops selling when stock is low</>}
           meterPercent={100}
           status="good"
           icon={
@@ -88,10 +88,10 @@ export default function DashboardOverview() {
           }
         />
         <MetricKpiCard
-          title="Monthly Degradation Write-offs Prevented"
-          badgeText="FIFO ENGINE ON"
+          title="Spoilage Losses Prevented"
+          badgeText="THIS MONTH"
           value="₱42,500 Saved"
-          subtext={<>Carbon Filter Lot A: FIFO dispatch enforced on <strong>3 active batches</strong></>}
+          subtext={<>Older batches dispatched first to reduce waste</>}
           meterPercent={80}
           status="good"
           icon={

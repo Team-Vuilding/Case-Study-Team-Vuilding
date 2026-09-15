@@ -103,7 +103,7 @@ export default function PurchaseHistorySection() {
             Purchase History
           </h2>
           <p className="wba-section-page-desc">
-            Complete purchase order ledger with supplier tracking, cost analysis, and delivery status.
+            All purchase orders — view supplier details, amounts, and delivery status.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

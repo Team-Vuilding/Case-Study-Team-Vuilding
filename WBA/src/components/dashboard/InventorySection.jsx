@@ -33,10 +33,10 @@ export default function InventorySection({ onTriggerAudit }) {
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
-            Inventory Management
+            Inventory
           </h2>
           <p className="wba-section-page-desc">
-            Multi-state real-time inventory reconciliation, FIFO / FEFO perishable batch tracking, and Available-to-Promise (ATP) engine.
+            View and manage all product stock — track quantities, resolve mismatches, and monitor expiring batches.
           </p>
         </div>
         <button

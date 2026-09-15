@@ -2,18 +2,12 @@ import React, { useState } from 'react';
 import { SEASONAL_DEMAND_PROFILES } from '../../data/mockInventoryData';
 
 export default function SeasonalForecastChart() {
-  const [activeMode, setActiveMode] = useState('summer'); // 'summer' | 'standard'
-  const [selectedMonth, setSelectedMonth] = useState(5); // June (index 5) by default
-
-  // Seasonal parameters for Portable AC 1.5HP (SKU-AC-101)
-  const leadTimeDays = 21;
-  const avgDailyDemand = activeMode === 'summer' ? 38 : 4;
-  const safetyStock = activeMode === 'summer' ? 180 : 20;
-  
-  // ROP = (Average Daily Demand * Lead Time) + Safety Stock
-  const calculatedROP = (avgDailyDemand * leadTimeDays) + safetyStock;
+  const [activeMode, setActiveMode] = useState('summer');
+  const [selectedMonth, setSelectedMonth] = useState(5);
 
   const maxVal = Math.max(...SEASONAL_DEMAND_PROFILES.map((p) => Math.max(p.demand, p.stockLevel, 1500)));
+
+  const selectedData = SEASONAL_DEMAND_PROFILES[selectedMonth];
 
   return (
     <div className="wba-glow-card wba-forecast-card">
@@ -24,39 +18,32 @@ export default function SeasonalForecastChart() {
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
               <polyline points="17 6 23 6 23 12" />
             </svg>
-            <span>Demand Surge & Dynamic Reorder Point (ROP) Engine</span>
+            <span>Monthly Demand & Stock Overview</span>
           </div>
           <span className="wba-card-desc">
-            Algorithmic buffer stock modeling to eliminate summer stockouts and prevent off-season warehouse holding penalties
+            Tap a month to see demand and stock details. Red bars indicate overstock periods.
           </span>
         </div>
 
-        <div className="wba-card-actions">
-          <div className="wba-formula-capsule" title="Dynamic Reorder Point Formula">
-            <span>ROP = (d̄ × L) + SS</span>
-            <span style={{ color: '#c084fc', fontWeight: 700 }}>= {calculatedROP} Units</span>
-          </div>
-
-          <div className="wba-pill-toggle">
-            <button
-              type="button"
-              className={`wba-pill-btn ${activeMode === 'summer' ? 'active' : ''}`}
-              onClick={() => setActiveMode('summer')}
-            >
-              Peak Summer Mode
-            </button>
-            <button
-              type="button"
-              className={`wba-pill-btn ${activeMode === 'standard' ? 'active' : ''}`}
-              onClick={() => setActiveMode('standard')}
-            >
-              Off-Peak Mode
-            </button>
-          </div>
+        <div className="wba-pill-toggle">
+          <button
+            type="button"
+            className={`wba-pill-btn ${activeMode === 'summer' ? 'active' : ''}`}
+            onClick={() => setActiveMode('summer')}
+          >
+            Peak Season
+          </button>
+          <button
+            type="button"
+            className={`wba-pill-btn ${activeMode === 'standard' ? 'active' : ''}`}
+            onClick={() => setActiveMode('standard')}
+          >
+            Off-Season
+          </button>
         </div>
       </div>
 
-      {/* SVG Interactive Wave & Bar Visualization */}
+      {/* Chart */}
       <div style={{ position: 'relative', height: '170px', width: '100%', marginTop: '8px' }}>
         <svg
           viewBox="0 0 960 170"
@@ -64,12 +51,10 @@ export default function SeasonalForecastChart() {
           preserveAspectRatio="none"
         >
           <defs>
-            {/* Gradient for Summer Demand */}
             <linearGradient id="demandAreaGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#c026d3" stopOpacity="0.45" />
               <stop offset="100%" stopColor="#9333ea" stopOpacity="0.02" />
             </linearGradient>
-
             <linearGradient id="stockBarGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.8" />
               <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.2" />
@@ -81,18 +66,6 @@ export default function SeasonalForecastChart() {
           <line x1="0" y1="80" x2="960" y2="80" stroke="rgba(168, 85, 247, 0.15)" strokeDasharray="4 4" />
           <line x1="0" y1="130" x2="960" y2="130" stroke="rgba(168, 85, 247, 0.15)" strokeDasharray="4 4" />
 
-          {/* Threshold Line for Reorder Point */}
-          <line
-            x1="0"
-            y1={140 - (calculatedROP / maxVal) * 110}
-            x2="960"
-            y2={140 - (calculatedROP / maxVal) * 110}
-            stroke="#f59e0b"
-            strokeWidth="1.8"
-            strokeDasharray="6 4"
-          />
-
-          {/* Month Bars & Points */}
           {SEASONAL_DEMAND_PROFILES.map((p, idx) => {
             const x = (idx / 11) * 880 + 40;
             const barHeight = (p.stockLevel / maxVal) * 110;
@@ -101,7 +74,6 @@ export default function SeasonalForecastChart() {
 
             return (
               <g key={p.month} onClick={() => setSelectedMonth(idx)} style={{ cursor: 'pointer' }}>
-                {/* Stock Level Column */}
                 <rect
                   x={x - 14}
                   y={140 - barHeight}
@@ -113,8 +85,6 @@ export default function SeasonalForecastChart() {
                   strokeWidth="1"
                   opacity={isSelected ? 1 : 0.75}
                 />
-
-                {/* Demand Point */}
                 <circle
                   cx={x}
                   cy={demandY}
@@ -123,8 +93,6 @@ export default function SeasonalForecastChart() {
                   stroke="#ffffff"
                   strokeWidth={isSelected ? 2 : 1}
                 />
-
-                {/* Month Label */}
                 <text
                   x={x}
                   y="160"
@@ -142,8 +110,8 @@ export default function SeasonalForecastChart() {
         </svg>
       </div>
 
-      {/* Interactive Month Insight Banner */}
-      {selectedMonth !== null && (
+      {/* Selected Month Info */}
+      {selectedData && (
         <div
           style={{
             marginTop: '14px',
@@ -160,28 +128,27 @@ export default function SeasonalForecastChart() {
           }}
         >
           <div>
-            <strong style={{ color: '#ffffff' }}>
-              {SEASONAL_DEMAND_PROFILES[selectedMonth].month} Operational Forecast:
-            </strong>{' '}
+            <strong style={{ color: '#ffffff' }}>{selectedData.month}:</strong>{' '}
             <span style={{ color: '#c4b5fd' }}>
-              Projected Demand: <strong>{SEASONAL_DEMAND_PROFILES[selectedMonth].demand} units</strong> | Warehouse Stock: <strong>{SEASONAL_DEMAND_PROFILES[selectedMonth].stockLevel} units</strong> | Monthly Holding Cost: <strong>₱{SEASONAL_DEMAND_PROFILES[selectedMonth].holdingCost.toLocaleString()}</strong>
+              Expected sales: <strong>{selectedData.demand} units</strong> &nbsp;·&nbsp;
+              Stock on hand: <strong>{selectedData.stockLevel} units</strong> &nbsp;·&nbsp;
+              Storage cost: <strong>₱{selectedData.holdingCost.toLocaleString()}</strong>
             </span>
           </div>
-
           <div>
-            {SEASONAL_DEMAND_PROFILES[selectedMonth].isPeakMonth && (
+            {selectedData.isPeakMonth && (
               <span style={{ color: '#ec4899', fontWeight: 700 }}>
-                ⚡ Peak Surge: Automated PO should be staged 45 days prior (April/May) to prevent stockout.
+                ⚡ High-demand month — reorder early to avoid stockouts.
               </span>
             )}
-            {SEASONAL_DEMAND_PROFILES[selectedMonth].isExcessStock && (
+            {selectedData.isExcessStock && (
               <span style={{ color: '#f87171', fontWeight: 700 }}>
-                ⚠️ High Excess Stock: Carrying 920 units into low season drives ₱48,500/mo holding fees.
+                ⚠️ Too much stock — excess units are driving up storage costs.
               </span>
             )}
-            {!SEASONAL_DEMAND_PROFILES[selectedMonth].isPeakMonth && !SEASONAL_DEMAND_PROFILES[selectedMonth].isExcessStock && (
+            {!selectedData.isPeakMonth && !selectedData.isExcessStock && (
               <span style={{ color: '#34d399', fontWeight: 600 }}>
-                ✓ Balanced Replenishment Buffer maintained.
+                ✓ Stock levels are healthy for this period.
               </span>
             )}
           </div>

@@ -11,19 +11,12 @@ export default function FifoExpiryQueue() {
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 14 14" />
             </svg>
-            <span>FIFO / FEFO Expiry Queue</span>
+            <span>Batch Expiry Tracker</span>
           </div>
           <span className="wba-card-desc">
-            Active Carbon Filters (9-month maximum shelf life)
+            Active Carbon Filter batches — oldest stock is dispatched first to reduce waste
           </span>
         </div>
-
-        <span
-          className="wba-kpi-badge wba-badge-critical"
-          style={{ fontSize: '0.72rem' }}
-        >
-          FIFO Enforced
-        </span>
       </div>
 
       <div className="wba-fifo-queue-list">
@@ -43,7 +36,7 @@ export default function FifoExpiryQueue() {
                     isCritical ? 'wba-tag-urgent' : 'wba-kpi-badge wba-badge-good'
                   }`}
                 >
-                  Priority #{batch.dispatchPriority} {isCritical ? '• PULL FIRST' : ''}
+                  {isCritical ? '⚡ Dispatch First' : `Pick Order #${batch.dispatchPriority}`}
                 </span>
               </div>
 
@@ -52,6 +45,7 @@ export default function FifoExpiryQueue() {
                 <strong>{batch.binLocation}</strong>
               </div>
 
+              {/* Shelf age progress bar */}
               <div className="wba-shelf-age-bar">
                 <div
                   className="wba-shelf-age-fill"
@@ -69,10 +63,10 @@ export default function FifoExpiryQueue() {
 
               <div className="wba-batch-meta">
                 <span>
-                  Age: <strong>{batch.currentAgeMonths} mo / 9 mo</strong>
+                  Age: <strong>{batch.currentAgeMonths} of 9 months</strong>
                 </span>
                 <span style={{ color: isCritical ? '#f87171' : 'inherit' }}>
-                  {batch.daysUntilDegraded} days left ({batch.quantityRemaining} units)
+                  {batch.daysUntilDegraded} days until expiry · {batch.quantityRemaining} units left
                 </span>
               </div>
             </div>
@@ -81,9 +75,9 @@ export default function FifoExpiryQueue() {
       </div>
 
       <div className="wba-fifo-instruction-box">
-        <strong>⚠️ WMS Picking Policy Enforced:</strong>
+        <strong>⚠️ Dispatch Reminder:</strong>
         <p style={{ marginTop: '4px' }}>
-          Floor teams must pull from <strong>Rear Bin C-01 (Lot 2025-08-A)</strong> first. Front pallet picking is system-blocked to eliminate rotting stock write-offs.
+          Always pull from <strong>Bin C-01 (Batch Aug 2025)</strong> first. This is the oldest batch and must go out before newer stock.
         </p>
       </div>
     </div>

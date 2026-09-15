@@ -14,7 +14,7 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
             return {
               ...item,
               paperSpreadsheetCount: item.physicalOnHand,
-              status: 'Reconciled & Locked',
+              status: 'Synced',
               statusSeverity: 'good',
             };
           }
@@ -26,12 +26,12 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
         onTriggerAudit({
           id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
           timestamp: new Date().toLocaleTimeString(),
-          eventType: 'LEDGER_RECONCILED',
+          eventType: 'Stock Count Corrected',
           severity: 'good',
-          actor: 'Admin Console (Instant Sync)',
+          actor: 'Admin',
           sku: id,
-          description: `Discrepancy reconciled for ${id}. Available-to-Promise locked to real-time physical count.`,
-          actionTaken: 'Legacy paper discrepancy cleared.',
+          description: `Stock count discrepancy resolved for ${id}. System count updated to match physical count.`,
+          actionTaken: 'Records corrected and synced.',
         });
       }
     }, 800);
@@ -47,15 +47,11 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
-            <span>Real-Time Multi-State Inventory Ledger</span>
+            <span>Inventory Stock Ledger</span>
           </div>
           <span className="wba-card-desc">
-            Continuous reconciliation across Physical On-Hand, Reserved, and Allocated states to prevent overselling
+            Live stock counts across all products — highlights mismatches between physical and system records
           </span>
-        </div>
-
-        <div className="wba-formula-capsule" style={{ fontSize: '0.76rem' }}>
-          ATP = Physical − (Reserved + Allocated)
         </div>
       </div>
 
@@ -63,20 +59,19 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
         <table className="wba-table">
           <thead>
             <tr>
-              <th>SKU / Product</th>
-              <th>Cat</th>
-              <th>Physical On-Hand</th>
-              <th>Reserved (Online)</th>
-              <th>Allocated (Picking)</th>
-              <th>Available (ATP)</th>
-              <th>Legacy Paper Variance</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>In Stock</th>
+              <th>Reserved</th>
+              <th>Being Picked</th>
+              <th>Available to Sell</th>
+              <th>Count Mismatch</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => {
-              // Calculate real-time Available to Promise (ATP)
-              const atp = Math.max(0, item.physicalOnHand - item.reserved - item.allocated);
+              const available = Math.max(0, item.physicalOnHand - item.reserved - item.allocated);
               const variance = item.physicalOnHand - item.paperSpreadsheetCount;
               const hasDiscrepancy = variance !== 0;
 
@@ -84,7 +79,7 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                 <tr key={item.id}>
                   <td>
                     <span className="wba-sku-name">{item.name}</span>
-                    <span className="wba-sku-code">{item.sku} • {item.warehouseBin}</span>
+                    <span className="wba-sku-code">{item.sku} · {item.warehouseBin}</span>
                   </td>
                   <td>
                     <span
@@ -96,31 +91,24 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                           : 'wba-cat-c'
                       }`}
                     >
-                      Cat {item.category}
+                      {item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : 'Perishable'}
                     </span>
                   </td>
-                  <td style={{ fontWeight: 700, color: '#ffffff' }}>
-                    {item.physicalOnHand}
-                  </td>
-                  <td style={{ color: '#fbbf24' }}>
-                    {item.reserved}
-                  </td>
-                  <td style={{ color: '#38bdf8' }}>
-                    {item.allocated}
-                  </td>
+                  <td style={{ fontWeight: 700, color: '#ffffff' }}>{item.physicalOnHand}</td>
+                  <td style={{ color: '#fbbf24' }}>{item.reserved}</td>
+                  <td style={{ color: '#38bdf8' }}>{item.allocated}</td>
                   <td>
-                    <span className={`wba-atp-pill ${atp === 0 ? 'wba-atp-zero' : 'wba-atp-positive'}`}>
-                      {atp} Units
+                    <span className={`wba-atp-pill ${available === 0 ? 'wba-atp-zero' : 'wba-atp-positive'}`}>
+                      {available} units
                     </span>
                   </td>
                   <td>
                     {hasDiscrepancy ? (
-                      <span style={{ color: '#f87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>⚠️ {variance}</span>
-                        <span style={{ fontSize: '0.7rem', color: '#fca5a5' }}>(Paper: {item.paperSpreadsheetCount})</span>
+                      <span style={{ color: '#f87171', fontWeight: 700 }}>
+                        ⚠️ {Math.abs(variance)} {variance < 0 ? 'missing' : 'extra'}
                       </span>
                     ) : (
-                      <span style={{ color: '#34d399', fontWeight: 600 }}>0 (Synced)</span>
+                      <span style={{ color: '#34d399', fontWeight: 600 }}>✓ Accurate</span>
                     )}
                   </td>
                   <td>
@@ -138,10 +126,10 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                         onClick={() => handleReconcile(item.id)}
                         disabled={reconcilingId === item.id}
                       >
-                        {reconcilingId === item.id ? 'Syncing...' : 'Reconcile'}
+                        {reconcilingId === item.id ? 'Fixing...' : 'Fix Count'}
                       </button>
                     ) : (
-                      <span style={{ fontSize: '0.74rem', color: '#a78bfa' }}>Verified</span>
+                      <span style={{ fontSize: '0.74rem', color: '#a78bfa' }}>✓ OK</span>
                     )}
                   </td>
                 </tr>
