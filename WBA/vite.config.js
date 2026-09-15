@@ -4,4 +4,7 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    allowedHosts: ['octane-jumble-uncurious.ngrok-free.dev']
+  }
 })
