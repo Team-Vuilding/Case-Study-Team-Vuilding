@@ -1005,12 +1005,140 @@
   .wba-top-metrics-row {
     grid-template-columns: 1fr;
   }
-  .wba-sidebar {
+  .wba-dash-sidebar {
     position: fixed;
     height: 100vh;
     transform: translateX(-100%);
+    z-index: 200;
   }
-  .wba-sidebar.mobile-open {
+  .wba-dash-sidebar.mobile-open {
     transform: translateX(0);
   }
 }
+
+/* ==========================================================================
+   Section Page Layout — Per-Sidebar-Tab Full Pages
+   ========================================================================== */
+.wba-section-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+  margin-bottom: 4px;
+}
+
+.wba-section-page-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 6px 0;
+}
+
+.wba-section-page-desc {
+  font-size: 0.86rem;
+  color: #948aa8;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* Scrollable main content area per tab */
+.wba-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* ==========================================================================
+   Login Modal Z-Index Override (ensures it overlaps landing Navbar z:50)
+   ========================================================================== */
+.wba-modal-overlay {
+  z-index: 9999 !important;
+}
+
+/* Error Message in Login */
+.wba-modal-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* Demo Credential Hints */
+.wba-credentials-hint {
+  background: rgba(20, 8, 40, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.wba-hint-label {
+  font-size: 0.74rem;
+  color: #948aa8;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wba-hint-item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.wba-hint-item:hover {
+  background: rgba(88, 28, 135, 0.35);
+}
+
+.wba-hint-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7e22ce, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.wba-hint-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.wba-hint-info strong {
+  font-size: 0.82rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.wba-hint-info span {
+  font-size: 0.74rem;
+  color: #948aa8;
+}
+

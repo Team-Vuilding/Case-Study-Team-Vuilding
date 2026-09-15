@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import DashboardHeader from './DashboardHeader';
-import MetricKpiCard from './MetricKpiCard';
-import SeasonalForecastChart from './SeasonalForecastChart';
-import RealTimeInventoryLedger from './RealTimeInventoryLedger';
-import FifoExpiryQueue from './FifoExpiryQueue';
-import LiveAuditTrail from './LiveAuditTrail';
-import AddProductModal from './AddProductModal';
+import DashboardOverview from './DashboardOverview';
+import InventorySection from './InventorySection';
+import PurchaseHistorySection from './PurchaseHistorySection';
+import AuditLogsSection from './AuditLogsSection';
 import NotificationDrawer from './NotificationDrawer';
-import { DASHBOARD_METRICS } from '../../data/mockInventoryData';
 import './dashboard.css';
 
-export default function AdminDashboard({ onViewLandingPage }) {
+export default function AdminDashboard({ currentUser, onLogout }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [liveLogs, setLiveLogs] = useState([]);
 
@@ -22,17 +18,72 @@ export default function AdminDashboard({ onViewLandingPage }) {
     setLiveLogs((prev) => [newLog, ...prev]);
   };
 
-  const handleAddProduct = (newProduct) => {
-    handleAddAuditLog({
-      id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
-      timestamp: new Date().toLocaleTimeString(),
-      eventType: 'PRODUCT_CATALOG_ADDED',
-      severity: 'good',
-      actor: 'Admin Console',
-      sku: newProduct.sku,
-      description: `Added ${newProduct.name} to warehouse catalog (${newProduct.warehouseBin}).`,
-      actionTaken: 'Real-time ledger synced across handhelds.',
-    });
+  const PAGE_TITLES = {
+    dashboard: 'Dashboard',
+    inventory: 'Inventory',
+    'purchase-history': 'Purchase History',
+    'audit-logs': 'Audit Logs',
+    'manage-accounts': 'Manage Accounts',
+    'help-center': 'Help Center',
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardOverview />;
+      case 'inventory':
+        return <InventorySection onTriggerAudit={handleAddAuditLog} />;
+      case 'purchase-history':
+        return <PurchaseHistorySection />;
+      case 'audit-logs':
+        return <AuditLogsSection externalLogs={liveLogs} />;
+      case 'manage-accounts':
+        return (
+          <div className="wba-grid-container">
+            <div className="wba-section-page-header">
+              <div>
+                <h2 className="wba-section-page-title">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Manage Accounts
+                </h2>
+                <p className="wba-section-page-desc">User account management — role assignments and access control.</p>
+              </div>
+            </div>
+            <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔐</div>
+              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Account Management</h3>
+              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>User roles and permissions management will be available in a future release.</p>
+            </div>
+          </div>
+        );
+      case 'help-center':
+        return (
+          <div className="wba-grid-container">
+            <div className="wba-section-page-header">
+              <div>
+                <h2 className="wba-section-page-title">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  Help Center
+                </h2>
+                <p className="wba-section-page-desc">Documentation, guides, and operational references.</p>
+              </div>
+            </div>
+            <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📚</div>
+              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Help & Documentation</h3>
+              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Operational documentation and user guides coming soon.</p>
+            </div>
+          </div>
+        );
+      default:
+        return <DashboardOverview />;
+    }
   };
 
   return (
@@ -46,7 +97,7 @@ export default function AdminDashboard({ onViewLandingPage }) {
         isCollapsed={isSidebarCollapsed}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
-        onOpenAddProduct={() => setIsAddProductOpen(true)}
+        onOpenAddProduct={() => setActiveTab('inventory')}
       />
 
       {/* Main Content Area */}
@@ -56,98 +107,20 @@ export default function AdminDashboard({ onViewLandingPage }) {
           <DashboardHeader
             isSidebarCollapsed={isSidebarCollapsed}
             onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
-            currentRole="Admin"
+            currentRole={currentUser?.role || 'Admin'}
+            currentUser={currentUser}
+            pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
             unreadAlertCount={3}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
-            onOpenAddProduct={() => setIsAddProductOpen(true)}
-            onViewLandingPage={onViewLandingPage}
+            onLogout={onLogout}
           />
 
-          {/* Grid Layout (Matches Reference Screenshot Structure) */}
-          <main className="wba-grid-container">
-            {/* Top Row: 3 Metric Cards */}
-            <section className="wba-top-metrics-row" aria-label="Key Performance Indicators">
-              <MetricKpiCard
-                title="Warehouse Capacity & Holding Cost"
-                badgeText="88% CAPACITY"
-                value="₱84,200 /mo"
-                subtext={
-                  <>
-                    Excess fees: <strong>₱48,500</strong> (340 Off-Peak AC Units)
-                  </>
-                }
-                meterPercent={DASHBOARD_METRICS.holdingCosts.warehouseCapacityUsedPercent}
-                status={DASHBOARD_METRICS.holdingCosts.severity}
-                icon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 3h18v18H3z" />
-                    <path d="M3 9h18" />
-                    <path d="M9 21V9" />
-                  </svg>
-                }
-              />
-
-              <MetricKpiCard
-                title="Real-Time Discrepancy Control"
-                badgeText="-33 UNITS DISCREPANCY"
-                value="12 vs 45 Units"
-                subtext={
-                  <>
-                    Smart Thermostats: <strong>12 Physical</strong> vs 45 Paper
-                  </>
-                }
-                meterPercent={27} // 12 / 45
-                status={DASHBOARD_METRICS.shrinkageStatus.severity}
-                icon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                }
-              />
-
-              <MetricKpiCard
-                title="Perishable Shelf-Life Risk"
-                badgeText="FIFO ENFORCED"
-                value="24 Days to Expiry"
-                subtext={
-                  <>
-                    Lot 2025-08-A (34 Units): <strong>₱42,500</strong> protected
-                  </>
-                }
-                meterPercent={91} // 8.2 / 9 months
-                status={DASHBOARD_METRICS.expiryStatus.severity}
-                icon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 14 14" />
-                  </svg>
-                }
-              />
-            </section>
-
-            {/* Middle Row: 1 Wide Card (Seasonal Demand & Dynamic ROP Hub) */}
-            <section className="wba-middle-row" aria-label="Demand Forecasting & Reorder Points">
-              <SeasonalForecastChart />
-            </section>
-
-            {/* Bottom Row: 3 Cards (Ledger ~48%, FIFO ~26%, Audit Trail ~26%) */}
-            <section className="wba-bottom-row" aria-label="Operational Execution Panels">
-              <RealTimeInventoryLedger onTriggerAudit={handleAddAuditLog} />
-              <FifoExpiryQueue />
-              <LiveAuditTrail externalLogs={liveLogs} />
-            </section>
+          {/* Tab Content */}
+          <main className="wba-tab-content">
+            {renderContent()}
           </main>
         </div>
       </div>
-
-      {/* Add Product Modal */}
-      <AddProductModal
-        isOpen={isAddProductOpen}
-        onClose={() => setIsAddProductOpen(false)}
-        onAddProduct={handleAddProduct}
-      />
 
       {/* Notification Drawer */}
       <NotificationDrawer

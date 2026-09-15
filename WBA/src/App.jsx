@@ -8,20 +8,28 @@ import AdminDashboard from './components/dashboard/AdminDashboard';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' | 'landing'
+  // Start on landing page — user must authenticate to access dashboard
+  const [currentView, setCurrentView] = useState('landing');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Handle successful login from modal
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
     setCurrentView('dashboard');
     setIsLoginOpen(false);
   };
 
-  if (currentView === 'dashboard') {
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setCurrentView('landing');
+  };
+
+  if (currentView === 'dashboard' && currentUser) {
     return (
       <AdminDashboard
-        onViewLandingPage={() => setCurrentView('landing')}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
     );
   }
@@ -41,10 +49,7 @@ function App() {
 
       {/* Main Content */}
       <main className="wba-main-content">
-        {/* Exact Recreation Hero Section */}
-        <Hero onGetStarted={() => setCurrentView('dashboard')} />
-
-        {/* Detailed Landing Sections */}
+        <Hero onGetStarted={() => setIsLoginOpen(true)} />
         <AboutSection />
         <FeaturesSection />
       </main>
@@ -54,13 +59,6 @@ function App() {
         <div className="wba-footer-content">
           <p>&copy; {new Date().getFullYear()} WBA Inc. All rights reserved.</p>
           <div className="wba-footer-links">
-            <button
-              type="button"
-              style={{ background: 'none', border: 'none', color: '#c084fc', cursor: 'pointer' }}
-              onClick={() => setCurrentView('dashboard')}
-            >
-              Access Admin Dashboard
-            </button>
             <a href="#privacy">Privacy Policy</a>
             <a href="#terms">Terms of Service</a>
             <a href="#contact">Contact Support</a>
@@ -68,7 +66,7 @@ function App() {
         </div>
       </footer>
 
-      {/* Interactive Login Modal */}
+      {/* Login Modal — fixed, above all landing page content */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
