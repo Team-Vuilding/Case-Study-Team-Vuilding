@@ -1,11 +1,14 @@
 import React from 'react';
 
-export default function NotificationDrawer({ isOpen, onClose }) {
+export default function NotificationDrawer({ isOpen, onClose, currentUser }) {
   if (!isOpen) return null;
 
-  const notifications = [
+  const accessLevel = currentUser?.accessLevel || 'admin';
+
+  const allNotifications = [
     {
       id: 'NOTIF-1',
+      roles: ['admin', 'warehouse'],
       title: 'Stock Discrepancy & Shrinkage Alert',
       severity: 'critical',
       time: '12m ago',
@@ -14,6 +17,7 @@ export default function NotificationDrawer({ isOpen, onClose }) {
     },
     {
       id: 'NOTIF-2',
+      roles: ['admin', 'warehouse'],
       title: 'FIFO Expiry Risk (24 Days Remaining)',
       severity: 'critical',
       time: '45m ago',
@@ -22,13 +26,25 @@ export default function NotificationDrawer({ isOpen, onClose }) {
     },
     {
       id: 'NOTIF-3',
+      roles: ['admin', 'purchasing'],
       title: 'Seasonal Holding Cost Surge Alert',
       severity: 'warning',
       time: '2h ago',
       description: 'Warehouse capacity at 88%. 340 overstock AC units stored off-peak generating ₱48,500/mo in excess holding fees. Dynamic ROP buffer recommendations updated.',
       actionText: 'View ROP Replenishment Plan',
     },
+    {
+      id: 'NOTIF-4',
+      roles: ['admin', 'sales'],
+      title: 'Available-to-Promise (ATP) Lock Active',
+      severity: 'critical',
+      time: '15m ago',
+      description: 'Online checkout sales automatically paused for Smart Climate Thermostat v2 due to verified inventory discrepancy. Prevents customer backorders.',
+      actionText: 'View Sellable ATP Inventory',
+    },
   ];
+
+  const notifications = allNotifications.filter((n) => n.roles.includes(accessLevel));
 
   return (
     <div className="wba-dash-modal-overlay" onClick={onClose}>

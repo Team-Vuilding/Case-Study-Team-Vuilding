@@ -2,18 +2,28 @@ import React, { useState } from 'react';
 import RealTimeInventoryLedger from './RealTimeInventoryLedger';
 import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
+import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function InventorySection({ onTriggerAudit }) {
+export default function InventorySection({ currentUser, onTriggerAudit }) {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const accessLevel = currentUser?.accessLevel || 'admin';
+  const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
+  const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
 
   const handleAddProduct = (newProduct) => {
+    // Action guard: abort if unauthorized role tries to trigger
+    if (!canAddProduct) {
+      console.warn(`[RBAC] Add product blocked for accessLevel: ${accessLevel}`);
+      return;
+    }
+
     if (onTriggerAudit) {
       onTriggerAudit({
         id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
         timestamp: new Date().toLocaleTimeString(),
         eventType: 'PRODUCT_CATALOG_ADDED',
         severity: 'good',
-        actor: 'Admin Console',
+        actor: `${currentUser?.name || 'Admin'} (${currentUser?.role || 'Admin'})`,
         sku: newProduct.sku,
         description: `New SKU ${newProduct.name} added to warehouse catalog at ${newProduct.warehouseBin}.`,
         actionTaken: 'Real-time ledger and ATP engine synced.',
@@ -36,34 +46,77 @@ export default function InventorySection({ onTriggerAudit }) {
             Inventory
           </h2>
           <p className="wba-section-page-desc">
-            View and manage all product stock — track quantities, resolve mismatches, and monitor expiring batches.
+            {accessLevel === 'sales'
+              ? 'Real-time product availability, pricing, and Available-to-Promise (ATP) inventory levels.'
+              : 'View and manage product stock — track quantities, resolve mismatches, and monitor expiring batches.'}
           </p>
         </div>
-        <button
-          type="button"
-          className="wba-btn-primary"
-          onClick={() => setIsAddProductOpen(true)}
-        >
-          + Add Product
-        </button>
+        {canAddProduct && (
+          <button
+            type="button"
+            className="wba-btn-primary"
+            onClick={() => setIsAddProductOpen(true)}
+          >
+            + Add Product
+          </button>
+        )}
       </div>
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        <RealTimeInventoryLedger onTriggerAudit={onTriggerAudit} />
+        <RealTimeInventoryLedger currentUser={currentUser} onTriggerAudit={onTriggerAudit} />
       </section>
 
-      {/* FIFO / FEFO Expiry Queue */}
+      {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
       <section style={{ width: '100%' }}>
-        <FifoExpiryQueue />
+        {canViewFifo ? (
+          <FifoExpiryQueue />
+        ) : (
+          <div className="wba-glow-card">
+            <div className="wba-card-title-bar">
+              <div className="wba-card-title-group">
+                <div className="wba-card-heading">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  <span>Sales Order & ATP Reservation Monitor</span>
+                </div>
+                <span className="wba-card-desc">
+                  Active customer checkout locks and Available-to-Promise stock status across online channels
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '12px' }}>
+              <div style={{ flex: '1', minWidth: '180px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ fontSize: '0.74rem', color: '#7dd3fc', textTransform: 'uppercase', marginBottom: '4px' }}>Total Active Reservations</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>62 Units</div>
+                <div style={{ fontSize: '0.75rem', color: '#948aa8', marginTop: '4px' }}>Customer cart holds protected for checkout</div>
+              </div>
+              <div style={{ flex: '1', minWidth: '180px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ fontSize: '0.74rem', color: '#6ee7b7', textTransform: 'uppercase', marginBottom: '4px' }}>Oversell Incidents Blocked</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>14 Prevented</div>
+                <div style={{ fontSize: '0.75rem', color: '#948aa8', marginTop: '4px' }}>Zero unfulfillable online orders recorded</div>
+              </div>
+              <div style={{ flex: '1', minWidth: '180px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ fontSize: '0.74rem', color: '#fca5a5', textTransform: 'uppercase', marginBottom: '4px' }}>Stockout ATP Lock</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>1 Product Locked</div>
+                <div style={{ fontSize: '0.75rem', color: '#948aa8', marginTop: '4px' }}>Smart Thermostat ATP locked at 0</div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* Add Product Modal */}
-      <AddProductModal
-        isOpen={isAddProductOpen}
-        onClose={() => setIsAddProductOpen(false)}
-        onAddProduct={handleAddProduct}
-      />
+      {/* Add Product Modal (Only rendered when permitted) */}
+      {canAddProduct && (
+        <AddProductModal
+          isOpen={isAddProductOpen}
+          onClose={() => setIsAddProductOpen(false)}
+          onAddProduct={handleAddProduct}
+        />
+      )}
     </div>
   );
 }
+

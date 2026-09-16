@@ -74,9 +74,27 @@ const STATUS_STYLE = {
   Pending: { background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)' },
 };
 
-export default function PurchaseHistorySection() {
+export default function PurchaseHistorySection({ currentUser }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
+  const accessLevel = currentUser?.accessLevel || 'admin';
+
+  // Hard guard for Sales Staff
+  if (accessLevel === 'sales') {
+    return (
+      <div className="wba-grid-container">
+        <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
+          <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+          <p style={{ color: '#c4b5fd', fontSize: '0.92rem' }}>
+            Sales Staff accounts do not have permission to view procurement records or purchase orders.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isWarehouse = accessLevel === 'warehouse';
 
   const filtered = PURCHASE_ORDERS.filter((po) => {
     const matchSearch =
@@ -88,6 +106,7 @@ export default function PurchaseHistorySection() {
   });
 
   const totalSpend = filtered.reduce((sum, po) => sum + po.totalCost, 0);
+  const totalUnits = filtered.reduce((sum, po) => sum + po.quantity, 0);
 
   return (
     <div className="wba-grid-container">
@@ -100,10 +119,12 @@ export default function PurchaseHistorySection() {
               <path d="M3 3v5h5" />
               <polyline points="12 7 12 12 15 15" />
             </svg>
-            Purchase History
+            {isWarehouse ? 'Purchase Order Deliveries' : 'Purchase History & Orders'}
           </h2>
           <p className="wba-section-page-desc">
-            All purchase orders — view supplier details, amounts, and delivery status.
+            {isWarehouse
+              ? 'Track expected supplier shipments, delivery receipts, and warehouse receiving schedules.'
+              : 'All purchase orders — view supplier details, procurement amounts, and delivery status.'}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -133,8 +154,10 @@ export default function PurchaseHistorySection() {
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         {[
           { label: 'Total POs', val: filtered.length },
-          { label: 'Total Spend', val: `₱${totalSpend.toLocaleString()}` },
-          { label: 'Delivered', val: filtered.filter(p => p.status === 'Delivered').length },
+          isWarehouse
+            ? { label: 'Total Units Expected', val: `${totalUnits.toLocaleString()} units` }
+            : { label: 'Total Spend', val: `₱${totalSpend.toLocaleString()}` },
+          { label: 'Delivered (Received)', val: filtered.filter(p => p.status === 'Delivered').length },
           { label: 'In Transit', val: filtered.filter(p => p.status === 'In Transit').length },
         ].map((s) => (
           <div key={s.label} className="wba-glow-card" style={{ flex: '1', minWidth: '140px', padding: '14px 18px' }}>

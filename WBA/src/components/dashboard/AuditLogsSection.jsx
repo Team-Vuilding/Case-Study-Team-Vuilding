@@ -23,18 +23,24 @@ const getSeverityStyle = (sev) => {
   }
 };
 
-const getSeverityLabel = (sev) => {
-  switch (sev) {
-    case 'critical': return '🔴 Critical';
-    case 'warning': return '🟡 Warning';
-    case 'good': return '🟢 Resolved';
-    default: return '🔵 Info';
-  }
-};
-
-export default function AuditLogsSection({ externalLogs = [] }) {
+export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
   const [search, setSearch] = useState('');
   const [severity, setSeverity] = useState('All');
+  const accessLevel = currentUser?.accessLevel || 'admin';
+
+  if (accessLevel === 'sales') {
+    return (
+      <div className="wba-grid-container">
+        <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
+          <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+          <p style={{ color: '#c4b5fd', fontSize: '0.92rem' }}>
+            Sales Staff accounts do not have permission to view administrative audit trails.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const allLogs = [...externalLogs, ...INITIAL_AUDIT_LOGS];
 

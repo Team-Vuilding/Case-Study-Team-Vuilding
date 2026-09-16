@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { SEASONAL_DEMAND_PROFILES } from '../../data/mockInventoryData';
 
-export default function SeasonalForecastChart() {
+export default function SeasonalForecastChart({ currentUser }) {
   const [activeMode, setActiveMode] = useState('summer');
   const [selectedMonth, setSelectedMonth] = useState(5);
+  const accessLevel = currentUser?.accessLevel || 'admin';
+  const isSales = accessLevel === 'sales';
 
   const selectedData = SEASONAL_DEMAND_PROFILES[selectedMonth];
 
@@ -16,10 +18,12 @@ export default function SeasonalForecastChart() {
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
               <polyline points="17 6 23 6 23 12" />
             </svg>
-            <span>Monthly Demand & Stock Overview</span>
+            <span>{isSales ? 'Seasonal Product Demand & Stock Availability' : 'Monthly Demand & Stock Overview'}</span>
           </div>
           <span className="wba-card-desc">
-            Compare monthly sales demand with stock on hand. Tap any month to inspect details.
+            {isSales
+              ? 'Compare forecasted customer demand with current stock levels to advise prospective buyers.'
+              : 'Compare monthly sales demand with stock on hand. Tap any month to inspect details.'}
           </span>
         </div>
 
@@ -268,14 +272,28 @@ export default function SeasonalForecastChart() {
             <div>
               <strong style={{ color: '#ffffff' }}>{selectedData.month}:</strong>{' '}
               <span style={{ color: '#c4b5fd' }}>
-                Expected sales: <strong style={{ color: '#38bdf8' }}>{selectedData.demand} units</strong> &nbsp;·&nbsp;
-                Stock on hand: <strong style={{ color: '#ffffff' }}>{selectedData.stockLevel} units</strong> &nbsp;·&nbsp;
-                Reorder Point (ROP): <strong style={{ color: '#c084fc' }}>{rop} units</strong> &nbsp;·&nbsp;
-                Storage cost: <strong>₱{selectedData.holdingCost.toLocaleString()}</strong>
+                Expected customer orders: <strong style={{ color: '#38bdf8' }}>{selectedData.demand} units</strong> &nbsp;·&nbsp;
+                Stock on hand: <strong style={{ color: '#ffffff' }}>{selectedData.stockLevel} units</strong>
+                {!isSales && (
+                  <>
+                    &nbsp;·&nbsp; Reorder Point (ROP): <strong style={{ color: '#c084fc' }}>{rop} units</strong> &nbsp;·&nbsp;
+                    Storage cost: <strong>₱{selectedData.holdingCost.toLocaleString()}</strong>
+                  </>
+                )}
               </span>
             </div>
             <div>
-              {isBelowRop ? (
+              {isSales ? (
+                selectedData.stockLevel < selectedData.demand ? (
+                  <span style={{ color: '#f87171', fontWeight: 700 }}>
+                    ⚠️ High Demand Window — Stock ({selectedData.stockLevel}) is below projected sales volume ({selectedData.demand}).
+                  </span>
+                ) : (
+                  <span style={{ color: '#34d399', fontWeight: 600 }}>
+                    ✓ Ample Availability — Stock ({selectedData.stockLevel}) comfortably satisfies projected order volume ({selectedData.demand}).
+                  </span>
+                )
+              ) : isBelowRop ? (
                 <span style={{ color: '#f87171', fontWeight: 700 }}>
                   ⚠️ Under-Stocked — Stock on hand ({selectedData.stockLevel}) is below the Reorder Point ({rop} units). High stockout risk.
                 </span>
@@ -295,3 +313,4 @@ export default function SeasonalForecastChart() {
     </div>
   );
 }
+

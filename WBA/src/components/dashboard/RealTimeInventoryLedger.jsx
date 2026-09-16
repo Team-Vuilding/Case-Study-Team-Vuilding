@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
+import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function RealTimeInventoryLedger({ onTriggerAudit }) {
+export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit }) {
   const [items, setItems] = useState(INITIAL_INVENTORY_ITEMS);
   const [reconcilingId, setReconcilingId] = useState(null);
 
+  const accessLevel = currentUser?.accessLevel || 'admin';
+  const canFixCount = hasPermission(accessLevel, PERMISSIONS.FIX_COUNT);
+
   const handleReconcile = (id) => {
+    // Action guard: abort if unauthorized role tries to reconcile
+    if (!canFixCount) {
+      console.warn(`[RBAC] Reconciliation action blocked for accessLevel: ${accessLevel}`);
+      return;
+    }
+
     setReconcilingId(id);
     setTimeout(() => {
       setItems((prev) =>
@@ -28,7 +38,7 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
           timestamp: new Date().toLocaleTimeString(),
           eventType: 'Stock Count Corrected',
           severity: 'good',
-          actor: 'Admin',
+          actor: `${currentUser?.name || 'Staff'} (${currentUser?.role || 'User'})`,
           sku: id,
           description: `Stock count discrepancy resolved for ${id}. System count updated to match physical count.`,
           actionTaken: 'Records corrected and synced.',
@@ -47,10 +57,12 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
-            <span>Inventory Stock Ledger</span>
+            <span>{accessLevel === 'sales' ? 'Product Availability & Pricing Ledger' : 'Inventory Stock Ledger'}</span>
           </div>
           <span className="wba-card-desc">
-            Live stock counts across all products — highlights mismatches between physical and system records
+            {accessLevel === 'sales'
+              ? 'Real-time sellable inventory (Available-to-Promise), customer reservations, and unit pricing'
+              : 'Live stock counts across all products — highlights mismatches between physical and system records'}
           </span>
         </div>
       </div>
@@ -61,6 +73,7 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
             <tr>
               <th>Product</th>
               <th>Category</th>
+              {accessLevel === 'sales' && <th>Unit Price</th>}
               <th>In Stock</th>
               <th>Reserved</th>
               <th>Being Picked</th>
@@ -79,7 +92,9 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                 <tr key={item.id}>
                   <td>
                     <span className="wba-sku-name">{item.name}</span>
-                    <span className="wba-sku-code">{item.sku} · {item.warehouseBin}</span>
+                    <span className="wba-sku-code">
+                      {item.sku} {accessLevel !== 'sales' && `· ${item.warehouseBin}`}
+                    </span>
                   </td>
                   <td>
                     <span
@@ -94,6 +109,11 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                       {item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : 'Perishable'}
                     </span>
                   </td>
+                  {accessLevel === 'sales' && (
+                    <td style={{ fontWeight: 700, color: '#34d399' }}>
+                      ₱{item.unitPrice.toLocaleString()}
+                    </td>
+                  )}
                   <td style={{ fontWeight: 700, color: '#ffffff' }}>{item.physicalOnHand}</td>
                   <td style={{ color: '#fbbf24' }}>{item.reserved}</td>
                   <td style={{ color: '#38bdf8' }}>{item.allocated}</td>
@@ -112,7 +132,7 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                     )}
                   </td>
                   <td>
-                    {hasDiscrepancy ? (
+                    {hasDiscrepancy && canFixCount ? (
                       <button
                         type="button"
                         className="wba-pill-btn"
@@ -128,6 +148,10 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
                       >
                         {reconcilingId === item.id ? 'Fixing...' : 'Fix Count'}
                       </button>
+                    ) : hasDiscrepancy && !canFixCount ? (
+                      <span style={{ fontSize: '0.74rem', color: '#f87171', fontStyle: 'italic' }}>
+                        Audit Req.
+                      </span>
                     ) : (
                       <span style={{ fontSize: '0.74rem', color: '#a78bfa' }}>✓ OK</span>
                     )}
@@ -141,3 +165,4 @@ export default function RealTimeInventoryLedger({ onTriggerAudit }) {
     </div>
   );
 }
+

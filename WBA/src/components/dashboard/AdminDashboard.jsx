@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import DashboardHeader from './DashboardHeader';
 import DashboardOverview from './DashboardOverview';
@@ -6,21 +6,77 @@ import InventorySection from './InventorySection';
 import PurchaseHistorySection from './PurchaseHistorySection';
 import AuditLogsSection from './AuditLogsSection';
 import NotificationDrawer from './NotificationDrawer';
+import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
 
 export default function AdminDashboard({ currentUser, onLogout }) {
+  const accessLevel = currentUser?.accessLevel || 'admin';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState(() => {
+
+  // Helper to parse and sanitize active tab from hash or storage
+  const resolveInitialTab = useCallback(() => {
     try {
-      return localStorage.getItem('wba_active_tab') || 'dashboard';
+      const hashTab = window.location.hash.replace(/^#\/?/, '').trim();
+      if (hashTab && isTabAllowed(accessLevel, hashTab)) {
+        return hashTab;
+      }
+      const savedTab = localStorage.getItem('wba_active_tab');
+      if (savedTab && isTabAllowed(accessLevel, savedTab)) {
+        return savedTab;
+      }
     } catch {
-      return 'dashboard';
+      // ignore
     }
-  });
+    return getDefaultTab(accessLevel);
+  }, [accessLevel]);
+
+  const [activeTab, setActiveTab] = useState(resolveInitialTab);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [liveLogs, setLiveLogs] = useState([]);
 
+  // Sync state with URL hash and listen for direct manual URL changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (!rawHash) {
+        return;
+      }
+      if (isTabAllowed(accessLevel, rawHash)) {
+        setActiveTab(rawHash);
+        try {
+          localStorage.setItem('wba_active_tab', rawHash);
+        } catch {
+          // ignore
+        }
+      } else {
+        // Direct unauthorized URL entry: reject and redirect to safe default
+        const fallback = getDefaultTab(accessLevel);
+        setActiveTab(fallback);
+        window.location.hash = `#/${fallback}`;
+        try {
+          localStorage.setItem('wba_active_tab', fallback);
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [accessLevel]);
+
+  // Keep hash synchronized with activeTab
+  useEffect(() => {
+    if (window.location.hash !== `#/${activeTab}`) {
+      window.location.hash = `#/${activeTab}`;
+    }
+  }, [activeTab]);
+
   const handleSelectTab = (tab) => {
+    if (!isTabAllowed(accessLevel, tab)) {
+      console.warn(`[RBAC] Navigation to '${tab}' blocked for accessLevel: ${accessLevel}`);
+      return;
+    }
     setActiveTab(tab);
     try {
       localStorage.setItem('wba_active_tab', tab);
@@ -43,15 +99,37 @@ export default function AdminDashboard({ currentUser, onLogout }) {
   };
 
   const renderContent = () => {
+    // Route guard: strictly prevent rendering unauthorized tabs
+    if (!isTabAllowed(accessLevel, activeTab)) {
+      return (
+        <div className="wba-grid-container">
+          <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
+            <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+            <p style={{ color: '#c4b5fd', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 20px' }}>
+              Your account (<strong>{currentUser?.name || 'User'}</strong> — <em>{currentUser?.role || 'Staff'}</em>) is not authorized to access this section.
+            </p>
+            <button
+              type="button"
+              className="wba-btn-primary"
+              onClick={() => handleSelectTab(getDefaultTab(accessLevel))}
+            >
+              Return to Authorized Dashboard
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardOverview />;
+        return <DashboardOverview currentUser={currentUser} />;
       case 'inventory':
-        return <InventorySection onTriggerAudit={handleAddAuditLog} />;
+        return <InventorySection currentUser={currentUser} onTriggerAudit={handleAddAuditLog} />;
       case 'purchase-history':
-        return <PurchaseHistorySection />;
+        return <PurchaseHistorySection currentUser={currentUser} />;
       case 'audit-logs':
-        return <AuditLogsSection externalLogs={liveLogs} />;
+        return <AuditLogsSection currentUser={currentUser} externalLogs={liveLogs} />;
       case 'manage-accounts':
         return (
           <div className="wba-grid-container">
@@ -69,8 +147,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
             </div>
             <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔐</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Account Management</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>User roles and permissions management will be available in a future release.</p>
+              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Admin User Directory</h3>
+              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Active Administrator: {currentUser?.name} ({currentUser?.email})</p>
             </div>
           </div>
         );
@@ -86,18 +164,18 @@ export default function AdminDashboard({ currentUser, onLogout }) {
                   </svg>
                   Help Center
                 </h2>
-                <p className="wba-section-page-desc">Documentation, guides, and operational references.</p>
+                <p className="wba-section-page-desc">Documentation, operational guides, and role references.</p>
               </div>
             </div>
             <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📚</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Help & Documentation</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Operational documentation and user guides coming soon.</p>
+              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>WBA Operational Reference</h3>
+              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
             </div>
           </div>
         );
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview currentUser={currentUser} />;
     }
   };
 
@@ -113,6 +191,7 @@ export default function AdminDashboard({ currentUser, onLogout }) {
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         onOpenAddProduct={() => handleSelectTab('inventory')}
+        currentUser={currentUser}
       />
 
       {/* Main Content Area */}
@@ -125,7 +204,7 @@ export default function AdminDashboard({ currentUser, onLogout }) {
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
             pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
-            unreadAlertCount={3}
+            unreadAlertCount={accessLevel === 'sales' ? 1 : accessLevel === 'purchasing' ? 1 : accessLevel === 'warehouse' ? 2 : 3}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
             onLogout={onLogout}
           />
@@ -141,7 +220,9 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       <NotificationDrawer
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
+        currentUser={currentUser}
       />
     </div>
   );
 }
+
