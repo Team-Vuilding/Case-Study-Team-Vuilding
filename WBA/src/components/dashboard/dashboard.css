@@ -102,6 +102,10 @@
   justify-content: flex-start;
 }
 
+.wba-dash-mobile-close {
+  display: none;
+}
+
 .wba-dash-sidebar.collapsed .wba-dash-sidebar-header {
   justify-content: center;
 }
@@ -1048,6 +1052,26 @@
 
   .wba-dash-sidebar.mobile-open {
     transform: translateX(0);
+  }
+
+  .wba-dash-sidebar.mobile-closed {
+    transform: translateX(-100%);
+  }
+
+  .wba-dash-mobile-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 8px;
+    background: rgba(45, 16, 75, 0.5);
+    color: #c4b5fd;
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
   }
 
   .wba-main-wrapper {

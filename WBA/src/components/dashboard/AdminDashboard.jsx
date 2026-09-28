@@ -12,6 +12,7 @@ import './dashboard.css';
 export default function AdminDashboard({ currentUser, onLogout }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
 
   // Helper to parse and sanitize active tab from hash or storage
   const resolveInitialTab = useCallback(() => {
@@ -188,6 +189,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       {/* Left Sidebar Navigation */}
       <DashboardSidebar
         isCollapsed={isSidebarCollapsed}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         onOpenAddProduct={() => handleSelectTab('inventory')}
@@ -200,7 +203,10 @@ export default function AdminDashboard({ currentUser, onLogout }) {
           {/* Header Bar */}
           <DashboardHeader
             isSidebarCollapsed={isSidebarCollapsed}
-            onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
+            onToggleSidebar={() => {
+              setIsSidebarCollapsed((prev) => !prev);
+              setIsMobileSidebarOpen(true);
+            }}
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
             pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
