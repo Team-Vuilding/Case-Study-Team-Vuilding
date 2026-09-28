@@ -38,7 +38,7 @@ The project-owner instructions in this document are the implementation baseline.
 | Role | Authorized scope |
 | --- | --- |
 | **Admin** | Full user-management control: create users, assign roles, configure access, and view global dashboards/logs. Full inventory CRUD, category management, and oversight of stock counts/reconciliation. Executive purchasing access: view budgets, approve high-value POs, and view demand forecasts. |
-| **Warehouse Staff** | Warehouse operations: receive and ship stock, process stock movements, perform physical counts, and reconcile discrepancies. Read inventory categories and stock quantities; may update quantities only through approved physical-count or stock-movement workflows. No catalog, pricing, category, user, supplier, or purchasing-management access. |
+| **Warehouse Staff** | Warehouse operations: receive and ship stock, process stock movements, perform physical counts, and reconcile discrepancies. Read inventory categories and stock quantities; may update quantities only through approved physical-count or stock-movement workflows. They may view their relevant movement, count, and reconciliation history, but not the global Audit Logs page. No catalog, pricing, category, user, supplier, or purchasing-management access. |
 | **Purchasing Manager** | Supplier and purchasing workflow ownership: manage suppliers, create and manage purchase orders, configure/view reorder points, and view forecasts. No direct inventory quantity adjustments or user-management access. |
 | **Sales Staff** | Read-only access to pricing, stock availability, and item categories for product/service operations. No stock adjustments, catalog edits, purchasing, warehouse, or user-management access. |
 
