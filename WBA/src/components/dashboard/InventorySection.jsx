@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import RealTimeInventoryLedger from './RealTimeInventoryLedger';
 import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
+import QrInventoryScanner from './QrInventoryScanner';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
 export default function InventorySection({ currentUser, onTriggerAudit }) {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const inventoryLedgerRef = useRef(null);
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
   const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
+  const isWarehouseStaff = accessLevel === 'warehouse';
+
+  const handleQrScan = (scan) => {
+    if (!isWarehouseStaff) return;
+    inventoryLedgerRef.current?.receiveQrScan(scan);
+  };
 
   const handleAddProduct = (newProduct) => {
     // Action guard: abort if unauthorized role tries to trigger
@@ -60,11 +69,16 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
             + Add Product
           </button>
         )}
+        {isWarehouseStaff && (
+          <button type="button" className="wba-btn-primary wba-qr-launch-button" onClick={() => setIsQrScannerOpen(true)}>
+            Scan QR to receive stock
+          </button>
+        )}
       </div>
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        <RealTimeInventoryLedger currentUser={currentUser} onTriggerAudit={onTriggerAudit} />
+        <RealTimeInventoryLedger ref={inventoryLedgerRef} currentUser={currentUser} onTriggerAudit={onTriggerAudit} />
       </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
@@ -115,6 +129,9 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
           onClose={() => setIsAddProductOpen(false)}
           onAddProduct={handleAddProduct}
         />
+      )}
+      {isWarehouseStaff && (
+        <QrInventoryScanner isOpen={isQrScannerOpen} onClose={() => setIsQrScannerOpen(false)} onScan={handleQrScan} />
       )}
     </div>
   );

@@ -1,13 +1,55 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit }) {
+const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ currentUser, onTriggerAudit }, ref) {
   const [items, setItems] = useState(INITIAL_INVENTORY_ITEMS);
   const [reconcilingId, setReconcilingId] = useState(null);
 
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canFixCount = hasPermission(accessLevel, PERMISSIONS.FIX_COUNT);
+
+  const receiveQrScan = useCallback((scan) => {
+    if (accessLevel !== 'warehouse') return;
+    const scanCode = scan.code.toLowerCase();
+    const matchingItem = items.find((item) => item.sku.toLowerCase() === scanCode);
+    if (!matchingItem) {
+      if (onTriggerAudit) {
+        onTriggerAudit({
+          id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
+          timestamp: new Date().toLocaleTimeString(),
+          eventType: 'QR_SCAN_NOT_FOUND',
+          severity: 'warning',
+          actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
+          sku: scan.code,
+          description: `QR scan could not be added because SKU ${scan.code} is not in the inventory ledger.`,
+          actionTaken: 'No stock count was changed.',
+        });
+      }
+      return;
+    }
+    setItems((previousItems) => previousItems.map((item) => item.id === matchingItem.id ? {
+      ...item,
+      physicalOnHand: item.physicalOnHand + scan.quantity,
+      paperSpreadsheetCount: item.paperSpreadsheetCount + scan.quantity,
+      status: 'Synced',
+      statusSeverity: 'good',
+    } : item));
+    if (onTriggerAudit) {
+      onTriggerAudit({
+        id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
+        timestamp: new Date().toLocaleTimeString(),
+        eventType: 'QR_STOCK_RECEIVED',
+        severity: 'good',
+        actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
+        sku: matchingItem.sku,
+        description: `${scan.quantity} unit${scan.quantity === 1 ? '' : 's'} added to ${matchingItem.name} from a QR scan.`,
+        actionTaken: 'On-hand and ledger counts were updated.',
+      });
+    }
+  }, [accessLevel, currentUser?.name, currentUser?.role, items, onTriggerAudit]);
+
+  useImperativeHandle(ref, () => ({ receiveQrScan }), [receiveQrScan]);
 
   const handleReconcile = (id) => {
     // Action guard: abort if unauthorized role tries to reconcile
@@ -164,5 +206,7 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
       </div>
     </div>
   );
-}
+});
+
+export default RealTimeInventoryLedger;
 
