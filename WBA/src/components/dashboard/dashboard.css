@@ -1032,6 +1032,80 @@
   .wba-dash-sidebar.mobile-open {
     transform: translateX(0);
   }
+
+  .wba-main-wrapper {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .wba-dashboard-frame {
+    border-radius: 16px;
+    padding: 16px;
+    min-height: calc(100vh - 20px);
+  }
+
+  .wba-header {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .wba-header-title {
+    font-size: 1.05rem;
+  }
+
+  .wba-header-right {
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  .wba-role-badge {
+    padding: 5px 9px;
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .wba-dashboard-frame {
+    padding: 12px;
+  }
+
+  .wba-header-left {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .wba-header-title-wrap {
+    min-width: 0;
+  }
+
+  .wba-header-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wba-header-separator,
+  .wba-role-badge {
+    display: none;
+  }
+
+  .wba-section-page-title {
+    font-size: 1.15rem;
+  }
+
+  .wba-section-page-header {
+    gap: 10px;
+  }
+
+  .wba-dash-modal-card {
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 20px 16px;
+  }
+
+  .wba-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ==========================================================================
