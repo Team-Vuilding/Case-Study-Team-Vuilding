@@ -5,7 +5,6 @@ import { isTabAllowed, hasPermission, PERMISSIONS } from '../../data/rbac';
 export default function DashboardSidebar({
   isCollapsed = false,
   isMobileOpen = true,
-  onCloseMobile,
   activeTab = 'dashboard',
   onSelectTab,
   onOpenAddProduct,
@@ -19,15 +18,6 @@ export default function DashboardSidebar({
       {/* Brand Logo matching reference */}
       <div className="wba-dash-sidebar-header">
         <Logo className="wba-dash-sidebar-logo" />
-        <button
-          type="button"
-          className="wba-dash-mobile-close"
-          onClick={onCloseMobile}
-          aria-label="Close sidebar"
-          title="Close sidebar"
-        >
-          ×
-        </button>
       </div>
 
       {/* + Add product button (Admin only) */}

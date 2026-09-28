@@ -190,7 +190,6 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       <DashboardSidebar
         isCollapsed={isSidebarCollapsed}
         isMobileOpen={isMobileSidebarOpen}
-        onCloseMobile={() => setIsMobileSidebarOpen(false)}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         onOpenAddProduct={() => handleSelectTab('inventory')}
@@ -205,7 +204,7 @@ export default function AdminDashboard({ currentUser, onLogout }) {
             isSidebarCollapsed={isSidebarCollapsed}
             onToggleSidebar={() => {
               setIsSidebarCollapsed((prev) => !prev);
-              setIsMobileSidebarOpen(true);
+              setIsMobileSidebarOpen((prev) => !prev);
             }}
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
