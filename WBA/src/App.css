@@ -60,7 +60,7 @@
   padding: 16px 48px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .wba-logo-link {
@@ -88,6 +88,7 @@
 .wba-nav {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 .wba-nav-list {
@@ -133,6 +134,8 @@
 .wba-header-actions {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  margin-left: 40px;
 }
 
 .wba-login-btn {
@@ -880,6 +883,25 @@
 }
 
 @media (max-width: 768px) {
+  .wba-header-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .wba-nav-list {
+    gap: 16px;
+  }
+
+  .wba-header-actions {
+    margin-left: 20px;
+  }
+
+  .wba-login-btn {
+    padding-left: 16px;
+    padding-right: 16px;
+    font-size: 12px;
+  }
+
   .wba-hero-container {
     grid-template-columns: 1fr;
     text-align: center;
