@@ -1107,7 +1107,6 @@
   .wba-main-wrapper {
     width: 100%;
     padding: 10px;
-    padding-left: 88px;
   }
 
   .wba-dashboard-frame {
@@ -1139,10 +1138,6 @@
 @media (max-width: 600px) {
   .wba-dashboard-frame {
     padding: 12px;
-  }
-
-  .wba-main-wrapper {
-    padding-left: 82px;
   }
 
   .wba-header-left {
