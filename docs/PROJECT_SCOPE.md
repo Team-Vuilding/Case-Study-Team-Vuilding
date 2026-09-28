@@ -2,6 +2,13 @@
 
 This document is the shared product and authorization reference for WBA. All future implementation work must align with this scope. Before adding a page, action, role permission, or workflow that conflicts with it, stop and ask the project owner for direction.
 
+## Source Material
+
+- Project-owner scope and RBAC instructions supplied on 2026-09-28.
+- Supporting case study: `CCS112-Case-Study-20260624-103601 (1).pdf` (project-owner supplied).
+
+The project-owner instructions in this document are the implementation baseline. The case study is supporting context; if it conflicts with the baseline, ask the project owner before proceeding.
+
 ## Product Pages
 
 ### Core System & Access
