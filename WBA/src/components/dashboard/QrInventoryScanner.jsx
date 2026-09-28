@@ -20,8 +20,9 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
 
   const startCamera = async () => {
     setError('');
-    if (!navigator.mediaDevices?.getUserMedia || !('BarcodeDetector' in window)) {
-      setError('Camera QR scanning is not supported here. Enter the QR/SKU value manually.');
+    if (streamRef.current) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('Camera access is not supported here. Enter the QR/SKU value manually.');
       return;
     }
 
@@ -30,6 +31,11 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
       streamRef.current = stream;
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
+      setCameraState('preview');
+      if (!('BarcodeDetector' in window)) {
+        setError('Camera preview is available, but this browser cannot decode QR codes. Enter the detected SKU manually.');
+        return;
+      }
       const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
       setCameraState('scanning');
 
@@ -80,10 +86,11 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
 
         <form onSubmit={handleSubmit}>
           <div className="wba-qr-camera-frame">
-            {cameraState === 'scanning' ? <video ref={videoRef} muted playsInline /> : <span>Camera preview will appear here</span>}
+            <video ref={videoRef} muted playsInline className={cameraState === 'idle' ? 'wba-qr-camera-hidden' : ''} />
+            {cameraState === 'idle' && <span>Tap Open camera to begin scanning</span>}
           </div>
-          <button type="button" className="wba-pill-btn wba-qr-camera-button" onClick={startCamera}>
-            {cameraState === 'scanning' ? 'Scanning…' : 'Use camera'}
+          <button type="button" className="wba-pill-btn wba-qr-camera-button" onClick={startCamera} disabled={cameraState !== 'idle'}>
+            {cameraState === 'scanning' ? 'Point camera at QR code' : cameraState === 'preview' ? 'Camera ready' : 'Open camera'}
           </button>
 
           <div className="wba-input-group">
