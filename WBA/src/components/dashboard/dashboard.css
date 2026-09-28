@@ -89,6 +89,10 @@
   flex-shrink: 0;
 }
 
+.wba-dash-sidebar-backdrop {
+  display: none;
+}
+
 .wba-dash-sidebar.collapsed {
   width: 78px;
   min-width: 78px;
@@ -1067,6 +1071,17 @@
 
   .wba-dash-sidebar.mobile-closed {
     transform: translateX(-100%);
+  }
+
+  .wba-dash-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.42);
+    cursor: pointer;
+    z-index: 150;
   }
 
   .wba-dash-mobile-toggle {

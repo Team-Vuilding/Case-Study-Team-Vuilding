@@ -196,6 +196,14 @@ export default function AdminDashboard({ currentUser, onLogout }) {
         onOpenAddProduct={() => handleSelectTab('inventory')}
         currentUser={currentUser}
       />
+      {isMobileSidebarOpen && (
+        <button
+          type="button"
+          className="wba-dash-sidebar-backdrop"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-label="Close sidebar"
+        />
+      )}
 
       {/* Main Content Area */}
       <div className="wba-main-wrapper">
