@@ -51,10 +51,16 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
       };
       detect();
     } catch {
-      setError('Camera access was unavailable. Enter the QR/SKU value manually.');
+      setError('We could not open your camera. Allow camera access in your browser, then try again; you can also enter the QR/SKU value manually.');
       stopCamera();
     }
   };
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const openCamera = requestAnimationFrame(() => startCamera());
+    return () => cancelAnimationFrame(openCamera);
+  }, [isOpen]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -87,10 +93,10 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
         <form onSubmit={handleSubmit}>
           <div className="wba-qr-camera-frame">
             <video ref={videoRef} muted playsInline className={cameraState === 'idle' ? 'wba-qr-camera-hidden' : ''} />
-            {cameraState === 'idle' && <span>Tap Open camera to begin scanning</span>}
+            {cameraState === 'idle' && <span>{error ? 'Camera could not be opened' : 'Opening your device camera…'}</span>}
           </div>
           <button type="button" className="wba-pill-btn wba-qr-camera-button" onClick={startCamera} disabled={cameraState !== 'idle'}>
-            {cameraState === 'scanning' ? 'Point camera at QR code' : cameraState === 'preview' ? 'Camera ready' : 'Open camera'}
+            {cameraState === 'scanning' ? 'Point camera at QR code' : cameraState === 'preview' ? 'Camera ready' : error ? 'Retry camera' : 'Opening camera…'}
           </button>
 
           <div className="wba-input-group">
