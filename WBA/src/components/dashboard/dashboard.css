@@ -1026,9 +1026,26 @@
   .wba-dash-sidebar {
     position: fixed;
     height: 100vh;
-    transform: translateX(-100%);
+    width: 78px;
+    min-width: 78px;
+    padding: 24px 12px;
+    transform: translateX(0);
     z-index: 200;
+    box-shadow: 10px 0 28px rgba(0, 0, 0, 0.45);
   }
+
+  .wba-dash-sidebar.collapsed {
+    width: 78px;
+    min-width: 78px;
+    padding: 24px 12px;
+  }
+
+  .wba-dash-sidebar:not(.collapsed) {
+    width: 250px;
+    min-width: 250px;
+    padding: 24px 20px 24px 24px;
+  }
+
   .wba-dash-sidebar.mobile-open {
     transform: translateX(0);
   }
@@ -1036,6 +1053,7 @@
   .wba-main-wrapper {
     width: 100%;
     padding: 10px;
+    padding-left: 88px;
   }
 
   .wba-dashboard-frame {
@@ -1067,6 +1085,10 @@
 @media (max-width: 600px) {
   .wba-dashboard-frame {
     padding: 12px;
+  }
+
+  .wba-main-wrapper {
+    padding-left: 82px;
   }
 
   .wba-header-left {
