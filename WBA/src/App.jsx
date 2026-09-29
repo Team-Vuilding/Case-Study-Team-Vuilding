@@ -5,6 +5,7 @@ import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
 import LoginModal from './components/LoginModal';
 import AdminDashboard from './components/dashboard/AdminDashboard';
+import { getActiveAccount } from './data/authAccounts';
 import './App.css';
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('wba_auth_user');
-      return savedUser ? JSON.parse(savedUser) : null;
+      return savedUser ? getActiveAccount(JSON.parse(savedUser).id) : null;
     } catch {
       return null;
     }
@@ -21,7 +22,7 @@ function App() {
   const [currentView, setCurrentView] = useState(() => {
     try {
       const savedUser = localStorage.getItem('wba_auth_user');
-      return savedUser ? 'dashboard' : 'landing';
+      return savedUser && getActiveAccount(JSON.parse(savedUser).id) ? 'dashboard' : 'landing';
     } catch {
       return 'landing';
     }

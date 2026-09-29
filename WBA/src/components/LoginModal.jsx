@@ -12,11 +12,11 @@ export default function LoginModal({ isOpen, onClose, onSuccess }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const user = authenticate(email, password);
+    const user = await authenticate(email, password);
     if (!user) {
       setError('Invalid email or password. Check the credentials below and try again.');
       return;

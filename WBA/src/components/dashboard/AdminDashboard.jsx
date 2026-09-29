@@ -6,6 +6,7 @@ import InventorySection from './InventorySection';
 import PurchaseHistorySection from './PurchaseHistorySection';
 import AuditLogsSection from './AuditLogsSection';
 import NotificationDrawer from './NotificationDrawer';
+import ManageAccountsSection from './ManageAccountsSection';
 import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
 
@@ -140,27 +141,7 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       case 'audit-logs':
         return <AuditLogsSection currentUser={currentUser} externalLogs={liveLogs} />;
       case 'manage-accounts':
-        return (
-          <div className="wba-grid-container">
-            <div className="wba-section-page-header">
-              <div>
-                <h2 className="wba-section-page-title">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  Manage Accounts
-                </h2>
-                <p className="wba-section-page-desc">User account management — role assignments and access control.</p>
-              </div>
-            </div>
-            <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔐</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Admin User Directory</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Active Administrator: {currentUser?.name} ({currentUser?.email})</p>
-            </div>
-          </div>
-        );
+        return <ManageAccountsSection currentUser={currentUser} />;
       case 'help-center':
         return (
           <div className="wba-grid-container">
