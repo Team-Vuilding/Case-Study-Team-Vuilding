@@ -359,7 +359,7 @@
   min-width: 0;
   height: 100vh;
   max-height: 100vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   padding: 16px 20px 24px 20px;
   position: relative;
@@ -378,7 +378,7 @@
   border-radius: 24px;
   padding: 22px 26px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(147, 51, 234, 0.06);
-  min-height: 100%;
+  min-height: 0;
 }
 
 /* Top Header Bar */
@@ -1216,7 +1216,6 @@
   .wba-dashboard-frame {
     border-radius: 16px;
     padding: 16px;
-    min-height: 100%;
   }
 
   .wba-header {
@@ -1371,10 +1370,11 @@
   .wba-account-modal { max-height: calc(100vh - 24px); overflow-y: auto; }
 }
 
-/* Let the main wrapper provide the page's single scrollbar. */
+/* Keep dashboard content inside the viewport without a second page scrollbar. */
 .wba-tab-content {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
   padding-right: 4px;
 }
 
