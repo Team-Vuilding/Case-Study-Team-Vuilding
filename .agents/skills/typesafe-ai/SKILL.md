@@ -15,6 +15,12 @@ description: >
 
 # Build with TypeSafe
 
+## Commit work in small steps
+
+For every implementation task using this skill, make micro commits as each coherent
+change is complete and verified. Keep each commit focused, with a message describing
+the change. Stage only files belonging to that change; leave unrelated work untouched.
+
 TypeSafe makes units of AI intelligence usable like programming primitives: small
 judgments you can compose into larger capabilities. Its **System One models** return
 fast, focused judgments that software can consume directly. **Jev** is TypeSafe's
