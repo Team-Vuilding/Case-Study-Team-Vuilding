@@ -7,14 +7,12 @@ export default function Hero({ onGetStarted }) {
       <div className="wba-hero-container">
         {/* Left Column: Headline & Subtitle */}
         <div className="wba-hero-content">
+          <span className="wba-hero-eyebrow"><span /> INVENTORY OPERATIONS, SIMPLIFIED</span>
           <h1 className="wba-hero-title">
-            Track Smarter, Stock<br />
-            Better, Sell More.
+            A clearer view of <span>every item in stock.</span>
           </h1>
           <p className="wba-hero-subtitle">
-            Real-time tracking and smart reorder,<br />
-            keeping your shelves full and your<br />
-            customers happy.
+            Track availability, spot count mismatches, and keep your team aligned from the warehouse to the storefront.
           </p>
           <div className="wba-hero-actions">
             <button
@@ -22,10 +20,10 @@ export default function Hero({ onGetStarted }) {
               className="wba-cta-primary"
               onClick={onGetStarted}
             >
-              Log In
+              Open workspace
             </button>
             <a href="#features" className="wba-cta-secondary">
-              Explore Features &rarr;
+              Explore features &rarr;
             </a>
           </div>
         </div>

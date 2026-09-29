@@ -7,6 +7,7 @@ import LoginModal from './components/LoginModal';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import { getActiveAccount } from './data/authAccounts';
 import './App.css';
+import './landing-modern.css';
 
 function App() {
   // Check localStorage for persisted user session across page refreshes

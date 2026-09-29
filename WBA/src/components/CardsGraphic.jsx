@@ -1,60 +1,49 @@
-import React, { useState } from 'react';
+import React from 'react';
+
+const activity = [
+  { label: 'Portable Inverter AC', value: '340', state: 'In stock' },
+  { label: 'Air Purifier HI3', value: '68', state: 'In stock' },
+  { label: 'Smart Thermostat', value: '12', state: 'Review count' },
+];
 
 export default function CardsGraphic() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMousePos({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
-  };
-
   return (
-    <div
-      className="cards-graphic-wrapper"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div
-        className="cards-graphic-container"
-        style={{
-          transform: `perspective(1000px) rotateY(${mousePos.x * 12}deg) rotateX(${-mousePos.y * 12}deg)`,
-        }}
-      >
-        {/* Card 1: Lavender / Muted Purple (Top Left) */}
-        <div
-          className="layered-card card-lavender"
-          style={{
-            transform: `translate(${mousePos.x * -10}px, ${mousePos.y * -10}px)`,
-          }}
-        >
-          <div className="card-glass-shine"></div>
+    <div className="wba-preview" aria-label="Illustration of the inventory dashboard">
+      <div className="wba-preview-heading">
+        <div>
+          <span className="wba-preview-eyebrow">WORKSPACE PREVIEW</span>
+          <h2>Inventory at a glance</h2>
         </div>
+        <span className="wba-preview-live"><span /> Overview</span>
+      </div>
 
-        {/* Card 2: Deep Violet / Dark Purple (Top Right) */}
-        <div
-          className="layered-card card-violet"
-          style={{
-            transform: `translate(${mousePos.x * 15}px, ${mousePos.y * 15}px)`,
-          }}
-        >
-          <div className="card-glass-shine"></div>
+      <div className="wba-preview-stat-grid">
+        <div className="wba-preview-stat">
+          <span>Products tracked</span>
+          <strong>04</strong>
+          <small>Across your catalog</small>
         </div>
+        <div className="wba-preview-stat">
+          <span>Needs attention</span>
+          <strong>01</strong>
+          <small>Count mismatch</small>
+        </div>
+      </div>
 
-        {/* Card 3: Middle / Bottom Deep Purple (Front) */}
-        <div
-          className="layered-card card-purple-front"
-          style={{
-            transform: `translate(${mousePos.x * 8}px, ${mousePos.y * 8}px)`,
-          }}
-        >
-          <div className="card-glass-shine"></div>
-        </div>
+      <div className="wba-preview-list-head">
+        <span>Stock overview</span>
+        <span>UNITS</span>
+      </div>
+      <div className="wba-preview-list">
+        {activity.map((item) => (
+          <div className="wba-preview-row" key={item.label}>
+            <div>
+              <strong>{item.label}</strong>
+              <small className={item.state === 'Review count' ? 'attention' : ''}>{item.state}</small>
+            </div>
+            <span>{item.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
