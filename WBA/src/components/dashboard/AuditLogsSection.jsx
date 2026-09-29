@@ -98,17 +98,24 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+      <div className="wba-audit-summary" aria-label="Filter audit logs by severity">
         {[
-          { label: 'Total Entries', val: allLogs.length, color: '#c084fc' },
-          { label: 'Critical Alerts', val: allLogs.filter(l => l.severity === 'critical').length, color: '#f87171' },
-          { label: 'Warnings', val: allLogs.filter(l => l.severity === 'warning').length, color: '#fbbf24' },
-          { label: 'Resolved', val: allLogs.filter(l => l.severity === 'good').length, color: '#34d399' },
+          { label: 'Total Entries', filter: 'All', val: allLogs.length, color: '#c084fc' },
+          { label: 'Critical Alerts', filter: 'critical', val: allLogs.filter(l => l.severity === 'critical').length, color: '#f87171' },
+          { label: 'Warnings', filter: 'warning', val: allLogs.filter(l => l.severity === 'warning').length, color: '#fbbf24' },
+          { label: 'Resolved', filter: 'good', val: allLogs.filter(l => l.severity === 'good').length, color: '#34d399' },
         ].map((s) => (
-          <div key={s.label} className="wba-glow-card" style={{ flex: '1', minWidth: '130px', padding: '14px 18px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#948aa8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color }}>{s.val}</div>
-          </div>
+          <button
+            key={s.label}
+            type="button"
+            className={`wba-glow-card wba-audit-summary-card ${severity === s.filter ? 'active' : ''}`}
+            onClick={() => setSeverity(s.filter)}
+            aria-pressed={severity === s.filter}
+            aria-label={`Show ${s.label.toLowerCase()} audit logs`}
+          >
+            <span className="wba-audit-summary-label">{s.label}</span>
+            <strong className="wba-audit-summary-value" style={{ color: s.color }}>{s.val}</strong>
+          </button>
         ))}
       </div>
 
@@ -121,7 +128,7 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
         <div className="wba-audit-stream" style={{ maxHeight: 'none', overflow: 'visible' }}>
           {filtered.length === 0 && (
             <div style={{ textAlign: 'center', padding: '32px', color: '#948aa8' }}>
-              No entries match your search.
+              No entries match the current filters.
             </div>
           )}
           {filtered.map((log) => (

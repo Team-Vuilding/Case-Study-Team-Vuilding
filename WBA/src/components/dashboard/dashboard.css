@@ -990,6 +990,55 @@
   border-color: rgba(192, 132, 252, 0.35);
 }
 
+.wba-audit-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.wba-audit-summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 18px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wba-audit-summary-card.active {
+  border-color: #9b77ee;
+  background: #25203d;
+  box-shadow: inset 0 0 0 1px rgba(185, 152, 255, 0.2);
+}
+
+.wba-audit-summary-label {
+  color: #aab2c9;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.wba-audit-summary-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1000px) {
+  .wba-audit-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .wba-audit-summary {
+    gap: 10px;
+  }
+}
+
 .wba-audit-top {
   display: flex;
   align-items: center;
