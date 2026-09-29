@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 
 export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
+  const [review, setReview] = useState(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -14,10 +17,30 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
     shelfLifeMonths: '',
   });
 
+  const signature = JSON.stringify(formData);
+  const currentReview = review?.signature === signature ? review : null;
+  const flags = currentReview?.scores && Object.entries(currentReview.scores).filter(([, score]) => score >= 0.65);
+
+  const handleReview = async () => {
+    setReviewing(true);
+    setAcknowledged(false);
+    try {
+      const response = await fetch('/api/typesafe/catalog-review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Review unavailable');
+      setReview({ signature, scores: data.scores });
+    } catch (error) {
+      setReview({ signature, error: error.message });
+    } finally {
+      setReviewing(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!currentReview || ((currentReview.error || flags?.length) && !acknowledged)) return;
     if (onAddProduct) {
       onAddProduct({
         ...formData,
@@ -162,6 +185,26 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
             )}
           </div>
 
+          <div style={{ marginTop: '18px', padding: '14px', border: '1px solid rgba(168, 85, 247, 0.35)', borderRadius: '10px', color: '#c4b5fd', fontSize: '0.82rem' }}>
+            <strong style={{ color: '#fff' }}>Jev catalog guardrail</strong>
+            <p style={{ margin: '6px 0 10px' }}>Review product identity, shelf-life tracking, and bin location before adding. This is advice; verify flagged details yourself.</p>
+            <button type="button" className="wba-pill-btn" onClick={handleReview} disabled={reviewing || !formData.name.trim() || !formData.sku.trim() || !formData.warehouseBin.trim()}>
+              {reviewing ? 'Reviewing…' : currentReview ? 'Review again' : 'Review with Jev'}
+            </button>
+            {currentReview?.scores && (
+              <p role="status" style={{ marginTop: '10px', color: flags.length ? '#fbbf24' : '#86efac' }}>
+                {flags.length ? `Check: ${flags.map(([key]) => ({ shelf_life_mismatch: 'shelf-life tracking', vague_identity: 'product name', location_mismatch: 'bin location' })[key]).join(', ')}.` : 'No semantic concerns flagged. Please confirm the item details.'}
+              </p>
+            )}
+            {currentReview?.error && <p role="status" style={{ marginTop: '10px', color: '#fbbf24' }}>{currentReview.error}</p>}
+            {currentReview && (currentReview.error || flags?.length > 0) && (
+              <label style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center' }}>
+                <input type="checkbox" checked={acknowledged} onChange={(e) => setAcknowledged(e.target.checked)} />
+                I checked these details and want to continue.
+              </label>
+            )}
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
             <button
               type="button"
@@ -171,7 +214,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
             >
               Cancel
             </button>
-            <button type="submit" className="wba-btn-primary">
+            <button type="submit" className="wba-btn-primary" disabled={reviewing || !currentReview || ((currentReview.error || flags?.length > 0) && !acknowledged)}>
               Add to Catalog
             </button>
           </div>
