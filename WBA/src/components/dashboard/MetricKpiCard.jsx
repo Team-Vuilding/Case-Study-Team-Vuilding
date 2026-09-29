@@ -9,20 +9,6 @@ export default function MetricKpiCard({
   badgeText,
   icon,
 }) {
-  const getMeterColor = () => {
-    switch (status) {
-      case 'critical':
-        return 'linear-gradient(90deg, #ef4444, #f87171)';
-      case 'warning':
-        return 'linear-gradient(90deg, #d97706, #fbbf24)';
-      case 'info':
-        return 'linear-gradient(90deg, #0284c7, #38bdf8)';
-      case 'good':
-      default:
-        return 'linear-gradient(90deg, #059669, #34d399)';
-    }
-  };
-
   const getBadgeClass = () => {
     switch (status) {
       case 'critical':
@@ -55,15 +41,9 @@ export default function MetricKpiCard({
       </div>
 
       {typeof meterPercent === 'number' && (
-        <div className="wba-kpi-meter" title={`${meterPercent}% utilized`}>
-          <div
-            className="wba-kpi-meter-fill"
-            style={{
-              width: `${Math.min(100, Math.max(0, meterPercent))}%`,
-              background: getMeterColor(),
-            }}
-          />
-        </div>
+        <span className={`wba-kpi-utilization wba-kpi-utilization-${status}`}>
+          {Math.min(100, Math.max(0, meterPercent))}% utilized
+        </span>
       )}
     </div>
   );

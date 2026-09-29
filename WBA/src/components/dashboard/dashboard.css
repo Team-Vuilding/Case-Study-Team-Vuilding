@@ -637,19 +637,36 @@
   color: #ffffff;
 }
 
-.wba-kpi-meter {
-  height: 6px;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+.wba-kpi-utilization {
+  display: inline-flex;
+  width: fit-content;
   margin-top: 14px;
-  overflow: hidden;
+  padding: 4px 8px;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.wba-kpi-meter-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.6s ease;
+.wba-kpi-utilization-warning {
+  border-color: rgba(245, 158, 11, 0.34);
+  background: rgba(245, 158, 11, 0.1);
+  color: #fcd34d;
+}
+
+.wba-kpi-utilization-critical {
+  border-color: rgba(239, 68, 68, 0.34);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+.wba-kpi-utilization-info {
+  border-color: rgba(56, 189, 248, 0.34);
+  background: rgba(56, 189, 248, 0.1);
+  color: #7dd3fc;
 }
 
 /* Middle Row: 1 Full-Width Card (Seasonality & Dynamic ROP) */
@@ -904,18 +921,20 @@
   color: #f3e8ff;
 }
 
-/* Shelf Age Bar */
-.wba-shelf-age-bar {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
+.wba-shelf-age-status {
+  font-weight: 600;
 }
 
-.wba-shelf-age-fill {
-  height: 100%;
-  border-radius: 4px;
+.wba-shelf-age-status.good {
+  color: #6ee7b7;
+}
+
+.wba-shelf-age-status.warning {
+  color: #fcd34d;
+}
+
+.wba-shelf-age-status.critical {
+  color: #fca5a5;
 }
 
 .wba-batch-meta {
