@@ -115,8 +115,8 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
         <div className="wba-grid-container">
           <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
-            <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
-            <p style={{ color: '#c4b5fd', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 20px' }}>
+            <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+            <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 20px' }}>
               Your account (<strong>{currentUser?.name || 'User'}</strong> — <em>{currentUser?.role || 'Staff'}</em>) is not authorized to access this section.
             </p>
             <button
@@ -159,8 +159,8 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
             </div>
             <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📚</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>WBA Operational Reference</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
+              <h3 style={{ color: 'var(--wba-inline-strong)', marginBottom: '8px' }}>WBA Operational Reference</h3>
+              <p style={{ color: 'var(--wba-inline-muted)', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
             </div>
           </div>
         );

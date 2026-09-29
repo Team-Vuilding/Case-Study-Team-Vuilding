@@ -67,12 +67,12 @@ export default function SeasonalForecastChart({ currentUser }) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ffffff', display: 'inline-block' }} />
-            <span style={{ color: '#ffffff' }}>Stock: {selectedData.stockLevel} units</span>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--wba-chart-stock)', display: 'inline-block' }} />
+            <span style={{ color: 'var(--wba-chart-stock)' }}>Stock: {selectedData.stockLevel} units</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#38bdf8', display: 'inline-block' }} />
-            <span style={{ color: '#38bdf8' }}>Demand: {selectedData.demand} units</span>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--wba-chart-demand)', display: 'inline-block' }} />
+            <span style={{ color: 'var(--wba-chart-demand)' }}>Demand: {selectedData.demand} units</span>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                     y={topY}
                     width={colWidth}
                     height={bottomY - topY}
-                    fill="rgba(30, 41, 59, 0.45)"
+                    fill="var(--wba-chart-band)"
                   />
                 )}
                 {isSelected && (
@@ -168,7 +168,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                 <polyline
                   points={stockPointsStr}
                   fill="none"
-                  stroke="#ffffff"
+                  stroke="var(--wba-chart-stock)"
                   strokeWidth="2.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -178,7 +178,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                 <polyline
                   points={demandPointsStr}
                   fill="none"
-                  stroke="#38bdf8"
+                  stroke="var(--wba-chart-demand)"
                   strokeWidth="2.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -207,7 +207,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                         cx={x}
                         cy={stockY}
                         r={isSelected ? 6 : 4}
-                        fill="#ffffff"
+                        fill="var(--wba-chart-stock)"
                         stroke="#0f172a"
                         strokeWidth="2"
                       />
@@ -217,7 +217,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                         cx={x}
                         cy={demandY}
                         r={isSelected ? 6 : 4}
-                        fill="#38bdf8"
+                        fill="var(--wba-chart-demand)"
                         stroke="#0f172a"
                         strokeWidth="2"
                       />
@@ -227,7 +227,7 @@ export default function SeasonalForecastChart({ currentUser }) {
                         x={x}
                         y={bottomY + 24}
                         textAnchor="middle"
-                        fill={isSelected ? '#ffffff' : '#94a3b8'}
+                        fill={isSelected ? 'var(--wba-chart-stock)' : 'var(--wba-text-muted)'}
                         fontSize="12"
                         fontWeight={isSelected ? '700' : '500'}
                         fontFamily="'Plus Jakarta Sans', sans-serif"

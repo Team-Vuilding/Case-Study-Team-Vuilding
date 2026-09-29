@@ -39,6 +39,16 @@
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   position: relative;
   overflow: hidden;
+  --wba-inline-strong: #ffffff;
+  --wba-inline-muted: #948aa8;
+  --wba-inline-accent: #c4b5fd;
+  --wba-inline-critical: #f87171;
+  --wba-inline-warning: #fbbf24;
+  --wba-inline-good: #34d399;
+  --wba-inline-info: #38bdf8;
+  --wba-chart-stock: #ffffff;
+  --wba-chart-demand: #38bdf8;
+  --wba-chart-band: rgba(30, 41, 59, 0.45);
 }
 
 /* Background Ambient Elements */
@@ -1858,8 +1868,19 @@ html[data-theme='light'] .wba-dashboard-app {
   --wba-text-main: #20243a;
   --wba-text-secondary: #545b72;
   --wba-text-muted: #737a91;
+  --wba-purple-400: #6536b3;
   background: #eef0f8;
   color: #20243a;
+  --wba-inline-strong: #20243a;
+  --wba-inline-muted: #626a81;
+  --wba-inline-accent: #573391;
+  --wba-inline-critical: #b42336;
+  --wba-inline-warning: #8a5500;
+  --wba-inline-good: #08765b;
+  --wba-inline-info: #075d86;
+  --wba-chart-stock: #573391;
+  --wba-chart-demand: #075d86;
+  --wba-chart-band: rgba(101, 54, 179, 0.06);
 }
 
 html[data-theme='light'] .wba-ambient-blur-1,
@@ -1905,4 +1926,56 @@ html[data-theme='light'] .wba-dash-modal-card h3 { color: #20243a; }
 html[data-theme='light'] .wba-section-page-title,
 html[data-theme='light'] .wba-accounts-section-head h3,
 html[data-theme='light'] .wba-account-identity strong { color: #20243a; }
+
+html[data-theme='light'] .wba-kpi-metric,
+html[data-theme='light'] .wba-kpi-subtext strong,
+html[data-theme='light'] .wba-card-heading,
+html[data-theme='light'] .wba-sku-name,
+html[data-theme='light'] .wba-batch-id,
+html[data-theme='light'] .wba-batch-bin strong,
+html[data-theme='light'] .wba-accounts-summary strong,
+html[data-theme='light'] .wba-account-modal h2 { color: #20243a; }
+html[data-theme='light'] .wba-pill-toggle,
+html[data-theme='light'] .wba-formula-capsule { background: #f3f0fb; border-color: #d8cbed; color: #42305e; }
+html[data-theme='light'] .wba-pill-btn { color: #514863; }
+html[data-theme='light'] .wba-pill-btn.active { color: #ffffff; }
+html[data-theme='light'] .wba-audit-summary-card.active { background: #eee8ff; }
+html[data-theme='light'] .wba-audit-summary-label,
+html[data-theme='light'] .wba-accounts-summary span,
+html[data-theme='light'] .wba-accounts-section-head p,
+html[data-theme='light'] .wba-accounts-form-intro,
+html[data-theme='light'] .wba-account-identity span,
+html[data-theme='light'] .wba-account-activity span,
+html[data-theme='light'] .wba-account-activity time,
+html[data-theme='light'] .wba-accounts-empty { color: #626a81; }
+html[data-theme='light'] .wba-account-role,
+html[data-theme='light'] .wba-account-activity strong,
+html[data-theme='light'] .wba-accounts-role-help,
+html[data-theme='light'] .wba-accounts-demo-note { color: #573391; }
+html[data-theme='light'] .wba-account-avatar { color: #512a90; }
+html[data-theme='light'] .wba-accounts-notice,
+html[data-theme='light'] .wba-account-status.active { color: #08765b; }
+html[data-theme='light'] .wba-account-status { color: #935b06; }
+html[data-theme='light'] .wba-batch-card.priority-pick { background: #fff4f3; }
+html[data-theme='light'] .wba-badge-warning,
+html[data-theme='light'] .wba-kpi-utilization-warning,
+html[data-theme='light'] .wba-shelf-age-status.warning { color: #8a5500; }
+html[data-theme='light'] .wba-badge-critical,
+html[data-theme='light'] .wba-kpi-utilization-critical,
+html[data-theme='light'] .wba-atp-zero,
+html[data-theme='light'] .wba-tag-urgent,
+html[data-theme='light'] .wba-fifo-instruction-box,
+html[data-theme='light'] .wba-shelf-age-status.critical { color: #b42336; }
+html[data-theme='light'] .wba-badge-good,
+html[data-theme='light'] .wba-kpi-utilization,
+html[data-theme='light'] .wba-atp-positive,
+html[data-theme='light'] .wba-shelf-age-status.good { color: #08765b; }
+html[data-theme='light'] .wba-kpi-utilization-info,
+html[data-theme='light'] .wba-cat-c { color: #075d86; }
+html[data-theme='light'] .wba-cat-a { color: #a21d62; }
+html[data-theme='light'] .wba-cat-b { color: #6536b3; }
+html[data-theme='light'] .wba-audit-item:hover { background: #f7f4ff; }
+html[data-theme='light'] .wba-qr-scanner-heading h2 { color: #20243a; }
+html[data-theme='light'] .wba-qr-scanner-heading p { color: #626a81; }
+html[data-theme='light'] .wba-qr-camera-frame { background: #f6f5fb; color: #626a81; }
 

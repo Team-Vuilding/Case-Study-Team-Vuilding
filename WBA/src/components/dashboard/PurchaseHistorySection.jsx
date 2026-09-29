@@ -70,9 +70,9 @@ const PURCHASE_ORDERS = [
 ];
 
 const STATUS_STYLE = {
-  Delivered: { background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)' },
-  'In Transit': { background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' },
-  Pending: { background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)' },
+  Delivered: { background: 'rgba(16, 185, 129, 0.15)', color: 'var(--wba-inline-good)', border: '1px solid rgba(16, 185, 129, 0.4)' },
+  'In Transit': { background: 'rgba(56, 189, 248, 0.15)', color: 'var(--wba-inline-info)', border: '1px solid rgba(56, 189, 248, 0.4)' },
+  Pending: { background: 'rgba(245, 158, 11, 0.15)', color: 'var(--wba-inline-warning)', border: '1px solid rgba(245, 158, 11, 0.4)' },
 };
 
 export default function PurchaseHistorySection({ currentUser }) {
@@ -86,8 +86,8 @@ export default function PurchaseHistorySection({ currentUser }) {
       <div className="wba-grid-container">
         <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
-          <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
-          <p style={{ color: '#c4b5fd', fontSize: '0.92rem' }}>
+          <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+          <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem' }}>
             Sales Staff accounts do not have permission to view procurement records or purchase orders.
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function PurchaseHistorySection({ currentUser }) {
               key={f}
               type="button"
               className={`wba-pill-btn ${filter === f ? 'active' : ''}`}
-              style={{ border: '1px solid rgba(168,85,247,0.3)', color: filter === f ? '#fff' : '#c4b5fd', fontSize: '0.8rem' }}
+              style={{ border: '1px solid rgba(168,85,247,0.3)', color: filter === f ? '#fff' : 'var(--wba-inline-accent)', fontSize: '0.8rem' }}
               onClick={() => setFilter(f)}
             >
               {f}
@@ -162,8 +162,8 @@ export default function PurchaseHistorySection({ currentUser }) {
           { label: 'In Transit', val: filtered.filter(p => p.status === 'In Transit').length },
         ].map((s) => (
           <div key={s.label} className="wba-glow-card" style={{ flex: '1', minWidth: '140px', padding: '14px 18px' }}>
-            <div style={{ fontSize: '0.74rem', color: '#948aa8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff' }}>{s.val}</div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{s.val}</div>
           </div>
         ))}
       </div>
@@ -190,16 +190,16 @@ export default function PurchaseHistorySection({ currentUser }) {
                 <React.Fragment key={po.id}>
                   <tr>
                     <td>
-                      <span style={{ fontFamily: 'monospace', color: '#c084fc', fontWeight: 700 }}>{po.id}</span>
+                      <span style={{ fontFamily: 'monospace', color: 'var(--wba-inline-accent)', fontWeight: 700 }}>{po.id}</span>
                     </td>
                     <td>
                       <span className="wba-sku-name">{po.product}</span>
                       <span className="wba-sku-code">{po.sku}</span>
                     </td>
-                    <td style={{ color: '#c4b5fd' }}>{po.supplier}</td>
-                    <td style={{ fontWeight: 700, color: '#fff' }}>{po.quantity.toLocaleString()}</td>
+                    <td style={{ color: 'var(--wba-inline-accent)' }}>{po.supplier}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{po.quantity.toLocaleString()}</td>
                     <td>₱{po.unitCost.toLocaleString()}</td>
-                    <td style={{ fontWeight: 700, color: '#fff' }}>₱{po.totalCost.toLocaleString()}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>₱{po.totalCost.toLocaleString()}</td>
                     <td>{po.orderDate}</td>
                     <td>{po.expectedDelivery}</td>
                     <td>
@@ -220,7 +220,7 @@ export default function PurchaseHistorySection({ currentUser }) {
                       <td colSpan={9} style={{ paddingTop: '0', paddingBottom: '10px' }}>
                         <div style={{
                           fontSize: '0.75rem',
-                          color: po.noteSeverity === 'warning' ? '#fbbf24' : '#948aa8',
+                          color: po.noteSeverity === 'warning' ? 'var(--wba-inline-warning)' : 'var(--wba-inline-muted)',
                           background: po.noteSeverity === 'warning' ? 'rgba(245,158,11,0.08)' : 'transparent',
                           borderLeft: `2px solid ${po.noteSeverity === 'warning' ? '#f59e0b' : 'rgba(168,85,247,0.3)'}`,
                           paddingLeft: '10px',
@@ -236,7 +236,7 @@ export default function PurchaseHistorySection({ currentUser }) {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#948aa8' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--wba-inline-muted)' }}>
               No purchase orders match your search.
             </div>
           )}

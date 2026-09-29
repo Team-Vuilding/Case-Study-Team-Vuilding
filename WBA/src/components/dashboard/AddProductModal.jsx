@@ -71,10 +71,10 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
         </button>
 
         <div style={{ marginBottom: '18px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--wba-inline-strong)' }}>
             Add Inventory Item
           </h2>
-          <p style={{ fontSize: '0.82rem', color: '#c4b5fd', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.82rem', color: 'var(--wba-inline-accent)', marginTop: '4px' }}>
             Configure item classification, warehouse bin location, and shelf-life tracking parameters.
           </p>
         </div>
@@ -165,7 +165,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
                   checked={formData.hasShelfLife}
                   onChange={(e) => setFormData({ ...formData, hasShelfLife: e.target.checked })}
                 />
-                <label htmlFor="hasShelfLife" style={{ fontSize: '0.82rem', color: '#c4b5fd', cursor: 'pointer' }}>
+                <label htmlFor="hasShelfLife" style={{ fontSize: '0.82rem', color: 'var(--wba-inline-accent)', cursor: 'pointer' }}>
                   Enable FIFO / FEFO Tracking
                 </label>
               </div>
@@ -185,18 +185,18 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
             )}
           </div>
 
-          <div style={{ marginTop: '18px', padding: '14px', border: '1px solid rgba(168, 85, 247, 0.35)', borderRadius: '10px', color: '#c4b5fd', fontSize: '0.82rem' }}>
-            <strong style={{ color: '#fff' }}>Jev catalog guardrail</strong>
+          <div style={{ marginTop: '18px', padding: '14px', border: '1px solid rgba(168, 85, 247, 0.35)', borderRadius: '10px', color: 'var(--wba-inline-accent)', fontSize: '0.82rem' }}>
+            <strong style={{ color: 'var(--wba-inline-strong)' }}>Jev catalog guardrail</strong>
             <p style={{ margin: '6px 0 10px' }}>Review product identity, shelf-life tracking, and bin location before adding. This is advice; verify flagged details yourself.</p>
             <button type="button" className="wba-pill-btn" onClick={handleReview} disabled={reviewing || !formData.name.trim() || !formData.sku.trim() || !formData.warehouseBin.trim()}>
               {reviewing ? 'Reviewing…' : currentReview ? 'Review again' : 'Review with Jev'}
             </button>
             {currentReview?.scores && (
-              <p role="status" style={{ marginTop: '10px', color: flags.length ? '#fbbf24' : '#86efac' }}>
+              <p role="status" style={{ marginTop: '10px', color: flags.length ? 'var(--wba-inline-warning)' : 'var(--wba-inline-good)' }}>
                 {flags.length ? `Check: ${flags.map(([key]) => ({ shelf_life_mismatch: 'shelf-life tracking', vague_identity: 'product name', location_mismatch: 'bin location' })[key]).join(', ')}.` : 'No semantic concerns flagged. Please confirm the item details.'}
               </p>
             )}
-            {currentReview?.error && <p role="status" style={{ marginTop: '10px', color: '#fbbf24' }}>{currentReview.error}</p>}
+            {currentReview?.error && <p role="status" style={{ marginTop: '10px', color: 'var(--wba-inline-warning)' }}>{currentReview.error}</p>}
             {currentReview && (currentReview.error || flags?.length > 0) && (
               <label style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center' }}>
                 <input type="checkbox" checked={acknowledged} onChange={(e) => setAcknowledged(e.target.checked)} />
@@ -209,7 +209,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
             <button
               type="button"
               className="wba-pill-btn"
-              style={{ border: '1px solid rgba(168, 85, 247, 0.3)', color: '#c4b5fd' }}
+              style={{ border: '1px solid rgba(168, 85, 247, 0.3)', color: 'var(--wba-inline-accent)' }}
               onClick={onClose}
             >
               Cancel

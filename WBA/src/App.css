@@ -1580,6 +1580,9 @@ html[data-theme='light'] .wba-nav-link:hover,
 html[data-theme='light'] .wba-nav-link.active { color: #2d164e; }
 html[data-theme='light'] .wba-login-btn { color: #3b1767; border-color: #8b5cf6; }
 html[data-theme='light'] .wba-theme-toggle { color: #5b21b6; background: #f1edff; border-color: #c4b5fd; }
+html[data-theme='light'] .wba-hero-eyebrow,
+html[data-theme='light'] .wba-hero-title span,
+html[data-theme='light'] .wba-cta-secondary { color: #5b21b6; }
 html[data-theme='light'] .wba-hero-title,
 html[data-theme='light'] .wba-section-title,
 html[data-theme='light'] .wba-about-card h3,
@@ -1596,8 +1599,9 @@ html[data-theme='light'] .wba-tab-btn { color: #625a72; border-color: rgba(124, 
 html[data-theme='light'] .wba-tab-btn:hover,
 html[data-theme='light'] .wba-tab-btn.active { color: #2d164e; background: #eee7ff; }
 html[data-theme='light'] .wba-metric-pill { color: #4b3d60; }
-html[data-theme='light'] .wba-footer { border-top-color: rgba(124, 58, 237, 0.15); }
+html[data-theme='light'] .wba-footer { background: #f1eef9; border-top-color: rgba(124, 58, 237, 0.15); }
 html[data-theme='light'] .wba-footer,
-html[data-theme='light'] .wba-footer a { color: #625a72; }
+html[data-theme='light'] .wba-footer a,
+html[data-theme='light'] .wba-footer-content { color: #5b5269; }
 
 

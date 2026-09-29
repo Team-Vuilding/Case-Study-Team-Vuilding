@@ -153,13 +153,13 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
                     </span>
                   </td>
                   {accessLevel === 'sales' && (
-                    <td style={{ fontWeight: 700, color: '#34d399' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-good)' }}>
                       ₱{item.unitPrice.toLocaleString()}
                     </td>
                   )}
-                  <td style={{ fontWeight: 700, color: '#ffffff' }}>{item.physicalOnHand}</td>
-                  <td style={{ color: '#fbbf24' }}>{item.reserved}</td>
-                  <td style={{ color: '#38bdf8' }}>{item.allocated}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{item.physicalOnHand}</td>
+                  <td style={{ color: 'var(--wba-inline-warning)' }}>{item.reserved}</td>
+                  <td style={{ color: 'var(--wba-inline-info)' }}>{item.allocated}</td>
                   <td>
                     <span className={`wba-atp-pill ${available === 0 ? 'wba-atp-zero' : 'wba-atp-positive'}`}>
                       {available} units
@@ -167,11 +167,11 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
                   </td>
                   <td>
                     {hasDiscrepancy ? (
-                      <span style={{ color: '#f87171', fontWeight: 700 }}>
+                      <span style={{ color: 'var(--wba-inline-critical)', fontWeight: 700 }}>
                         ⚠️ {Math.abs(variance)} {variance < 0 ? 'missing' : 'extra'}
                       </span>
                     ) : (
-                      <span style={{ color: '#34d399', fontWeight: 600 }}>✓ Accurate</span>
+                      <span style={{ color: 'var(--wba-inline-good)', fontWeight: 600 }}>✓ Accurate</span>
                     )}
                   </td>
                   <td>
@@ -182,7 +182,7 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
                         style={{
                           background: 'rgba(239, 68, 68, 0.25)',
                           border: '1px solid rgba(239, 68, 68, 0.5)',
-                          color: '#fca5a5',
+                          color: 'var(--wba-inline-critical)',
                           fontSize: '0.72rem',
                           padding: '4px 8px',
                         }}
@@ -192,11 +192,11 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
                         {reconcilingId === item.id ? 'Fixing...' : 'Fix Count'}
                       </button>
                     ) : hasDiscrepancy && !canFixCount ? (
-                      <span style={{ fontSize: '0.74rem', color: '#f87171', fontStyle: 'italic' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-critical)', fontStyle: 'italic' }}>
                         Audit Req.
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.74rem', color: '#a78bfa' }}>✓ OK</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-accent)' }}>✓ OK</span>
                     )}
                   </td>
                 </tr>
