@@ -371,13 +371,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   background: rgba(14, 6, 26, 0.7);
   backdrop-filter: blur(14px);
   border: 1.5px solid rgba(168, 85, 247, 0.32);
   border-radius: 24px;
   padding: 22px 26px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(147, 51, 234, 0.06);
-  min-height: calc(100vh - 40px);
+  min-height: 100%;
 }
 
 /* Top Header Bar */
@@ -1215,7 +1216,7 @@
   .wba-dashboard-frame {
     border-radius: 16px;
     padding: 16px;
-    min-height: calc(100vh - 20px);
+    min-height: 100%;
   }
 
   .wba-header {
@@ -1370,10 +1371,10 @@
   .wba-account-modal { max-height: calc(100vh - 24px); overflow-y: auto; }
 }
 
-/* Scrollable main content area per tab */
+/* Let the main wrapper provide the page's single scrollbar. */
 .wba-tab-content {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
   padding-right: 4px;
 }
 
