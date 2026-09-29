@@ -1849,3 +1849,60 @@
   color: #948aa8;
 }
 
+/* Theme overrides */
+html[data-theme='light'] .wba-dashboard-app {
+  --wba-bg-deep: #eef0f8;
+  --wba-bg-panel: #ffffff;
+  --wba-bg-card: #ffffff;
+  --wba-bg-card-hover: #f7f5ff;
+  --wba-text-main: #20243a;
+  --wba-text-secondary: #545b72;
+  --wba-text-muted: #737a91;
+  background: #eef0f8;
+  color: #20243a;
+}
+
+html[data-theme='light'] .wba-ambient-blur-1,
+html[data-theme='light'] .wba-ambient-blur-2 { opacity: 0.45; }
+html[data-theme='light'] .wba-dash-sidebar { background: #ffffff; border-right-color: #dce0ec; }
+html[data-theme='light'] .wba-dash-section-title,
+html[data-theme='light'] .wba-kpi-label,
+html[data-theme='light'] .wba-table th { color: #687089; }
+html[data-theme='light'] .wba-dash-nav-item,
+html[data-theme='light'] .wba-dash-sidebar-bottom .wba-dash-nav-item { color: #505870; }
+html[data-theme='light'] .wba-dash-nav-item:hover { background: #f0edfb; color: #342054; }
+html[data-theme='light'] .wba-dash-nav-item.active { background: #ebe5ff; color: #3b1f68; }
+html[data-theme='light'] .wba-dash-divider { background: #e1e4ef; }
+html[data-theme='light'] .wba-dashboard-frame { background: #ffffff; border-color: #dfe2ec; box-shadow: 0 18px 45px rgba(35, 42, 70, 0.1); }
+html[data-theme='light'] .wba-dashboard-app .wba-header,
+html[data-theme='light'] .wba-section-page-header { border-bottom-color: #e2e5ee; }
+html[data-theme='light'] .wba-header-title,
+html[data-theme='light'] .wba-section-page-title { color: #20243a; }
+html[data-theme='light'] .wba-role-badge,
+html[data-theme='light'] .wba-toggle-btn,
+html[data-theme='light'] .wba-icon-btn { background: #f4f2fa; border-color: #daddeb; color: #4e5670; }
+html[data-theme='light'] .wba-role-badge { color: #454b61; }
+html[data-theme='light'] .wba-toggle-btn:hover,
+html[data-theme='light'] .wba-icon-btn:hover { background: #ebe5ff; color: #3b1f68; }
+html[data-theme='light'] .wba-glow-card,
+html[data-theme='light'] .wba-batch-card,
+html[data-theme='light'] .wba-audit-item,
+html[data-theme='light'] .wba-accounts-summary > div { background: #ffffff; border-color: #dfe2ec; box-shadow: 0 8px 20px rgba(35, 42, 70, 0.05); }
+html[data-theme='light'] .wba-table-container { border-color: #dfe2ec; }
+html[data-theme='light'] .wba-table th { background: #f5f6fb; border-bottom-color: #dfe2ec; }
+html[data-theme='light'] .wba-table td { border-bottom-color: #eceef4; color: #424a61; }
+html[data-theme='light'] .wba-table tr:hover td { background: #f6f3ff; }
+html[data-theme='light'] .wba-kpi-subtext,
+html[data-theme='light'] .wba-card-desc,
+html[data-theme='light'] .wba-section-page-desc { color: #626a81; }
+html[data-theme='light'] .wba-input-field,
+html[data-theme='light'] .wba-account-actions button { background: #ffffff; border-color: #d4d8e6; color: #30374e; }
+html[data-theme='light'] .wba-dash-modal-card,
+html[data-theme='light'] .wba-drawer-panel { background: #ffffff; border-color: #dfe2ec; }
+html[data-theme='light'] .wba-dash-modal-card h1,
+html[data-theme='light'] .wba-dash-modal-card h2,
+html[data-theme='light'] .wba-dash-modal-card h3 { color: #20243a; }
+html[data-theme='light'] .wba-section-page-title,
+html[data-theme='light'] .wba-accounts-section-head h3,
+html[data-theme='light'] .wba-account-identity strong { color: #20243a; }
+

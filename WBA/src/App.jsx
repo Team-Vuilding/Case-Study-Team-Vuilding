@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AboutSection from './components/AboutSection';
@@ -10,6 +10,13 @@ import './App.css';
 import './landing-modern.css';
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('wba_theme') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
   // Check localStorage for persisted user session across page refreshes
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -31,6 +38,18 @@ function App() {
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    try {
+      localStorage.setItem('wba_theme', theme);
+    } catch {
+      // ignore storage error
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
@@ -59,6 +78,8 @@ function App() {
       <AdminDashboard
         currentUser={currentUser}
         onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     );
   }
@@ -74,6 +95,8 @@ function App() {
         onOpenLogin={() => setIsLoginOpen(true)}
         activeSection={activeSection}
         setActiveSection={setActiveSection}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content */}

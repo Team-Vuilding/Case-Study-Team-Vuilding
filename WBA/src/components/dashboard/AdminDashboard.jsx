@@ -10,7 +10,7 @@ import ManageAccountsSection from './ManageAccountsSection';
 import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
 
-export default function AdminDashboard({ currentUser, onLogout }) {
+export default function AdminDashboard({ currentUser, onLogout, theme, onToggleTheme }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -207,6 +207,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
             unreadAlertCount={accessLevel === 'sales' ? 1 : accessLevel === 'purchasing' ? 1 : accessLevel === 'warehouse' ? 2 : 3}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
             onLogout={onLogout}
+            theme={theme}
+            onToggleTheme={onToggleTheme}
           />
 
           {/* Tab Content */}

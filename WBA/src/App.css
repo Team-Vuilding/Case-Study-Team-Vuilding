@@ -138,6 +138,26 @@
   margin-left: 40px;
 }
 
+.wba-theme-toggle {
+  width: 36px;
+  height: 36px;
+  margin-right: 12px;
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.12);
+  color: #fef3c7;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.wba-theme-toggle:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: #c084fc;
+  transform: translateY(-1px);
+}
+
 .wba-login-btn {
   background: transparent;
   color: #ffffff;
@@ -1541,5 +1561,43 @@
   border-color: #ec4899;
   transform: scale(1.1);
 }
+
+/* Light theme is intentionally scoped so the original dark violet design remains intact. */
+html[data-theme='light'] .wba-landing-page {
+  background-color: #f8f7fd;
+  background-image:
+    radial-gradient(circle at 80% 25%, rgba(147, 51, 234, 0.14) 0%, rgba(248, 247, 253, 0) 55%),
+    radial-gradient(circle at 15% 75%, rgba(192, 132, 252, 0.14) 0%, rgba(248, 247, 253, 0) 50%);
+}
+
+html[data-theme='light'] .wba-landing-page > .wba-header {
+  background: rgba(255, 255, 255, 0.84);
+  border-bottom-color: rgba(109, 40, 217, 0.16);
+}
+
+html[data-theme='light'] .wba-nav-link { color: #5f5770; }
+html[data-theme='light'] .wba-nav-link:hover,
+html[data-theme='light'] .wba-nav-link.active { color: #2d164e; }
+html[data-theme='light'] .wba-login-btn { color: #3b1767; border-color: #8b5cf6; }
+html[data-theme='light'] .wba-theme-toggle { color: #5b21b6; background: #f1edff; border-color: #c4b5fd; }
+html[data-theme='light'] .wba-hero-title,
+html[data-theme='light'] .wba-section-title,
+html[data-theme='light'] .wba-about-card h3,
+html[data-theme='light'] .wba-feature-title { color: #24113f; text-shadow: none; }
+html[data-theme='light'] .wba-hero-subtitle,
+html[data-theme='light'] .wba-section-desc,
+html[data-theme='light'] .wba-about-card p,
+html[data-theme='light'] .wba-feature-desc { color: #625a72; }
+html[data-theme='light'] .wba-about-card,
+html[data-theme='light'] .wba-features-container { background: rgba(255, 255, 255, 0.76); border-color: rgba(124, 58, 237, 0.18); box-shadow: 0 10px 28px rgba(76, 29, 149, 0.08); }
+html[data-theme='light'] .wba-about-card:hover { background: #ffffff; box-shadow: 0 12px 30px rgba(76, 29, 149, 0.14); }
+html[data-theme='light'] .wba-feature-display { background: #f5f1ff; border-color: rgba(124, 58, 237, 0.2); }
+html[data-theme='light'] .wba-tab-btn { color: #625a72; border-color: rgba(124, 58, 237, 0.16); }
+html[data-theme='light'] .wba-tab-btn:hover,
+html[data-theme='light'] .wba-tab-btn.active { color: #2d164e; background: #eee7ff; }
+html[data-theme='light'] .wba-metric-pill { color: #4b3d60; }
+html[data-theme='light'] .wba-footer { border-top-color: rgba(124, 58, 237, 0.15); }
+html[data-theme='light'] .wba-footer,
+html[data-theme='light'] .wba-footer a { color: #625a72; }
 
 
