@@ -359,7 +359,7 @@
   min-width: 0;
   height: 100vh;
   max-height: 100vh;
-  overflow-y: hidden;
+  overflow-y: auto;
   overflow-x: hidden;
   padding: 16px 20px 24px 20px;
   position: relative;
@@ -368,7 +368,7 @@
 }
 
 .wba-dashboard-frame {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -378,7 +378,7 @@
   border-radius: 24px;
   padding: 22px 26px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(147, 51, 234, 0.06);
-  min-height: 0;
+  min-height: calc(100vh - 40px);
 }
 
 /* Top Header Bar */
@@ -1370,11 +1370,10 @@
   .wba-account-modal { max-height: calc(100vh - 24px); overflow-y: auto; }
 }
 
-/* Keep dashboard content inside the viewport without a second page scrollbar. */
+/* Let the frame grow with each page so content stays inside its border. */
 .wba-tab-content {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  overflow: visible;
   padding-right: 4px;
 }
 
@@ -1505,6 +1504,12 @@
   backdrop-filter: none;
 }
 
+@media (max-width: 900px) {
+  .wba-dashboard-frame {
+    min-height: calc(100vh - 20px);
+  }
+}
+
 .wba-dashboard-app .wba-header {
   position: static;
   flex-shrink: 0;
@@ -1545,7 +1550,7 @@
 }
 
 .wba-tab-content {
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
 }
 
 .wba-grid-container {
