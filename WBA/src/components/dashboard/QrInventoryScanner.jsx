@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
 
 export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
   const videoRef = useRef(null);
@@ -8,6 +9,8 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
   const [quantity, setQuantity] = useState(1);
   const [cameraState, setCameraState] = useState('idle');
   const [error, setError] = useState('');
+  const [suggestion, setSuggestion] = useState(null);
+  const [matching, setMatching] = useState(false);
 
   const stopCamera = () => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -44,6 +47,7 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
         const codes = await detector.detect(videoRef.current);
         if (codes[0]?.rawValue) {
           setCode(codes[0].rawValue.trim());
+          setSuggestion(null);
           stopCamera();
           return;
         }
@@ -62,16 +66,40 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
     return () => cancelAnimationFrame(openCamera);
   }, [isOpen]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const scannedCode = code.trim();
     if (!scannedCode) {
       setError('Scan a QR code or enter a SKU before adding stock.');
       return;
     }
-    onScan({ code: scannedCode, quantity: Math.max(1, Number(quantity) || 1) });
+    const receivedQuantity = Number(quantity);
+    if (!Number.isSafeInteger(receivedQuantity) || receivedQuantity < 1) {
+      setError('Enter a whole-number quantity of at least 1.');
+      return;
+    }
+    const exact = INITIAL_INVENTORY_ITEMS.find((item) => item.sku.toLowerCase() === scannedCode.toLowerCase());
+    if (!exact && suggestion?.label !== scannedCode) {
+      setMatching(true);
+      setError('');
+      try {
+        const response = await fetch('/api/typesafe/scan-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: scannedCode }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Product lookup unavailable');
+        const product = INITIAL_INVENTORY_ITEMS.find((item) => item.sku === result.suggestion);
+        if (!product) throw new Error('No reliable product match. Check the SKU on the item label before receiving stock.');
+        setSuggestion({ label: scannedCode, product });
+      } catch (lookupError) {
+        setError(lookupError.message);
+      } finally {
+        setMatching(false);
+      }
+      return;
+    }
+    onScan({ code: exact?.sku || suggestion.product.sku, quantity: receivedQuantity, originalLabel: scannedCode });
     stopCamera();
     setCode('');
+    setSuggestion(null);
     setQuantity(1);
     onClose();
   };
@@ -101,16 +129,17 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
 
           <div className="wba-input-group">
             <label className="wba-input-label" htmlFor="qr-sku">Scanned QR / SKU</label>
-            <input id="qr-sku" className="wba-input-field" value={code} onChange={(event) => setCode(event.target.value)} placeholder="e.g. WBA-AC-001" autoComplete="off" />
+            <input id="qr-sku" className="wba-input-field" value={code} onChange={(event) => { setCode(event.target.value); setSuggestion(null); setError(''); }} placeholder="e.g. WBA-AC-001" autoComplete="off" />
           </div>
           <div className="wba-input-group">
             <label className="wba-input-label" htmlFor="qr-quantity">Quantity received</label>
             <input id="qr-quantity" className="wba-input-field" type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
           </div>
           {error && <p className="wba-qr-scanner-error" role="alert">{error}</p>}
+          {suggestion?.label === code.trim() && <p role="status">Suggested match: {suggestion.product.name} ({suggestion.product.sku}). Verify the physical label before confirming receipt.</p>}
           <div className="wba-qr-scanner-actions">
             <button type="button" className="wba-pill-btn" onClick={() => { stopCamera(); onClose(); }}>Cancel</button>
-            <button type="submit" className="wba-btn-primary">Add to inventory</button>
+            <button type="submit" className="wba-btn-primary" disabled={matching}>{matching ? 'Checking label…' : suggestion?.label === code.trim() ? 'Confirm matched product and receive' : 'Add to inventory'}</button>
           </div>
         </form>
       </div>

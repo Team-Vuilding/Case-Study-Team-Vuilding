@@ -11,6 +11,7 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
 
   const receiveQrScan = useCallback((scan) => {
     if (accessLevel !== 'warehouse') return;
+    if (!Number.isSafeInteger(scan?.quantity) || scan.quantity < 1 || typeof scan.code !== 'string') return;
     const scanCode = scan.code.toLowerCase();
     const matchingItem = items.find((item) => item.sku.toLowerCase() === scanCode);
     if (!matchingItem) {
@@ -43,7 +44,7 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
         severity: 'good',
         actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
         sku: matchingItem.sku,
-        description: `${scan.quantity} unit${scan.quantity === 1 ? '' : 's'} added to ${matchingItem.name} from a QR scan.`,
+        description: `${scan.quantity} unit${scan.quantity === 1 ? '' : 's'} added to ${matchingItem.name} from a QR scan.${scan.originalLabel && scan.originalLabel.toLowerCase() !== matchingItem.sku.toLowerCase() ? ` Confirmed label: ${scan.originalLabel}.` : ''}`,
         actionTaken: 'On-hand and ledger counts were updated.',
       });
     }

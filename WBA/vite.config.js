@@ -1,10 +1,13 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
+import { INITIAL_INVENTORY_ITEMS } from './src/data/mockInventoryData.js'
 
 function typesafeReview() {
   let apiKey
   const middleware = (req, res, next) => {
-    if (req.url !== '/api/typesafe/catalog-review') return next()
+    const isCatalogReview = req.url === '/api/typesafe/catalog-review'
+    const isScanMatch = req.url === '/api/typesafe/scan-match'
+    if (!isCatalogReview && !isScanMatch) return next()
     res.setHeader('Content-Type', 'application/json')
     if (req.method !== 'POST') {
       res.statusCode = 405
@@ -24,6 +27,27 @@ function typesafeReview() {
     req.on('end', async () => {
       try {
         const item = JSON.parse(body)
+        if (isScanMatch) {
+          if (typeof item.label !== 'string' || !item.label.trim() || item.label.length > 200) throw new Error('Invalid label')
+          const criteria = Object.fromEntries(INITIAL_INVENTORY_ITEMS.map((product) => [product.sku, `${product.name} (${product.sku})`]))
+          criteria.none = 'The label does not clearly identify any listed product.'
+          const response = await fetch('https://api.typesafe.ai/v1/systemone', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'jev-latest',
+              state: { label: item.label.trim() },
+              questions: { product: { type: 'choice', instructions: 'Which existing product does this scanned or entered label clearly identify? Choose none if unclear.', criteria } },
+            }),
+            signal: AbortSignal.timeout(10000),
+          })
+          if (!response.ok) throw new Error(`TypeSafe request failed (${response.status})`)
+          const answer = (await response.json()).answers?.product
+          if (!Object.hasOwn(criteria, answer?.choice) || typeof answer?.confidence !== 'number') throw new Error('Invalid TypeSafe response')
+          const suggestion = answer.choice !== 'none' && answer.confidence >= 0.6 ? answer.choice : null
+          res.end(JSON.stringify({ suggestion, confidence: answer.confidence }))
+          return
+        }
         if (typeof item.name !== 'string' || typeof item.sku !== 'string' || typeof item.warehouseBin !== 'string') throw new Error('Invalid item')
         const response = await fetch('https://api.typesafe.ai/v1/systemone', {
           method: 'POST',
