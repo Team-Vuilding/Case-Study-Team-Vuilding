@@ -64,6 +64,7 @@ const PURCHASE_ORDERS = [
     orderDate: '2025-08-05',
     expectedDelivery: '2025-08-28',
     status: 'Delivered',
+    noteSeverity: 'warning',
     notes: '⚠️ Off-season panic order. Caused ₱48,500/mo holding cost penalty. ROP engine now prevents this.',
   },
 ];
@@ -219,9 +220,9 @@ export default function PurchaseHistorySection({ currentUser }) {
                       <td colSpan={9} style={{ paddingTop: '0', paddingBottom: '10px' }}>
                         <div style={{
                           fontSize: '0.75rem',
-                          color: po.notes.includes('⚠️') ? '#fbbf24' : '#948aa8',
-                          background: po.notes.includes('⚠️') ? 'rgba(245,158,11,0.08)' : 'transparent',
-                          borderLeft: `2px solid ${po.notes.includes('⚠️') ? '#f59e0b' : 'rgba(168,85,247,0.3)'}`,
+                          color: po.noteSeverity === 'warning' ? '#fbbf24' : '#948aa8',
+                          background: po.noteSeverity === 'warning' ? 'rgba(245,158,11,0.08)' : 'transparent',
+                          borderLeft: `2px solid ${po.noteSeverity === 'warning' ? '#f59e0b' : 'rgba(168,85,247,0.3)'}`,
                           paddingLeft: '10px',
                           borderRadius: '2px',
                         }}>
