@@ -158,31 +158,6 @@
   transform: translateY(-1px);
 }
 
-.wba-login-btn {
-  background: transparent;
-  color: #ffffff;
-  border: 1.5px solid #8e2ebd;
-  border-radius: 9999px;
-  padding: 7px 28px;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(142, 46, 189, 0.2);
-}
-
-.wba-login-btn:hover {
-  background: rgba(142, 46, 189, 0.2);
-  border-color: #c084fc;
-  box-shadow: 0 0 20px rgba(192, 132, 252, 0.4);
-  transform: translateY(-1px);
-}
-
-.wba-login-btn:active {
-  transform: translateY(1px);
-}
-
 /* ==========================================================================
    Hero Section
    ========================================================================== */
@@ -916,12 +891,6 @@
     margin-left: 20px;
   }
 
-  .wba-login-btn {
-    padding-left: 16px;
-    padding-right: 16px;
-    font-size: 12px;
-  }
-
   .wba-hero-container {
     grid-template-columns: 1fr;
     text-align: center;
@@ -1578,7 +1547,6 @@ html[data-theme='light'] .wba-landing-page > .wba-header {
 html[data-theme='light'] .wba-nav-link { color: #5f5770; }
 html[data-theme='light'] .wba-nav-link:hover,
 html[data-theme='light'] .wba-nav-link.active { color: #2d164e; }
-html[data-theme='light'] .wba-login-btn { color: #3b1767; border-color: #8b5cf6; }
 html[data-theme='light'] .wba-theme-toggle { color: #5b21b6; background: #f1edff; border-color: #c4b5fd; }
 html[data-theme='light'] .wba-hero-eyebrow,
 html[data-theme='light'] .wba-hero-title span,

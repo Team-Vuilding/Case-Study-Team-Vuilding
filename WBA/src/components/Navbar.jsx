@@ -1,7 +1,7 @@
 import React from 'react';
 import Logo from './Logo';
 
-export default function Navbar({ onOpenLogin, activeSection, setActiveSection, theme, onToggleTheme }) {
+export default function Navbar({ activeSection, setActiveSection, theme, onToggleTheme }) {
   const handleNavClick = (e, sectionId) => {
     e.preventDefault();
     setActiveSection(sectionId);
@@ -59,14 +59,6 @@ export default function Navbar({ onOpenLogin, activeSection, setActiveSection, t
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
             <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
-          </button>
-          <button
-            type="button"
-            className="wba-login-btn"
-            onClick={onOpenLogin}
-            id="login-button"
-          >
-            LOG IN
           </button>
         </div>
       </div>

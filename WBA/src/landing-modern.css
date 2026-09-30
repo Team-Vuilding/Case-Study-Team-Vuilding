@@ -17,7 +17,6 @@
 .wba-nav-list { gap: 34px; }
 .wba-nav-link { color: #aeb7ca; font-size: 0.9rem; font-weight: 600; }
 .wba-nav-link::after { background: #a987fa; }
-.wba-login-btn { border-color: #555176; border-radius: 10px; padding: 10px 20px; letter-spacing: 0.04em; box-shadow: none; }
 
 .wba-hero-section { padding-top: 88px; padding-bottom: 56px; }
 .wba-hero-container { grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr); gap: clamp(32px, 5vw, 86px); min-height: 490px; }

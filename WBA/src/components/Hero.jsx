@@ -20,7 +20,7 @@ export default function Hero({ onGetStarted }) {
               className="wba-cta-primary"
               onClick={onGetStarted}
             >
-              Open workspace
+              Log in
             </button>
             <a href="#features" className="wba-cta-secondary">
               Explore features &rarr;

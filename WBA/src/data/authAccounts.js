@@ -101,9 +101,9 @@ export async function hashAccountPassword(password, salt = crypto.randomUUID()) 
   return { passwordSalt: salt, passwordHash: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') };
 }
 
-export async function authenticate(email, password) {
+export async function authenticate(email, password, expectedAccessLevel = null) {
   const account = getAccounts().find(user => user.email.toLowerCase() === email.toLowerCase().trim());
-  if (!account || account.status !== 'active') return null;
+  if (!account || account.status !== 'active' || (expectedAccessLevel && account.accessLevel !== expectedAccessLevel)) return null;
   const demo = DUMMY_ACCOUNTS.find(user => user.id === account.id);
   const valid = account.passwordHash
     ? (await hashAccountPassword(password, account.passwordSalt)).passwordHash === account.passwordHash

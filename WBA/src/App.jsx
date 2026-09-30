@@ -3,11 +3,20 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
-import LoginModal from './components/LoginModal';
+import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import { getActiveAccount } from './data/authAccounts';
 import './App.css';
 import './landing-modern.css';
+
+const ACCESS_LEVELS = ['admin', 'warehouse', 'purchasing', 'sales'];
+
+function getAccessRoute() {
+  const route = window.location.hash.replace(/^#\/?/, '');
+  const role = route.startsWith('login/') ? route.slice(6) : null;
+  if (ACCESS_LEVELS.includes(role)) return { view: 'role-login', role };
+  return { view: 'landing', role: null };
+}
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -30,14 +39,32 @@ function App() {
   const [currentView, setCurrentView] = useState(() => {
     try {
       const savedUser = localStorage.getItem('wba_auth_user');
-      return savedUser && getActiveAccount(JSON.parse(savedUser).id) ? 'dashboard' : 'landing';
+      return savedUser && getActiveAccount(JSON.parse(savedUser).id) ? 'dashboard' : getAccessRoute().view;
     } catch {
-      return 'landing';
+      return getAccessRoute().view;
     }
   });
 
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(() => getAccessRoute().role);
+  const [isRolePickerOpen, setIsRolePickerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    if (currentUser) return undefined;
+    const handleAccessRoute = () => {
+      try {
+        const savedUser = localStorage.getItem('wba_auth_user');
+        if (savedUser && getActiveAccount(JSON.parse(savedUser).id)) return;
+      } catch {
+        // ignore an invalid saved session
+      }
+      const route = getAccessRoute();
+      setCurrentView(route.view);
+      setSelectedRole(route.role);
+    };
+    window.addEventListener('hashchange', handleAccessRoute);
+    return () => window.removeEventListener('hashchange', handleAccessRoute);
+  }, [currentUser]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -51,18 +78,47 @@ function App() {
 
   const toggleTheme = () => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
 
+  const showRoleSelection = () => {
+    setIsRolePickerOpen(true);
+  };
+
+  const showRoleLogin = (role) => {
+    if (!ACCESS_LEVELS.includes(role)) return;
+    setIsRolePickerOpen(false);
+    window.location.hash = `#/login/${role}`;
+    setSelectedRole(role);
+    setCurrentView('role-login');
+  };
+
+  const showLanding = () => {
+    setIsRolePickerOpen(false);
+    window.location.hash = '#/home';
+    setSelectedRole(null);
+    setCurrentView('landing');
+  };
+
+  const showRolePickerFromLogin = () => {
+    window.location.hash = '#/home';
+    setSelectedRole(null);
+    setCurrentView('landing');
+    setIsRolePickerOpen(true);
+  };
+
   const handleLoginSuccess = (user) => {
-    setCurrentUser(user);
-    setCurrentView('dashboard');
-    setIsLoginOpen(false);
+    setIsRolePickerOpen(false);
     try {
       localStorage.setItem('wba_auth_user', JSON.stringify(user));
+      localStorage.setItem('wba_active_tab', 'dashboard');
     } catch {
       // ignore storage error
     }
+    window.location.hash = '#/dashboard';
+    setCurrentUser(user);
+    setCurrentView('dashboard');
   };
 
   const handleLogout = () => {
+    setIsRolePickerOpen(false);
     setCurrentUser(null);
     setCurrentView('landing');
     try {
@@ -71,6 +127,7 @@ function App() {
     } catch {
       // ignore storage error
     }
+    window.location.hash = '#/home';
   };
 
   if (currentView === 'dashboard' && currentUser) {
@@ -78,6 +135,21 @@ function App() {
       <AdminDashboard
         currentUser={currentUser}
         onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    );
+  }
+
+  if (currentView === 'role-login') {
+    return (
+      <WorkspaceAccess
+        key={selectedRole}
+        role={selectedRole}
+        onSelectRole={showRoleLogin}
+        onBack={showRolePickerFromLogin}
+        onHome={showLanding}
+        onSuccess={handleLoginSuccess}
         theme={theme}
         onToggleTheme={toggleTheme}
       />
@@ -92,7 +164,6 @@ function App() {
 
       {/* Header / Navbar */}
       <Navbar
-        onOpenLogin={() => setIsLoginOpen(true)}
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         theme={theme}
@@ -101,7 +172,7 @@ function App() {
 
       {/* Main Content */}
       <main className="wba-main-content">
-        <Hero onGetStarted={() => setIsLoginOpen(true)} />
+        <Hero onGetStarted={showRoleSelection} />
         <AboutSection />
         <FeaturesSection />
       </main>
@@ -118,12 +189,14 @@ function App() {
         </div>
       </footer>
 
-      {/* Login Modal — fixed, above all landing page content */}
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSuccess={handleLoginSuccess}
-      />
+      {isRolePickerOpen && (
+        <WorkspaceAccess
+          role={null}
+          onSelectRole={showRoleLogin}
+          onClose={() => setIsRolePickerOpen(false)}
+        />
+      )}
+
     </div>
   );
 }
