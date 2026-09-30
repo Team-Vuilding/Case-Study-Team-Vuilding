@@ -3,16 +3,19 @@ import RealTimeInventoryLedger from './RealTimeInventoryLedger';
 import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
 import QrInventoryScanner from './QrInventoryScanner';
+import ProductQrGenerator from './ProductQrGenerator';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
 export default function InventorySection({ currentUser, onTriggerAudit }) {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [isQrGeneratorOpen, setIsQrGeneratorOpen] = useState(false);
   const inventoryLedgerRef = useRef(null);
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
   const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
   const isWarehouseStaff = accessLevel === 'warehouse';
+  const canGenerateQr = isWarehouseStaff || accessLevel === 'admin';
 
   const handleQrScan = (scan) => {
     if (!isWarehouseStaff) return;
@@ -74,6 +77,11 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
             Scan QR to receive stock
           </button>
         )}
+        {canGenerateQr && (
+          <button type="button" className="wba-pill-btn wba-qr-launch-button" onClick={() => setIsQrGeneratorOpen(true)}>
+            Generate product QR
+          </button>
+        )}
       </div>
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
@@ -132,6 +140,9 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
       )}
       {isWarehouseStaff && (
         <QrInventoryScanner isOpen={isQrScannerOpen} onClose={() => setIsQrScannerOpen(false)} onScan={handleQrScan} />
+      )}
+      {canGenerateQr && (
+        <ProductQrGenerator isOpen={isQrGeneratorOpen} onClose={() => setIsQrGeneratorOpen(false)} />
       )}
     </div>
   );
