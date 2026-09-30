@@ -103,8 +103,72 @@
   display: none;
 }
 
-.wba-qr-launch-button {
+.wba-qr-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border: 1px solid #343a50;
+  border-radius: 14px;
+  background: #1a2032;
+}
+
+.wba-qr-tools-copy,
+.wba-qr-tools-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wba-qr-tools-copy h3 {
+  color: #f3f0fb;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.wba-qr-tools-copy p {
+  margin-top: 3px;
+  color: #abb5cb;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.wba-qr-tools-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 10px;
+  background: #302648;
+  color: #c6a6ff;
+  font-size: 1.1rem;
+}
+
+.wba-qr-tools-actions {
+  flex: none;
+}
+
+.wba-qr-tools-actions button {
   white-space: nowrap;
+}
+
+.wba-qr-secondary-btn {
+  padding: 11px 16px;
+  border: 1px solid #605579;
+  border-radius: 9px;
+  background: #24283a;
+  color: #e9dfff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wba-qr-secondary-btn:hover {
+  background: #302b48;
+  border-color: #a080df;
 }
 
 .wba-qr-scanner-modal {
@@ -112,38 +176,102 @@
 }
 
 .wba-qr-generator-modal {
-  max-width: 460px;
+  max-width: 620px;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
 }
 
 .wba-qr-label-preview {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
   align-items: center;
-  gap: 6px;
   margin-top: 18px;
-  padding: 22px;
-  border: 1px dashed rgba(192, 132, 252, 0.45);
-  border-radius: 14px;
-  background: #fff;
-  color: #182033;
-  text-align: center;
+  padding: 16px;
+  border: 1px solid #353c52;
+  border-radius: 12px;
+  background: #1c2235;
 }
 
-.wba-qr-label-preview img {
+.wba-qr-preview-code {
+  display: grid;
+  place-items: center;
+  width: 220px;
+  height: 220px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+  color: #182033;
+}
+
+.wba-qr-preview-code img {
   display: block;
-  width: min(100%, 280px);
+  width: 100%;
   aspect-ratio: 1;
 }
 
-.wba-qr-label-preview strong {
-  font-size: 0.95rem;
+.wba-qr-preview-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
 }
 
-.wba-qr-label-preview code {
-  color: #525d72;
+.wba-qr-preview-details > span {
+  color: #b9a2ea;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.wba-qr-preview-details strong {
+  color: #f5f3fb;
+  font-size: 1.08rem;
+  line-height: 1.3;
+}
+
+.wba-qr-preview-details code {
+  padding: 6px 9px;
+  border: 1px solid #47506a;
+  border-radius: 6px;
+  color: #d7ddee;
   font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.wba-qr-preview-details p {
+  color: #aeb8cb;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .wba-qr-tools {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .wba-qr-tools-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .wba-qr-tools-actions button {
+    flex: 1;
+  }
+
+  .wba-qr-label-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .wba-qr-preview-code {
+    width: min(100%, 220px);
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 auto;
+  }
 }
 
 .wba-qr-scanner-heading {
@@ -2013,4 +2141,15 @@ html[data-theme='light'] .wba-audit-item:hover { background: #f7f4ff; }
 html[data-theme='light'] .wba-qr-scanner-heading h2 { color: #20243a; }
 html[data-theme='light'] .wba-qr-scanner-heading p { color: #626a81; }
 html[data-theme='light'] .wba-qr-camera-frame { background: #f6f5fb; color: #626a81; }
+html[data-theme='light'] .wba-qr-tools,
+html[data-theme='light'] .wba-qr-label-preview { background: #f7f8fc; border-color: #dfe2ec; }
+html[data-theme='light'] .wba-qr-tools-copy h3,
+html[data-theme='light'] .wba-qr-preview-details strong { color: #20243a; }
+html[data-theme='light'] .wba-qr-tools-copy p,
+html[data-theme='light'] .wba-qr-preview-details p { color: #626a81; }
+html[data-theme='light'] .wba-qr-tools-icon { background: #ece5fb; color: #6637ae; }
+html[data-theme='light'] .wba-qr-secondary-btn { background: #fff; border-color: #c9c3d9; color: #4a346b; }
+html[data-theme='light'] .wba-qr-secondary-btn:hover { background: #f1ebfb; }
+html[data-theme='light'] .wba-qr-preview-details > span { color: #6536a9; }
+html[data-theme='light'] .wba-qr-preview-details code { color: #39435b; border-color: #d0d6e4; }
 

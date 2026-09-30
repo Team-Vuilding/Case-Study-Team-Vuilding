@@ -49,8 +49,8 @@ export default function ProductQrGenerator({ isOpen, onClose }) {
         <div className="wba-qr-scanner-heading">
           <span className="wba-qr-scanner-icon">▦</span>
           <div>
-            <h2 id="qr-generator-title">Generate product QR</h2>
-            <p>Choose a product to create a label containing its exact SKU. This label can be scanned when receiving stock.</p>
+            <h2 id="qr-generator-title">Product QR label</h2>
+            <p>Select a product, then download its scannable SKU code.</p>
           </div>
         </div>
 
@@ -64,9 +64,15 @@ export default function ProductQrGenerator({ isOpen, onClose }) {
         </div>
 
         <div className="wba-qr-label-preview" aria-live="polite">
-          {svg ? <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} alt={`QR code for ${product?.name}, SKU ${selectedSku}`} /> : <span>{error || 'Generating QR code…'}</span>}
-          <strong>{product?.name}</strong>
-          <code>{selectedSku}</code>
+          <div className="wba-qr-preview-code">
+            {svg ? <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} alt={`QR code for ${product?.name}, SKU ${selectedSku}`} /> : <span>{error || 'Generating QR code…'}</span>}
+          </div>
+          <div className="wba-qr-preview-details">
+            <span>Ready to label</span>
+            <strong>{product?.name}</strong>
+            <code>{selectedSku}</code>
+            <p>The QR contains only this SKU, which the stock scanner uses to identify the product.</p>
+          </div>
         </div>
         {error && <p className="wba-qr-scanner-error" role="alert">{error}</p>}
         <div className="wba-qr-scanner-actions">

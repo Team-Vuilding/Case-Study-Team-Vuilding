@@ -72,17 +72,29 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
             + Add Product
           </button>
         )}
-        {isWarehouseStaff && (
-          <button type="button" className="wba-btn-primary wba-qr-launch-button" onClick={() => setIsQrScannerOpen(true)}>
-            Scan QR to receive stock
-          </button>
-        )}
-        {canGenerateQr && (
-          <button type="button" className="wba-pill-btn wba-qr-launch-button" onClick={() => setIsQrGeneratorOpen(true)}>
-            Generate product QR
-          </button>
-        )}
       </div>
+
+      {canGenerateQr && (
+        <section className="wba-qr-tools" aria-label="Product QR tools">
+          <div className="wba-qr-tools-copy">
+            <span className="wba-qr-tools-icon" aria-hidden="true">▦</span>
+            <div>
+              <h3>Product QR tools</h3>
+              <p>{isWarehouseStaff ? 'Create SKU labels or scan one to receive stock.' : 'Create a scannable SKU code for any catalog product.'}</p>
+            </div>
+          </div>
+          <div className="wba-qr-tools-actions">
+            {isWarehouseStaff && (
+              <button type="button" className="wba-btn-primary" onClick={() => setIsQrScannerOpen(true)}>
+                Scan to receive
+              </button>
+            )}
+            <button type="button" className={isWarehouseStaff ? 'wba-qr-secondary-btn' : 'wba-btn-primary'} onClick={() => setIsQrGeneratorOpen(true)}>
+              Generate QR
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
