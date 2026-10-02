@@ -13,6 +13,8 @@ class AuditController extends ApiController
         $query = DB::table('audit_events')->orderByDesc('id');
         if ($request->is('api/users/activity-logs')) {
             $query->whereIn('event_type', ['Signed in', 'Created account', 'Updated account', 'Deactivated account']);
+        } else {
+            $query->where('event_type', '!=', 'Signed in');
         }
 
         return response()->json(['data' => $query->limit(1000)->get()->map(fn ($event) => [

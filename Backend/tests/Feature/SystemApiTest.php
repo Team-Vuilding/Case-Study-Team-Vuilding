@@ -127,6 +127,28 @@ class SystemApiTest extends TestCase
         $this->getJson('/api/users/activity-logs')->assertOk()->assertJsonPath('data.0.action', 'Updated account');
     }
 
+    public function test_sign_in_records_are_only_shown_in_account_activity(): void
+    {
+        $admin = $this->signIn();
+        $this->postJson('/api/items', $this->product())->assertCreated();
+
+        $this->getJson('/api/audit-logs')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.eventType', 'PRODUCT_CATALOG_ADDED');
+        $this->getJson('/api/users/activity-logs')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.action', 'Signed in')
+            ->assertJsonPath('data.0.actor', $admin->name)
+            ->assertJsonPath('data.0.target', $admin->email);
+
+        $this->signIn('purchasing');
+        $this->getJson('/api/audit-logs')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.eventType', 'PRODUCT_CATALOG_ADDED');
+        $this->getJson('/api/users/activity-logs')->assertForbidden();
+        $this->assertDatabaseCount('audit_events', 3);
+    }
+
     public function test_order_workflow_receives_stock_only_once_and_hides_costs_from_warehouse(): void
     {
         $admin = $this->signIn();
