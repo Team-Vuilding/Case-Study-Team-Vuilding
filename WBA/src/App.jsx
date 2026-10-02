@@ -39,6 +39,8 @@ function App() {
   useEffect(() => {
     if (currentUser) return undefined;
     const handleAccessRoute = () => {
+      // Login stores the token before React removes this public-route listener.
+      if (getToken()) return;
       const route = getAccessRoute();
       setCurrentView(route.view);
       setSelectedRole(route.role);
