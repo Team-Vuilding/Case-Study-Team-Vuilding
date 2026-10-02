@@ -53,10 +53,67 @@ export const DUMMY_ACCOUNTS = [
  * Authenticate user with email + password.
  * Returns the user object or null if invalid.
  */
-export function authenticate(email, password) {
-  return DUMMY_ACCOUNTS.find(
-    (acc) =>
-      acc.email.toLowerCase() === email.toLowerCase().trim() &&
-      acc.password === password
-  ) || null;
+const ACCOUNT_STORAGE_KEY = 'wba_accounts_v1';
+const ACTIVITY_STORAGE_KEY = 'wba_account_activity_v1';
+
+const publicAccount = account => Object.fromEntries(
+  Object.entries(account).filter(([key]) => !['password', 'passwordHash', 'passwordSalt'].includes(key))
+);
+
+export function getAccounts() {
+  const initialAccounts = DUMMY_ACCOUNTS.map(account => ({ ...publicAccount(account), status: 'active' }));
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACCOUNT_STORAGE_KEY));
+    return Array.isArray(stored) ? stored : initialAccounts;
+  } catch {
+    return initialAccounts;
+  }
+}
+
+export function saveAccounts(accounts) {
+  localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(accounts));
+}
+
+export function getAccountActivity() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(ACTIVITY_STORAGE_KEY));
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordAccountActivity(actor, action, target) {
+  const entry = {
+    id: crypto.randomUUID(),
+    at: new Date().toISOString(),
+    actor,
+    action,
+    target,
+  };
+  localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify([entry, ...getAccountActivity()].slice(0, 100)));
+  return entry;
+}
+
+export async function hashAccountPassword(password, salt = crypto.randomUUID()) {
+  const bytes = new TextEncoder().encode(`${salt}:${password}`);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return { passwordSalt: salt, passwordHash: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') };
+}
+
+export async function authenticate(email, password, expectedAccessLevel = null) {
+  const account = getAccounts().find(user => user.email.toLowerCase() === email.toLowerCase().trim());
+  if (!account || account.status !== 'active' || (expectedAccessLevel && account.accessLevel !== expectedAccessLevel)) return null;
+  const demo = DUMMY_ACCOUNTS.find(user => user.id === account.id);
+  const valid = account.passwordHash
+    ? (await hashAccountPassword(password, account.passwordSalt)).passwordHash === account.passwordHash
+    : demo?.password === password;
+  if (!valid) return null;
+  recordAccountActivity(account.name, 'Signed in', account.email);
+  return publicAccount(account);
+}
+
+export function getActiveAccount(id) {
+  const account = getAccounts().find(user => user.id === id && user.status === 'active');
+  return account ? publicAccount(account) : null;
 }

@@ -45,28 +45,12 @@ export default function FifoExpiryQueue() {
                 <strong>{batch.binLocation}</strong>
               </div>
 
-              {/* Shelf age progress bar */}
-              <div className="wba-shelf-age-bar">
-                <div
-                  className="wba-shelf-age-fill"
-                  style={{
-                    width: `${Math.min(100, agePercent)}%`,
-                    background:
-                      agePercent > 85
-                        ? 'linear-gradient(90deg, #ef4444, #dc2626)'
-                        : agePercent > 55
-                        ? 'linear-gradient(90deg, #f59e0b, #d97706)'
-                        : 'linear-gradient(90deg, #10b981, #059669)',
-                  }}
-                />
-              </div>
-
               <div className="wba-batch-meta">
                 <span>
                   Age: <strong>{batch.currentAgeMonths} of 9 months</strong>
                 </span>
-                <span style={{ color: isCritical ? '#f87171' : 'inherit' }}>
-                  {batch.daysUntilDegraded} days until expiry · {batch.quantityRemaining} units left
+                <span className={`wba-shelf-age-status ${agePercent > 85 ? 'critical' : agePercent > 55 ? 'warning' : 'good'}`}>
+                  {Math.round(agePercent)}% shelf life used · {batch.daysUntilDegraded} days left
                 </span>
               </div>
             </div>

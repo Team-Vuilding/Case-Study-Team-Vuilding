@@ -5,22 +5,22 @@ export default function FeaturesSection() {
 
   const features = [
     {
-      title: 'Smart Stock Velocity Tracker',
-      tag: 'Live Telemetry',
-      desc: 'Monitor real-time product movement per store aisle or SKU with dynamic heatmaps and velocity indexes.',
-      metrics: ['99.98% Inventory Precision', '< 50ms Telemetry Sync', '24/7 Automated Shelf Scans'],
+      title: 'One inventory ledger',
+      tag: 'STOCK VISIBILITY',
+      desc: 'See on-hand stock, reservations, picking activity, and available-to-sell quantities in one view.',
+      metrics: ['SKU-level stock details', 'Count mismatch alerts', 'Available-to-promise status'],
     },
     {
-      title: 'Dynamic Reorder Automation',
-      tag: 'Autonomous AI',
-      desc: 'Set smart thresholds that automatically negotiate lead-time variances and fire purchase triggers.',
-      metrics: ['Zero Stockouts Guaranteed', '40% Reduced Holding Cost', 'Direct Supplier API Integrations'],
+      title: 'Demand and expiry insights',
+      tag: 'PLANNING',
+      desc: 'Compare monthly demand with stock on hand and prioritize older batches before they expire.',
+      metrics: ['Monthly demand overview', 'Reorder point guidance', 'Batch expiry tracking'],
     },
     {
-      title: 'Revenue & Margin Intelligence',
-      tag: 'Financial Insights',
-      desc: 'Understand exactly which items yield top margins and where shelf-space yields maximum ROI.',
-      metrics: ['Item Profitability Dashboards', 'Shrinkage & Waste Analytics', 'Automated Margin Alerts'],
+      title: 'A shared operations record',
+      tag: 'TEAM WORKFLOW',
+      desc: 'Keep purchasing, warehouse, and sales teams working from the same operational picture.',
+      metrics: ['Role-based dashboards', 'Purchase history', 'Audit activity'],
     },
   ];
 
@@ -28,9 +28,9 @@ export default function FeaturesSection() {
     <section id="features" className="wba-section wba-features-section">
       <div className="wba-section-header">
         <span className="wba-badge">FEATURES</span>
-        <h2 className="wba-section-title">Built For Scale, Speed, and Certainty</h2>
+        <h2 className="wba-section-title">The tools your team needs to stay ahead</h2>
         <p className="wba-section-desc">
-          Everything your operations team needs to eliminate stockouts and maximize shelf productivity.
+          Clear inventory information for the decisions you make every day.
         </p>
       </div>
 

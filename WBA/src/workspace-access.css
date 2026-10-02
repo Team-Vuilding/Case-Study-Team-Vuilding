@@ -1,0 +1,182 @@
+.wba-access-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% -20%, rgba(126, 87, 204, 0.16), transparent 48%), #0b0e19;
+  color: #f4f2fa;
+}
+
+.wba-access-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 32px;
+}
+
+.wba-access-home {
+  display: inline-flex;
+  align-items: center;
+  width: 142px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.wba-access-logo { width: 100%; }
+.wba-access-header-actions { display: flex; align-items: center; gap: 18px; }
+.wba-access-header-link { padding: 7px 0; border: 0; background: none; color: #bbb4cb; font: inherit; font-size: 0.86rem; cursor: pointer; }
+.wba-access-header-link:hover { color: #fff; }
+
+.wba-access-main {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 108px);
+  padding: 28px 24px 90px;
+}
+
+.wba-role-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(5, 7, 16, 0.76);
+  backdrop-filter: blur(8px);
+}
+
+.wba-access-chooser {
+  position: relative;
+  width: min(100%, 760px);
+  padding: 32px;
+  border: 1px solid #48435d;
+  border-radius: 20px;
+  background: #181d2e;
+  box-shadow: 0 26px 75px rgba(0, 0, 0, 0.42);
+}
+
+.wba-role-picker-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #aeb7cb;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.wba-role-picker-close:hover { background: #292d42; color: #fff; }
+.wba-access-intro { margin-bottom: 28px; }
+.wba-access-step { margin-bottom: 14px; color: #b8a3e6; font-size: 0.78rem; font-weight: 700; }
+.wba-access-intro h1,
+.wba-access-login-heading h1 { color: #fff; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.055em; line-height: 1.15; }
+.wba-access-intro > p:last-child,
+.wba-access-login-heading p { max-width: 550px; margin-top: 12px; color: #b9bfd0; font-size: 0.95rem; line-height: 1.6; }
+
+.wba-access-role-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.wba-access-role {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 112px;
+  padding: 20px;
+  border: 1px solid #343a50;
+  border-radius: 14px;
+  background: #181d2e;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.wba-access-role:hover { background: #24253b; border-color: #8e72c8; }
+.wba-access-role-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border: 1px solid #615282; border-radius: 10px; background: #302742; color: #d3bbff; font-size: 0.95rem; font-weight: 800; }
+.wba-access-role-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wba-access-role-copy strong { color: #f7f5fc; font-size: 0.96rem; }
+.wba-access-role-copy > span { color: #aeb7cb; font-size: 0.78rem; line-height: 1.45; }
+.wba-access-role-arrow { margin-left: auto; color: #aa8ae6; font-size: 1.3rem; }
+
+.wba-access-login {
+  width: min(100%, 470px);
+  padding: 30px;
+  border: 1px solid #343a50;
+  border-radius: 18px;
+  background: #181d2e;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+}
+
+.wba-access-back { margin-bottom: 30px; padding: 0; border: 0; background: none; color: #bba2ee; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.wba-access-back:hover { color: #e3d4ff; }
+.wba-access-login-heading .wba-access-role-icon { margin-bottom: 18px; }
+.wba-access-login-heading h1 { font-size: 1.8rem; }
+.wba-access-login-heading p { margin-top: 8px; font-size: 0.88rem; }
+.wba-access-form { display: flex; flex-direction: column; gap: 18px; margin-top: 30px; }
+.wba-access-form .wba-form-group label { color: #d8dcea; font-size: 0.82rem; font-weight: 700; }
+.wba-access-form .wba-form-group input { width: 100%; min-height: 44px; border: 1px solid #434a61; border-radius: 9px; background: #22283a; color: #fff; font: inherit; font-size: 0.9rem; }
+.wba-access-form .wba-form-group input:focus { border-color: #ae8cff; box-shadow: 0 0 0 3px rgba(174, 140, 255, 0.16); }
+.wba-access-form .wba-password-input-wrap input { padding-right: 72px; }
+.wba-access-form .wba-password-toggle { right: 10px; padding: 6px; color: #c9adfa; font-size: 0.75rem; font-weight: 700; line-height: 1; }
+.wba-access-submit { min-height: 46px; border: 1px solid #9773ea; border-radius: 9px; background: #7950dc; color: #fff; font: inherit; font-size: 0.9rem; font-weight: 800; cursor: pointer; }
+.wba-access-submit:hover { background: #8a61e9; }
+.wba-access-submit:disabled { opacity: 0.7; cursor: wait; }
+.wba-access-form .wba-modal-error { margin: 0; }
+
+.wba-access-demo { margin-top: 22px; padding-top: 20px; border-top: 1px solid #343a50; }
+.wba-access-demo > button,
+.wba-access-demo > div button { padding: 0; border: 0; background: none; color: #bca3ef; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.wba-access-demo > div { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; margin-top: 14px; }
+.wba-access-demo p { color: #aeb7cb; font-size: 0.76rem; }
+.wba-access-demo code { color: #f1eaff; font-size: 0.84rem; }
+.wba-access-demo > div button { margin-top: 6px; }
+
+.wba-access-page button:focus-visible,
+.wba-access-page input:focus-visible { outline: 2px solid #bb9aff; outline-offset: 3px; }
+
+@media (max-width: 620px) {
+  .wba-access-header { padding: 22px; }
+  .wba-access-main { display: block; min-height: 0; padding: 44px 20px 72px; }
+  .wba-access-role-list { grid-template-columns: 1fr; }
+  .wba-access-role { min-height: 88px; }
+  .wba-access-login { margin: 0 auto; padding: 24px; }
+  .wba-access-chooser { padding: 26px 20px; }
+}
+
+@media (max-width: 420px) {
+  .wba-access-header-link { display: none; }
+  .wba-access-login { padding: 20px; }
+}
+
+html[data-theme='light'] .wba-access-page { background: radial-gradient(circle at 50% -20%, rgba(145, 109, 212, 0.13), transparent 48%), #f7f7fb; color: #252b3e; }
+html[data-theme='light'] .wba-access-header-link { color: #5b5971; }
+html[data-theme='light'] .wba-access-header-link:hover { color: #291a4a; }
+html[data-theme='light'] .wba-access-intro h1,
+html[data-theme='light'] .wba-access-login-heading h1,
+html[data-theme='light'] .wba-access-role-copy strong { color: #23273b; }
+html[data-theme='light'] .wba-access-intro > p:last-child,
+html[data-theme='light'] .wba-access-login-heading p,
+html[data-theme='light'] .wba-access-role-copy > span,
+html[data-theme='light'] .wba-access-demo p { color: #616a80; }
+html[data-theme='light'] .wba-access-role,
+html[data-theme='light'] .wba-access-login,
+html[data-theme='light'] .wba-access-chooser { background: #fff; border-color: #dfe2ec; }
+html[data-theme='light'] .wba-access-role { background: #f7f8fc; border-color: #dfe2ec; }
+html[data-theme='light'] .wba-access-role:hover { background: #f5f0ff; border-color: #a18acb; }
+html[data-theme='light'] .wba-access-role-icon { background: #eee8fa; border-color: #cab9e7; color: #603e9c; }
+html[data-theme='light'] .wba-access-form .wba-form-group label { color: #384055; }
+html[data-theme='light'] .wba-access-form .wba-form-group input { background: #fff; border-color: #d2d8e5; color: #252b3e; }
+html[data-theme='light'] .wba-access-demo { border-top-color: #e1e4ec; }
+html[data-theme='light'] .wba-access-demo code { color: #453064; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wba-access-page * { transition-duration: 0.01ms !important; }
+}

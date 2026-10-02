@@ -21,7 +21,7 @@ export const PERMISSIONS = {
 // Allowed top-level navigation tabs per access level
 export const ROLE_TABS = {
   admin: ['dashboard', 'inventory', 'purchase-history', 'audit-logs', 'manage-accounts', 'help-center'],
-  warehouse: ['dashboard', 'inventory', 'purchase-history', 'audit-logs', 'help-center'],
+  warehouse: ['dashboard', 'inventory', 'purchase-history', 'help-center'],
   purchasing: ['dashboard', 'inventory', 'purchase-history', 'audit-logs', 'help-center'],
   sales: ['dashboard', 'inventory', 'help-center'],
 };
@@ -41,7 +41,6 @@ const ROLE_PERMISSIONS = {
   warehouse: [
     PERMISSIONS.FIX_COUNT,
     PERMISSIONS.VIEW_PURCHASE_HISTORY, // Can view delivery receipts/ETA
-    PERMISSIONS.VIEW_AUDIT_LOGS,        // Can view operational logs
     PERMISSIONS.VIEW_FIFO_QUEUE,
   ],
   purchasing: [

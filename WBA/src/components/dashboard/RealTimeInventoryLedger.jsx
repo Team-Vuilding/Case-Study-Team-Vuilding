@@ -1,13 +1,56 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit }) {
+const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ currentUser, onTriggerAudit }, ref) {
   const [items, setItems] = useState(INITIAL_INVENTORY_ITEMS);
   const [reconcilingId, setReconcilingId] = useState(null);
 
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canFixCount = hasPermission(accessLevel, PERMISSIONS.FIX_COUNT);
+
+  const receiveQrScan = useCallback((scan) => {
+    if (accessLevel !== 'warehouse') return;
+    if (!Number.isSafeInteger(scan?.quantity) || scan.quantity < 1 || typeof scan.code !== 'string') return;
+    const scanCode = scan.code.toLowerCase();
+    const matchingItem = items.find((item) => item.sku.toLowerCase() === scanCode);
+    if (!matchingItem) {
+      if (onTriggerAudit) {
+        onTriggerAudit({
+          id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
+          timestamp: new Date().toLocaleTimeString(),
+          eventType: 'QR_SCAN_NOT_FOUND',
+          severity: 'warning',
+          actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
+          sku: scan.code,
+          description: `QR scan could not be added because SKU ${scan.code} is not in the inventory ledger.`,
+          actionTaken: 'No stock count was changed.',
+        });
+      }
+      return;
+    }
+    setItems((previousItems) => previousItems.map((item) => item.id === matchingItem.id ? {
+      ...item,
+      physicalOnHand: item.physicalOnHand + scan.quantity,
+      paperSpreadsheetCount: item.paperSpreadsheetCount + scan.quantity,
+      status: 'Synced',
+      statusSeverity: 'good',
+    } : item));
+    if (onTriggerAudit) {
+      onTriggerAudit({
+        id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
+        timestamp: new Date().toLocaleTimeString(),
+        eventType: 'QR_STOCK_RECEIVED',
+        severity: 'good',
+        actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
+        sku: matchingItem.sku,
+        description: `${scan.quantity} unit${scan.quantity === 1 ? '' : 's'} added to ${matchingItem.name} from a QR scan.${scan.originalLabel && scan.originalLabel.toLowerCase() !== matchingItem.sku.toLowerCase() ? ` Confirmed label: ${scan.originalLabel}.` : ''}`,
+        actionTaken: 'On-hand and ledger counts were updated.',
+      });
+    }
+  }, [accessLevel, currentUser?.name, currentUser?.role, items, onTriggerAudit]);
+
+  useImperativeHandle(ref, () => ({ receiveQrScan }), [receiveQrScan]);
 
   const handleReconcile = (id) => {
     // Action guard: abort if unauthorized role tries to reconcile
@@ -110,13 +153,13 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
                     </span>
                   </td>
                   {accessLevel === 'sales' && (
-                    <td style={{ fontWeight: 700, color: '#34d399' }}>
+                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-good)' }}>
                       ₱{item.unitPrice.toLocaleString()}
                     </td>
                   )}
-                  <td style={{ fontWeight: 700, color: '#ffffff' }}>{item.physicalOnHand}</td>
-                  <td style={{ color: '#fbbf24' }}>{item.reserved}</td>
-                  <td style={{ color: '#38bdf8' }}>{item.allocated}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{item.physicalOnHand}</td>
+                  <td style={{ color: 'var(--wba-inline-warning)' }}>{item.reserved}</td>
+                  <td style={{ color: 'var(--wba-inline-info)' }}>{item.allocated}</td>
                   <td>
                     <span className={`wba-atp-pill ${available === 0 ? 'wba-atp-zero' : 'wba-atp-positive'}`}>
                       {available} units
@@ -124,11 +167,11 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
                   </td>
                   <td>
                     {hasDiscrepancy ? (
-                      <span style={{ color: '#f87171', fontWeight: 700 }}>
+                      <span style={{ color: 'var(--wba-inline-critical)', fontWeight: 700 }}>
                         ⚠️ {Math.abs(variance)} {variance < 0 ? 'missing' : 'extra'}
                       </span>
                     ) : (
-                      <span style={{ color: '#34d399', fontWeight: 600 }}>✓ Accurate</span>
+                      <span style={{ color: 'var(--wba-inline-good)', fontWeight: 600 }}>✓ Accurate</span>
                     )}
                   </td>
                   <td>
@@ -139,7 +182,7 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
                         style={{
                           background: 'rgba(239, 68, 68, 0.25)',
                           border: '1px solid rgba(239, 68, 68, 0.5)',
-                          color: '#fca5a5',
+                          color: 'var(--wba-inline-critical)',
                           fontSize: '0.72rem',
                           padding: '4px 8px',
                         }}
@@ -149,11 +192,11 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
                         {reconcilingId === item.id ? 'Fixing...' : 'Fix Count'}
                       </button>
                     ) : hasDiscrepancy && !canFixCount ? (
-                      <span style={{ fontSize: '0.74rem', color: '#f87171', fontStyle: 'italic' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-critical)', fontStyle: 'italic' }}>
                         Audit Req.
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.74rem', color: '#a78bfa' }}>✓ OK</span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-accent)' }}>✓ OK</span>
                     )}
                   </td>
                 </tr>
@@ -164,5 +207,7 @@ export default function RealTimeInventoryLedger({ currentUser, onTriggerAudit })
       </div>
     </div>
   );
-}
+});
+
+export default RealTimeInventoryLedger;
 

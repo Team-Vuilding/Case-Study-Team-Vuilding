@@ -47,13 +47,13 @@ export default function LiveAuditTrail({ externalLogs = [] }) {
   const getSeverityStyle = (sev) => {
     switch (sev) {
       case 'critical':
-        return { background: 'rgba(239, 68, 68, 0.25)', color: '#fca5a5' };
+        return { background: 'rgba(239, 68, 68, 0.25)', color: 'var(--wba-inline-critical)' };
       case 'warning':
-        return { background: 'rgba(245, 158, 11, 0.25)', color: '#fde047' };
+        return { background: 'rgba(245, 158, 11, 0.25)', color: 'var(--wba-inline-warning)' };
       case 'good':
-        return { background: 'rgba(16, 185, 129, 0.25)', color: '#6ee7b7' };
+        return { background: 'rgba(16, 185, 129, 0.25)', color: 'var(--wba-inline-good)' };
       default:
-        return { background: 'rgba(56, 189, 248, 0.25)', color: '#7dd3fc' };
+        return { background: 'rgba(56, 189, 248, 0.25)', color: 'var(--wba-inline-info)' };
     }
   };
 
@@ -82,7 +82,7 @@ export default function LiveAuditTrail({ externalLogs = [] }) {
           style={{
             background: 'rgba(56, 189, 248, 0.2)',
             border: '1px solid rgba(56, 189, 248, 0.4)',
-            color: '#38bdf8',
+            color: 'var(--wba-inline-info)',
             fontSize: '0.72rem',
           }}
           onClick={handleSimulateEvent}

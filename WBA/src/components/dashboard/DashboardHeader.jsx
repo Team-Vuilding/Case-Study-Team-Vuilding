@@ -9,6 +9,8 @@ export default function DashboardHeader({
   unreadAlertCount = 3,
   onOpenNotifications,
   onLogout,
+  theme,
+  onToggleTheme,
 }) {
   const initials = currentUser?.initials || currentUser?.name?.split(' ').map(n => n[0]).join('') || 'A';
 
@@ -49,6 +51,15 @@ export default function DashboardHeader({
         </div>
 
         {/* Notification Bell */}
+        <button
+          type="button"
+          className="wba-icon-btn wba-dashboard-theme-toggle"
+          onClick={onToggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+        </button>
         <button
           type="button"
           className="wba-icon-btn"

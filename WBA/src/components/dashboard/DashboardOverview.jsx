@@ -111,9 +111,9 @@ export default function DashboardOverview({ currentUser }) {
         <SeasonalForecastChart currentUser={currentUser} />
       </section>
 
-      {/* Bottom Quick Stats */}
-      <section className="wba-top-metrics-row" aria-label="Quick Stats">
-        {isSales ? (
+      {/* Sales Quick Stats */}
+      {isSales && (
+        <section className="wba-top-metrics-row" aria-label="Quick Stats">
           <>
             <MetricKpiCard
               title="Catalog Products"
@@ -158,52 +158,8 @@ export default function DashboardOverview({ currentUser }) {
               }
             />
           </>
-        ) : (
-          <>
-            <MetricKpiCard
-              title="Products Being Tracked"
-              badgeText="ACTIVE"
-              value="4 Products"
-              subtext={<>3 non-perishable · 1 perishable with expiry tracking</>}
-              meterPercent={65}
-              status="info"
-              icon={
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                </svg>
-              }
-            />
-            <MetricKpiCard
-              title="Online Oversells Blocked"
-              badgeText="PROTECTED"
-              value="14 Prevented"
-              subtext={<>System automatically stops selling when stock is low</>}
-              meterPercent={100}
-              status="good"
-              icon={
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              }
-            />
-            <MetricKpiCard
-              title="Spoilage Losses Prevented"
-              badgeText="THIS MONTH"
-              value="₱42,500 Saved"
-              subtext={<>Older batches dispatched first to reduce waste</>}
-              meterPercent={80}
-              status="good"
-              icon={
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="1" x2="12" y2="23" />
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              }
-            />
-          </>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

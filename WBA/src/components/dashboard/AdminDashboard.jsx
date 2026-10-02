@@ -6,12 +6,22 @@ import InventorySection from './InventorySection';
 import PurchaseHistorySection from './PurchaseHistorySection';
 import AuditLogsSection from './AuditLogsSection';
 import NotificationDrawer from './NotificationDrawer';
+import ManageAccountsSection from './ManageAccountsSection';
 import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
 
-export default function AdminDashboard({ currentUser, onLogout }) {
+export default function AdminDashboard({ currentUser, onLogout, theme, onToggleTheme }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const handleToggleSidebar = () => {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      setIsMobileSidebarOpen((prev) => !prev);
+      return;
+    }
+    setIsSidebarCollapsed((prev) => !prev);
+  };
 
   // Helper to parse and sanitize active tab from hash or storage
   const resolveInitialTab = useCallback(() => {
@@ -105,8 +115,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
         <div className="wba-grid-container">
           <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
-            <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
-            <p style={{ color: '#c4b5fd', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 20px' }}>
+            <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+            <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem', maxWidth: '480px', margin: '0 auto 20px' }}>
               Your account (<strong>{currentUser?.name || 'User'}</strong> — <em>{currentUser?.role || 'Staff'}</em>) is not authorized to access this section.
             </p>
             <button
@@ -131,27 +141,7 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       case 'audit-logs':
         return <AuditLogsSection currentUser={currentUser} externalLogs={liveLogs} />;
       case 'manage-accounts':
-        return (
-          <div className="wba-grid-container">
-            <div className="wba-section-page-header">
-              <div>
-                <h2 className="wba-section-page-title">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                  Manage Accounts
-                </h2>
-                <p className="wba-section-page-desc">User account management — role assignments and access control.</p>
-              </div>
-            </div>
-            <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔐</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>Admin User Directory</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Active Administrator: {currentUser?.name} ({currentUser?.email})</p>
-            </div>
-          </div>
-        );
+        return <ManageAccountsSection currentUser={currentUser} />;
       case 'help-center':
         return (
           <div className="wba-grid-container">
@@ -169,8 +159,8 @@ export default function AdminDashboard({ currentUser, onLogout }) {
             </div>
             <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📚</div>
-              <h3 style={{ color: '#ffffff', marginBottom: '8px' }}>WBA Operational Reference</h3>
-              <p style={{ color: '#948aa8', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
+              <h3 style={{ color: 'var(--wba-inline-strong)', marginBottom: '8px' }}>WBA Operational Reference</h3>
+              <p style={{ color: 'var(--wba-inline-muted)', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
             </div>
           </div>
         );
@@ -188,11 +178,21 @@ export default function AdminDashboard({ currentUser, onLogout }) {
       {/* Left Sidebar Navigation */}
       <DashboardSidebar
         isCollapsed={isSidebarCollapsed}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         onOpenAddProduct={() => handleSelectTab('inventory')}
         currentUser={currentUser}
       />
+      {isMobileSidebarOpen && (
+        <button
+          type="button"
+          className="wba-dash-sidebar-backdrop"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-label="Close sidebar"
+        />
+      )}
 
       {/* Main Content Area */}
       <div className="wba-main-wrapper">
@@ -200,13 +200,15 @@ export default function AdminDashboard({ currentUser, onLogout }) {
           {/* Header Bar */}
           <DashboardHeader
             isSidebarCollapsed={isSidebarCollapsed}
-            onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
+            onToggleSidebar={handleToggleSidebar}
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
             pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
             unreadAlertCount={accessLevel === 'sales' ? 1 : accessLevel === 'purchasing' ? 1 : accessLevel === 'warehouse' ? 2 : 3}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
             onLogout={onLogout}
+            theme={theme}
+            onToggleTheme={onToggleTheme}
           />
 
           {/* Tab Content */}

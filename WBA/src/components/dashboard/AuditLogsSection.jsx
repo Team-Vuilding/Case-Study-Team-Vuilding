@@ -16,10 +16,10 @@ const FRIENDLY_EVENT = {
 
 const getSeverityStyle = (sev) => {
   switch (sev) {
-    case 'critical': return { background: 'rgba(239,68,68,0.2)', color: '#fca5a5' };
-    case 'warning': return { background: 'rgba(245,158,11,0.2)', color: '#fde047' };
-    case 'good': return { background: 'rgba(16,185,129,0.2)', color: '#6ee7b7' };
-    default: return { background: 'rgba(56,189,248,0.2)', color: '#7dd3fc' };
+    case 'critical': return { background: 'rgba(239,68,68,0.2)', color: 'var(--wba-inline-critical)' };
+    case 'warning': return { background: 'rgba(245,158,11,0.2)', color: 'var(--wba-inline-warning)' };
+    case 'good': return { background: 'rgba(16,185,129,0.2)', color: 'var(--wba-inline-good)' };
+    default: return { background: 'rgba(56,189,248,0.2)', color: 'var(--wba-inline-info)' };
   }
 };
 
@@ -33,8 +33,8 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
       <div className="wba-grid-container">
         <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
-          <h2 style={{ color: '#f87171', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
-          <p style={{ color: '#c4b5fd', fontSize: '0.92rem' }}>
+          <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
+          <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem' }}>
             Sales Staff accounts do not have permission to view administrative audit trails.
           </p>
         </div>
@@ -98,30 +98,37 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+      <div className="wba-audit-summary" aria-label="Filter audit logs by severity">
         {[
-          { label: 'Total Entries', val: allLogs.length, color: '#c084fc' },
-          { label: 'Critical Alerts', val: allLogs.filter(l => l.severity === 'critical').length, color: '#f87171' },
-          { label: 'Warnings', val: allLogs.filter(l => l.severity === 'warning').length, color: '#fbbf24' },
-          { label: 'Resolved', val: allLogs.filter(l => l.severity === 'good').length, color: '#34d399' },
+          { label: 'Total Entries', filter: 'All', val: allLogs.length, color: 'var(--wba-inline-accent)' },
+          { label: 'Critical Alerts', filter: 'critical', val: allLogs.filter(l => l.severity === 'critical').length, color: 'var(--wba-inline-critical)' },
+          { label: 'Warnings', filter: 'warning', val: allLogs.filter(l => l.severity === 'warning').length, color: 'var(--wba-inline-warning)' },
+          { label: 'Resolved', filter: 'good', val: allLogs.filter(l => l.severity === 'good').length, color: 'var(--wba-inline-good)' },
         ].map((s) => (
-          <div key={s.label} className="wba-glow-card" style={{ flex: '1', minWidth: '130px', padding: '14px 18px' }}>
-            <div style={{ fontSize: '0.72rem', color: '#948aa8', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color }}>{s.val}</div>
-          </div>
+          <button
+            key={s.label}
+            type="button"
+            className={`wba-glow-card wba-audit-summary-card ${severity === s.filter ? 'active' : ''}`}
+            onClick={() => setSeverity(s.filter)}
+            aria-pressed={severity === s.filter}
+            aria-label={`Show ${s.label.toLowerCase()} audit logs`}
+          >
+            <span className="wba-audit-summary-label">{s.label}</span>
+            <strong className="wba-audit-summary-value" style={{ color: s.color }}>{s.val}</strong>
+          </button>
         ))}
       </div>
 
       {/* Log Stream */}
       <div className="wba-glow-card">
-        <div style={{ marginBottom: '14px', fontSize: '0.84rem', color: '#c4b5fd' }}>
-          Showing <strong style={{ color: '#fff' }}>{filtered.length}</strong> entries
+        <div style={{ marginBottom: '14px', fontSize: '0.84rem', color: 'var(--wba-inline-accent)' }}>
+          Showing <strong style={{ color: 'var(--wba-inline-strong)' }}>{filtered.length}</strong> entries
         </div>
 
         <div className="wba-audit-stream" style={{ maxHeight: 'none', overflow: 'visible' }}>
           {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '32px', color: '#948aa8' }}>
-              No entries match your search.
+            <div style={{ textAlign: 'center', padding: '32px', color: 'var(--wba-inline-muted)' }}>
+              No entries match the current filters.
             </div>
           )}
           {filtered.map((log) => (
@@ -133,7 +140,7 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
                 </span>
               </div>
               <div className="wba-audit-desc">
-                <strong style={{ color: '#e9d5ff' }}>{log.actor}</strong>
+                <strong style={{ color: 'var(--wba-inline-strong)' }}>{log.actor}</strong>
                 <br />
                 {log.description}
               </div>
