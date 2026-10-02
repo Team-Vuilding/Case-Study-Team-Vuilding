@@ -81,6 +81,14 @@ function typesafeReview() {
 export default defineConfig({
   plugins: [react(), typesafeReview()],
   server: {
-    allowedHosts: ['octane-jumble-uncurious.ngrok-free.dev']
-  }
+    allowedHosts: ['octane-jumble-uncurious.ngrok-free.dev'],
+    // Proxy REST API calls to the Laravel Backend
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
