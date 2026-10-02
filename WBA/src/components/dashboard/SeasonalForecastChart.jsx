@@ -68,11 +68,11 @@ export default function SeasonalForecastChart({ currentUser }) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--wba-chart-stock)', display: 'inline-block' }} />
-            <span style={{ color: 'var(--wba-chart-stock)' }}>Stock: {selectedData.stockLevel} units</span>
+            <span style={{ color: 'var(--wba-chart-stock)' }}>Stock: {selectedData?.stockLevel ?? 0} units</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--wba-chart-demand)', display: 'inline-block' }} />
-            <span style={{ color: 'var(--wba-chart-demand)' }}>Demand: {selectedData.demand} units</span>
+            <span style={{ color: 'var(--wba-chart-demand)' }}>Demand: {selectedData?.demand ?? 0} units</span>
           </div>
         </div>
 
