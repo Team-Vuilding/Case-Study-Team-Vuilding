@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { INITIAL_AUDIT_LOGS } from '../../data/mockInventoryData';
+import useApiData from '../../services/useApiData';
+import ApiStatus from '../ApiStatus';
 
 const SEVERITY_LABELS = ['All', 'critical', 'warning', 'good', 'info'];
 
@@ -23,7 +24,8 @@ const getSeverityStyle = (sev) => {
   }
 };
 
-export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
+export default function AuditLogsSection({ currentUser }) {
+  const { data, loading, error, reload } = useApiData('audit-logs');
   const [search, setSearch] = useState('');
   const [severity, setSeverity] = useState('All');
   const accessLevel = currentUser?.accessLevel || 'admin';
@@ -42,7 +44,8 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
     );
   }
 
-  const allLogs = [...externalLogs, ...INITIAL_AUDIT_LOGS];
+  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} />;
+  const allLogs = data || [];
 
   const filtered = allLogs.filter((log) => {
     const friendlyLabel = FRIENDLY_EVENT[log.eventType] || log.eventType;
@@ -144,7 +147,6 @@ export default function AuditLogsSection({ currentUser, externalLogs = [] }) {
                 <br />
                 {log.description}
               </div>
-              <div className="wba-audit-action">↳ {log.actionTaken}</div>
             </div>
           ))}
         </div>

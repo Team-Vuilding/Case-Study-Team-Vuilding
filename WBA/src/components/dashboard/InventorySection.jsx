@@ -1,4 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { apiRequest, refreshData } from '../../services/api';
+import useApiData from '../../services/useApiData';
+import ApiStatus from '../ApiStatus';
 import RealTimeInventoryLedger from './RealTimeInventoryLedger';
 import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
@@ -6,41 +9,33 @@ import QrInventoryScanner from './QrInventoryScanner';
 import ProductQrGenerator from './ProductQrGenerator';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function InventorySection({ currentUser, onTriggerAudit }) {
+export default function InventorySection({ currentUser }) {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [isQrGeneratorOpen, setIsQrGeneratorOpen] = useState(false);
-  const inventoryLedgerRef = useRef(null);
+  const { data, loading, error, reload } = useApiData('items');
+  const items = data || [];
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
   const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
   const isWarehouseStaff = accessLevel === 'warehouse';
   const canGenerateQr = isWarehouseStaff || accessLevel === 'admin';
 
-  const handleQrScan = (scan) => {
+  const handleQrScan = async (scan) => {
     if (!isWarehouseStaff) return;
-    inventoryLedgerRef.current?.receiveQrScan(scan);
+    await apiRequest('warehouse/movements', { method: 'POST', body: scan });
+    refreshData();
   };
 
-  const handleAddProduct = (newProduct) => {
+  const handleAddProduct = async (newProduct) => {
     // Action guard: abort if unauthorized role tries to trigger
     if (!canAddProduct) {
       console.warn(`[RBAC] Add product blocked for accessLevel: ${accessLevel}`);
       return;
     }
 
-    if (onTriggerAudit) {
-      onTriggerAudit({
-        id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
-        timestamp: new Date().toLocaleTimeString(),
-        eventType: 'PRODUCT_CATALOG_ADDED',
-        severity: 'good',
-        actor: `${currentUser?.name || 'Admin'} (${currentUser?.role || 'Admin'})`,
-        sku: newProduct.sku,
-        description: `New SKU ${newProduct.name} added to warehouse catalog at ${newProduct.warehouseBin}.`,
-        actionTaken: 'Real-time ledger and ATP engine synced.',
-      });
-    }
+    await apiRequest('items', { method: 'POST', body: newProduct });
+    refreshData();
     setIsAddProductOpen(false);
   };
 
@@ -98,7 +93,7 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        <RealTimeInventoryLedger ref={inventoryLedgerRef} currentUser={currentUser} onTriggerAudit={onTriggerAudit} />
+        {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} /> : <RealTimeInventoryLedger items={items} currentUser={currentUser} />}
       </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
@@ -124,18 +119,18 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '12px' }}>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '10px', padding: '14px' }}>
                 <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-info)', textTransform: 'uppercase', marginBottom: '4px' }}>Total Active Reservations</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>62 Units</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.reduce((sum, item) => sum + item.reserved, 0)} Units</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Customer cart holds protected for checkout</div>
               </div>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-good)', textTransform: 'uppercase', marginBottom: '4px' }}>Oversell Incidents Blocked</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>14 Prevented</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Zero unfulfillable online orders recorded</div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-good)', textTransform: 'uppercase', marginBottom: '4px' }}>Available to sell</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.reduce((sum, item) => sum + Math.max(0, item.physicalOnHand - item.reserved - item.allocated), 0)} Units</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>On-hand stock minus reserved and allocated units</div>
               </div>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', padding: '14px' }}>
                 <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-critical)', textTransform: 'uppercase', marginBottom: '4px' }}>Stockout ATP Lock</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>1 Product Locked</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Smart Thermostat ATP locked at 0</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.filter(item => item.physicalOnHand - item.reserved - item.allocated <= 0).length} Products</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Products with no available stock</div>
               </div>
             </div>
           </div>
@@ -151,10 +146,10 @@ export default function InventorySection({ currentUser, onTriggerAudit }) {
         />
       )}
       {isWarehouseStaff && (
-        <QrInventoryScanner isOpen={isQrScannerOpen} onClose={() => setIsQrScannerOpen(false)} onScan={handleQrScan} />
+        <QrInventoryScanner products={items} isOpen={isQrScannerOpen} onClose={() => setIsQrScannerOpen(false)} onScan={handleQrScan} />
       )}
       {canGenerateQr && (
-        <ProductQrGenerator isOpen={isQrGeneratorOpen} onClose={() => setIsQrGeneratorOpen(false)} />
+        <ProductQrGenerator products={items} isOpen={isQrGeneratorOpen} onClose={() => setIsQrGeneratorOpen(false)} />
       )}
     </div>
   );

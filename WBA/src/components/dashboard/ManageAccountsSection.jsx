@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { getAccounts, getAccountActivity, hashAccountPassword, recordAccountActivity, saveAccounts } from '../../data/authAccounts';
+import { apiRequest, refreshData } from '../../services/api';
+import useApiData from '../../services/useApiData';
+import ApiStatus from '../ApiStatus';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
 const ROLES = [
@@ -14,8 +16,10 @@ const initialsFor = name => name.trim().split(/\s+/).slice(0, 2).map(part => par
 
 export default function ManageAccountsSection({ currentUser }) {
   const authorized = hasPermission(currentUser?.accessLevel, PERMISSIONS.MANAGE_ACCOUNTS);
-  const [accounts, setAccounts] = useState(getAccounts);
-  const [activity, setActivity] = useState(getAccountActivity);
+  const users = useApiData('users');
+  const events = useApiData('users/activity-logs');
+  const accounts = users.data || [];
+  const activity = events.data || [];
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [editingId, setEditingId] = useState(null);
@@ -26,10 +30,7 @@ export default function ManageAccountsSection({ currentUser }) {
 
   if (!authorized) return <div className="wba-glow-card">Access denied.</div>;
 
-  const refresh = () => {
-    setAccounts(getAccounts());
-    setActivity(getAccountActivity());
-  };
+  const refresh = refreshData;
 
   const openCreate = () => {
     setEditingId(null);
@@ -53,51 +54,34 @@ export default function ManageAccountsSection({ currentUser }) {
     const role = ROLES.find(item => item.value === form.accessLevel);
     if (!name || !email || !role) return setError('Complete the name, email, and role.');
     if (accounts.some(account => account.id !== editingId && account.email.toLowerCase() === email)) return setError('This email already belongs to another account.');
-    if (!editingId && form.password.length < 8) return setError('New accounts need a password of at least 8 characters.');
-    if (editingId && form.password && form.password.length < 8) return setError('A replacement password needs at least 8 characters.');
+    if (!editingId && form.password.length < 12) return setError('New accounts need a password of at least 12 characters.');
+    if (editingId && form.password && form.password.length < 12) return setError('A replacement password needs at least 12 characters.');
     if (editingId === currentUser.id && form.accessLevel !== currentUser.accessLevel) return setError('You cannot change your own role.');
 
     try {
-      const credentials = form.password ? await hashAccountPassword(form.password) : {};
-      let updated;
-      let action;
-      if (editingId) {
-        updated = accounts.map(account => account.id === editingId ? {
-          ...account, name, email, accessLevel: role.value, role: role.label,
-          department: role.department, initials: initialsFor(name), ...credentials,
-        } : account);
-        action = 'Updated account';
-      } else {
-        const account = {
-          id: crypto.randomUUID(), name, email, accessLevel: role.value, role: role.label,
-          department: role.department, initials: initialsFor(name), status: 'active', avatar: null, ...credentials,
-        };
-        updated = [account, ...accounts];
-        action = 'Created account';
-      }
-      saveAccounts(updated);
-      recordAccountActivity(currentUser.name, action, email);
+      await apiRequest(editingId ? 'users/' + editingId : 'users', { method: editingId ? 'PUT' : 'POST', body: { name, email, accessLevel: role.value, ...(form.password ? { password: form.password } : {}) } });
       refresh();
       setIsFormOpen(false);
       setNotice(`${name} ${editingId ? 'updated' : 'added'} successfully.`);
-    } catch {
-      setError('The account could not be saved in this browser. Check local storage availability and try again.');
+    } catch (reason) {
+      setError(reason.message);
     }
   };
 
-  const toggleStatus = account => {
+  const toggleStatus = async account => {
     if (!hasPermission(currentUser?.accessLevel, PERMISSIONS.MANAGE_ACCOUNTS)) return;
     if (account.id === currentUser.id) return setNotice('You cannot deactivate your own account.');
     const status = account.status === 'active' ? 'inactive' : 'active';
     try {
-      saveAccounts(accounts.map(item => item.id === account.id ? { ...item, status } : item));
-      recordAccountActivity(currentUser.name, status === 'active' ? 'Activated account' : 'Deactivated account', account.email);
+      await apiRequest('users/' + account.id, { method: 'PUT', body: { name: account.name, email: account.email, accessLevel: account.accessLevel, status } });
       refresh();
       setNotice(`${account.name} is now ${status}.`);
-    } catch {
-      setNotice('Status could not be saved in this browser.');
+    } catch (reason) {
+      setNotice(reason.message);
     }
   };
+
+  if (users.loading || users.error || events.loading || events.error) return <ApiStatus loading={users.loading || events.loading} error={users.error || events.error} onRetry={() => { users.reload(); events.reload(); }} />;
 
   const visibleAccounts = accounts.filter(account =>
     (roleFilter === 'all' || account.accessLevel === roleFilter) &&
@@ -114,7 +98,7 @@ export default function ManageAccountsSection({ currentUser }) {
         <button type="button" className="wba-btn-primary" onClick={openCreate}>+ Add user</button>
       </div>
 
-      <p className="wba-accounts-demo-note">Demo mode: account changes are saved in this browser only. They are not shared with other devices.</p>
+
       {notice && <p className="wba-accounts-notice" role="status">{notice}</p>}
 
       <section className="wba-accounts-summary" aria-label="Account summary">
@@ -153,7 +137,7 @@ export default function ManageAccountsSection({ currentUser }) {
       </section>
 
       <section className="wba-glow-card wba-accounts-card">
-        <div className="wba-accounts-section-head"><div><h3>Account activity</h3><p>Recent sign-ins and account changes on this device.</p></div></div>
+        <div className="wba-accounts-section-head"><div><h3>Account activity</h3><p>Recent sign-ins and account changes recorded by the server.</p></div></div>
         <div className="wba-account-activity">
           {activity.length === 0 && <p className="wba-accounts-empty">No account activity yet.</p>}
           {activity.slice(0, 8).map(entry => <div key={entry.id}><strong>{entry.action}</strong><span>{entry.target} · {entry.actor}</span><time dateTime={entry.at}>{new Date(entry.at).toLocaleString()}</time></div>)}
@@ -169,7 +153,7 @@ export default function ManageAccountsSection({ currentUser }) {
             <label className="wba-input-group"><span className="wba-input-label">Full name</span><input className="wba-input-field" required value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} /></label>
             <label className="wba-input-group"><span className="wba-input-label">Work email</span><input className="wba-input-field" type="email" required value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} /></label>
             <label className="wba-input-group"><span className="wba-input-label">Role</span><select className="wba-input-field" value={form.accessLevel} disabled={editingId === currentUser.id} onChange={event => setForm({ ...form, accessLevel: event.target.value })}>{ROLES.map(role => <option key={role.value} value={role.value}>{role.label}</option>)}</select></label>
-            <label className="wba-input-group"><span className="wba-input-label">{editingId ? 'New password (optional)' : 'Temporary password'}</span><input className="wba-input-field" type="password" minLength={8} required={!editingId} value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} autoComplete="new-password" /></label>
+            <label className="wba-input-group"><span className="wba-input-label">{editingId ? 'New password (optional)' : 'Temporary password'}</span><input className="wba-input-field" type="password" minLength={12} required={!editingId} value={form.password} onChange={event => setForm({ ...form, password: event.target.value })} autoComplete="new-password" /></label>
             <p className="wba-accounts-role-help">{ROLES.find(role => role.value === form.accessLevel)?.summary}</p>
             {error && <p className="wba-modal-error" role="alert">{error}</p>}
             <div className="wba-accounts-form-actions"><button type="button" className="wba-pill-btn" onClick={() => setIsFormOpen(false)}>Cancel</button><button type="submit" className="wba-btn-primary">{editingId ? 'Save changes' : 'Create account'}</button></div>

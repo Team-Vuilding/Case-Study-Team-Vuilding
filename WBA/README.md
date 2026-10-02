@@ -4,25 +4,12 @@
 
 Before changing product pages, navigation, or role permissions, read the shared [WBA System Scope and Access Model](../docs/PROJECT_SCOPE.md). It is the collaboration reference for the required modules and RBAC boundaries.
 
-## TypeSafe Jev catalog review
+## Backend connection
 
-The Admin **Add Product** form offers a Jev review of product identity, shelf-life tracking, and bin location. The review is a semantic warning only; the Admin confirms flagged details before adding. A changed form needs a fresh review. Existing role checks remain in the action handler.
+The workspace uses the Laravel API in ../Backend and its SQLite database. Run php artisan migrate and php artisan wba:create-admin from that directory, then start it with php artisan serve. Start the frontend with npm run dev; Vite proxies /api to http://127.0.0.1:8000.
 
-Warehouse Staff can also enter a non-SKU label in the receiving scanner. Jev may suggest an existing catalog product, but the staff member must confirm it before stock changes. Exact SKU scans continue to use deterministic matching. Uncertain or unavailable matches leave stock unchanged and require a corrected SKU. The original label is recorded in the receiving audit event when a suggestion is confirmed.
+For separate production hosts, set VITE_API_BASE_URL=https://your-api-domain/api in the frontend build environment and FRONTEND_URL=https://your-frontend-domain in Laravel. Keep Laravel’s SQLite database on persistent storage. API sessions expire after 12 hours, and credentials are verified by the server. Operational data is never seeded with sample inventory.
 
-Create `WBA/.env.local` with `TYPESAFE_API_KEY=your_key`, then run `npm run dev`. The key stays on the Vite server and is never sent to the browser. If the service or key is unavailable, the Add Product form reports the error and permits an explicit manual confirmation; ambiguous receiving labels cannot be accepted without a reliable match. The current app is a front-end prototype: `/api/typesafe/catalog-review` and `/api/typesafe/scan-match` run only with Vite dev/preview. A production deployment needs authenticated server-side equivalents for both endpoints and server-side role checks before stock changes.
+## ngrok
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Set `NGROK_HOST=your-tunnel.ngrok-free.dev` in `WBA/.env.local` using your exact tunnel hostname, then restart `npm run dev`. Keep `VITE_API_BASE_URL=/api` and run `ngrok http http://localhost:5173`. The tunnel serves the frontend and proxies API requests to Laravel on port 8000. If your tunnel hostname changes, update `NGROK_HOST` and restart Vite.

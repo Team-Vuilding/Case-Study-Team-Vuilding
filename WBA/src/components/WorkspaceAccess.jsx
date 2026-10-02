@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
-import { authenticate, DUMMY_ACCOUNTS } from '../data/authAccounts';
+import { authApi } from '../services/api';
 import '../workspace-access.css';
 
 const ROLES = [
@@ -14,12 +14,10 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const closeButtonRef = useRef(null);
   const selectedRole = ROLES.find((item) => item.id === role);
-  const demoAccount = DUMMY_ACCOUNTS.find((item) => item.accessLevel === role);
 
   useEffect(() => {
     if (selectedRole) return undefined;
@@ -42,14 +40,14 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
     setError('');
     setIsSubmitting(true);
     try {
-      const user = await authenticate(email, password, selectedRole.id);
+      const user = await authApi.login({ email, password, accessLevel: selectedRole.id });
       if (!user) {
         setError(`These credentials do not match an active ${selectedRole.name.toLowerCase()} account.`);
         return;
       }
       onSuccess(user);
-    } catch {
-      setError('Sign in is unavailable right now. Try again.');
+    } catch (error) {
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -120,18 +118,6 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
               {error && <p className="wba-modal-error" role="alert">{error}</p>}
               <button type="submit" className="wba-access-submit" disabled={isSubmitting}>{isSubmitting ? 'Signing in…' : `Sign in as ${selectedRole.name}`}</button>
             </form>
-            {demoAccount && (
-              <div className="wba-access-demo">
-                <button type="button" onClick={() => setShowDemo((shown) => !shown)} aria-expanded={showDemo}>{showDemo ? 'Hide' : 'Use'} demo credentials</button>
-                {showDemo && (
-                  <div>
-                    <p>Demo account for {selectedRole.name.toLowerCase()}</p>
-                    <code>{demoAccount.email}</code>
-                    <button type="button" onClick={() => { setEmail(demoAccount.email); setPassword(demoAccount.password); setError(''); }}>Fill demo credentials</button>
-                  </div>
-                )}
-              </div>
-            )}
           </section>
       </main>
     </div>

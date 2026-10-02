@@ -5,7 +5,7 @@ import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
 import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
-import { getActiveAccount } from './data/authAccounts';
+import { authApi, getToken, setToken } from './services/api';
 import './App.css';
 import './landing-modern.css';
 
@@ -26,24 +26,11 @@ function App() {
       return 'dark';
     }
   });
-  // Check localStorage for persisted user session across page refreshes
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('wba_auth_user');
-      return savedUser ? getActiveAccount(JSON.parse(savedUser).id) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(Boolean(getToken()));
+  const [sessionError, setSessionError] = useState('');
 
-  const [currentView, setCurrentView] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('wba_auth_user');
-      return savedUser && getActiveAccount(JSON.parse(savedUser).id) ? 'dashboard' : getAccessRoute().view;
-    } catch {
-      return getAccessRoute().view;
-    }
-  });
+  const [currentView, setCurrentView] = useState(() => getAccessRoute().view);
 
   const [selectedRole, setSelectedRole] = useState(() => getAccessRoute().role);
   const [isRolePickerOpen, setIsRolePickerOpen] = useState(false);
@@ -52,12 +39,8 @@ function App() {
   useEffect(() => {
     if (currentUser) return undefined;
     const handleAccessRoute = () => {
-      try {
-        const savedUser = localStorage.getItem('wba_auth_user');
-        if (savedUser && getActiveAccount(JSON.parse(savedUser).id)) return;
-      } catch {
-        // ignore an invalid saved session
-      }
+      // Login stores the token before React removes this public-route listener.
+      if (getToken()) return;
       const route = getAccessRoute();
       setCurrentView(route.view);
       setSelectedRole(route.role);
@@ -65,6 +48,20 @@ function App() {
     window.addEventListener('hashchange', handleAccessRoute);
     return () => window.removeEventListener('hashchange', handleAccessRoute);
   }, [currentUser]);
+
+  useEffect(() => {
+    let active = true;
+    if (getToken()) {
+      authApi.me().then(user => {
+        if (active) { setCurrentUser(user); setCurrentView('dashboard'); }
+      }).catch(error => {
+        if (active && getToken()) setSessionError(error.message);
+      }).finally(() => { if (active) setCheckingSession(false); });
+    }
+    const expired = () => { setSessionError(''); setCurrentUser(null); setCurrentView('landing'); window.location.hash = '#/home'; };
+    window.addEventListener('wba-auth-expired', expired);
+    return () => { active = false; window.removeEventListener('wba-auth-expired', expired); };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -107,7 +104,6 @@ function App() {
   const handleLoginSuccess = (user) => {
     setIsRolePickerOpen(false);
     try {
-      localStorage.setItem('wba_auth_user', JSON.stringify(user));
       localStorage.setItem('wba_active_tab', 'dashboard');
     } catch {
       // ignore storage error
@@ -117,12 +113,13 @@ function App() {
     setCurrentView('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await authApi.logout(); } catch (error) { if (getToken()) { setSessionError(error.message); return; } }
+    setToken(null);
     setIsRolePickerOpen(false);
     setCurrentUser(null);
     setCurrentView('landing');
     try {
-      localStorage.removeItem('wba_auth_user');
       localStorage.removeItem('wba_active_tab');
     } catch {
       // ignore storage error
@@ -130,6 +127,8 @@ function App() {
     window.location.hash = '#/home';
   };
 
+  if (checkingSession) return <main className="wba-access-page" role="status">Checking your session…</main>;
+  if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
   if (currentView === 'dashboard' && currentUser) {
     return (
       <AdminDashboard

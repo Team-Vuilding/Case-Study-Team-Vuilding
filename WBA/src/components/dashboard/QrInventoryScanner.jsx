@@ -1,148 +1,84 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
+import { useEffect, useRef, useState } from 'react';
 
-export default function QrInventoryScanner({ isOpen, onClose, onScan }) {
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-  const animationRef = useRef(null);
+export default function QrInventoryScanner({ isOpen, onClose, onScan, products }) {
+  const video = useRef(null);
+  const stream = useRef(null);
+  const frame = useRef(null);
+  const generation = useRef(0);
   const [code, setCode] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [cameraState, setCameraState] = useState('idle');
+  const [expiresAt, setExpiresAt] = useState('');
+  const [lot, setLot] = useState('');
+  const [type, setType] = useState('stock_in');
+  const [camera, setCamera] = useState('idle');
   const [error, setError] = useState('');
-  const [suggestion, setSuggestion] = useState(null);
-  const [matching, setMatching] = useState(false);
-
-  const stopCamera = () => {
-    if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-    setCameraState('idle');
+  const [saving, setSaving] = useState(false);
+  const product = products.find(item => item.sku.toLowerCase() === code.trim().toLowerCase());
+  const stop = () => {
+    generation.current++;
+    cancelAnimationFrame(frame.current);
+    stream.current?.getTracks().forEach(track => track.stop());
+    stream.current = null;
   };
-
-  useEffect(() => () => stopCamera(), []);
-
-  const startCamera = async () => {
-    setError('');
-    if (streamRef.current) return;
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Camera access is not supported here. Enter the QR/SKU value manually.');
-      return;
-    }
-
+  const start = async () => {
+    stop();
+    const ticket = generation.current;
+    setCamera('opening');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      streamRef.current = stream;
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-      setCameraState('preview');
-      if (!('BarcodeDetector' in window)) {
-        setError('Camera preview is available, but this browser cannot decode QR codes. Enter the detected SKU manually.');
-        return;
-      }
+      const media = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (ticket !== generation.current) { media.getTracks().forEach(track => track.stop()); return; }
+      stream.current = media;
+      video.current.srcObject = media;
+      await video.current.play();
+      if (ticket !== generation.current) return;
+      setCamera('preview');
+      if (!window.BarcodeDetector) { setError('This browser cannot decode QR codes. Enter the SKU below.'); return; }
       const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-      setCameraState('scanning');
-
+      setCamera('scanning');
       const detect = async () => {
-        if (!videoRef.current || !streamRef.current) return;
-        const codes = await detector.detect(videoRef.current);
-        if (codes[0]?.rawValue) {
-          setCode(codes[0].rawValue.trim());
-          setSuggestion(null);
-          stopCamera();
-          return;
-        }
-        animationRef.current = requestAnimationFrame(detect);
+        if (ticket !== generation.current || !video.current) return;
+        try {
+          const results = await detector.detect(video.current);
+          if (ticket !== generation.current) return;
+          if (results[0]?.rawValue) { setCode(results[0].rawValue.trim()); stop(); setCamera('idle'); return; }
+          frame.current = requestAnimationFrame(detect);
+        } catch { stop(); setCamera('idle'); setError('QR decoding failed. Enter the SKU manually.'); }
       };
       detect();
-    } catch {
-      setError('We could not open your camera. Allow camera access in your browser, then try again; you can also enter the QR/SKU value manually.');
-      stopCamera();
-    }
+    } catch { if (ticket === generation.current) { stop(); setCamera('idle'); setError('Camera unavailable. Allow access or enter the SKU manually.'); } }
   };
-
   useEffect(() => {
-    if (!isOpen) return undefined;
-    const openCamera = requestAnimationFrame(() => startCamera());
-    return () => cancelAnimationFrame(openCamera);
+    const opening = isOpen ? requestAnimationFrame(() => start()) : null;
+    return () => { cancelAnimationFrame(opening); stop(); };
   }, [isOpen]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const scannedCode = code.trim();
-    if (!scannedCode) {
-      setError('Scan a QR code or enter a SKU before adding stock.');
-      return;
-    }
-    const receivedQuantity = Number(quantity);
-    if (!Number.isSafeInteger(receivedQuantity) || receivedQuantity < 1) {
-      setError('Enter a whole-number quantity of at least 1.');
-      return;
-    }
-    const exact = INITIAL_INVENTORY_ITEMS.find((item) => item.sku.toLowerCase() === scannedCode.toLowerCase());
-    if (!exact && suggestion?.label !== scannedCode) {
-      setMatching(true);
-      setError('');
-      try {
-        const response = await fetch('/api/typesafe/scan-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: scannedCode }) });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Product lookup unavailable');
-        const product = INITIAL_INVENTORY_ITEMS.find((item) => item.sku === result.suggestion);
-        if (!product) throw new Error('No reliable product match. Check the SKU on the item label before receiving stock.');
-        setSuggestion({ label: scannedCode, product });
-      } catch (lookupError) {
-        setError(lookupError.message);
-      } finally {
-        setMatching(false);
-      }
-      return;
-    }
-    onScan({ code: exact?.sku || suggestion.product.sku, quantity: receivedQuantity, originalLabel: scannedCode });
-    stopCamera();
-    setCode('');
-    setSuggestion(null);
-    setQuantity(1);
-    onClose();
-  };
-
   if (!isOpen) return null;
-
-  return (
-    <div className="wba-dash-modal-overlay" onClick={() => { stopCamera(); onClose(); }}>
-      <div className="wba-dash-modal-card wba-qr-scanner-modal" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="wba-modal-close-btn" onClick={() => { stopCamera(); onClose(); }} aria-label="Close QR scanner">&times;</button>
-        <div className="wba-qr-scanner-heading">
-          <span className="wba-qr-scanner-icon">⌘</span>
-          <div>
-            <h2>Scan stock into inventory</h2>
-            <p>Scan a QR label that contains an existing SKU, then confirm the received quantity.</p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="wba-qr-camera-frame">
-            <video ref={videoRef} muted playsInline className={cameraState === 'idle' ? 'wba-qr-camera-hidden' : ''} />
-            {cameraState === 'idle' && <span>{error ? 'Camera could not be opened' : 'Opening your device camera…'}</span>}
-          </div>
-          <button type="button" className="wba-pill-btn wba-qr-camera-button" onClick={startCamera} disabled={cameraState !== 'idle'}>
-            {cameraState === 'scanning' ? 'Point camera at QR code' : cameraState === 'preview' ? 'Camera ready' : error ? 'Retry camera' : 'Opening camera…'}
-          </button>
-
-          <div className="wba-input-group">
-            <label className="wba-input-label" htmlFor="qr-sku">Scanned QR / SKU</label>
-            <input id="qr-sku" className="wba-input-field" value={code} onChange={(event) => { setCode(event.target.value); setSuggestion(null); setError(''); }} placeholder="e.g. WBA-AC-001" autoComplete="off" />
-          </div>
-          <div className="wba-input-group">
-            <label className="wba-input-label" htmlFor="qr-quantity">Quantity received</label>
-            <input id="qr-quantity" className="wba-input-field" type="number" min="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} />
-          </div>
-          {error && <p className="wba-qr-scanner-error" role="alert">{error}</p>}
-          {suggestion?.label === code.trim() && <p role="status">Suggested match: {suggestion.product.name} ({suggestion.product.sku}). Verify the physical label before confirming receipt.</p>}
-          <div className="wba-qr-scanner-actions">
-            <button type="button" className="wba-pill-btn" onClick={() => { stopCamera(); onClose(); }}>Cancel</button>
-            <button type="submit" className="wba-btn-primary" disabled={matching}>{matching ? 'Checking label…' : suggestion?.label === code.trim() ? 'Confirm matched product and receive' : 'Add to inventory'}</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+  const close = () => { if (saving) return; stop(); onClose(); };
+  const submit = async event => {
+    event.preventDefault();
+    if (saving) return;
+    if (!product) return setError('This SKU is not in the catalog. Ask an administrator to add the product first.');
+    setSaving(true); setError('');
+    try {
+      await onScan({ code: product.sku, quantity: Number(quantity), type, expiresAt: type === 'stock_in' && product.shelfLifeMonths ? expiresAt : null, lot: lot.trim() || null });
+      stop(); setCode(''); setQuantity(1); setExpiresAt(''); setLot(''); onClose();
+    } catch (reason) { setError(reason.message); } finally { setSaving(false); }
+  };
+  return <div className="wba-dash-modal-overlay" onClick={close}><section className="wba-dash-modal-card wba-qr-scanner-modal" role="dialog" aria-modal="true" aria-labelledby="scan-title" onClick={event => event.stopPropagation()}>
+    <button type="button" className="wba-modal-close-btn" onClick={close} disabled={saving} aria-label="Close scanner">×</button>
+    <h2 id="scan-title">Scan product stock</h2><p>Scan a SKU label, choose an operation, and confirm the quantity.</p>
+    <div className="wba-qr-camera-frame"><video ref={video} muted playsInline /><span>{camera === 'opening' ? 'Opening camera…' : ''}</span></div>
+    <button type="button" className="wba-pill-btn" onClick={start} disabled={camera === 'opening'}>Restart camera</button>
+    <form onSubmit={submit}>
+      <label className="wba-input-group"><span className="wba-input-label">SKU</span><input className="wba-input-field" required value={code} onChange={event => { setCode(event.target.value); setError(''); }} /></label>
+      {product && <p>{product.name} · {product.physicalOnHand} units on hand</p>}
+      <label className="wba-input-group"><span className="wba-input-label">Operation</span><select className="wba-input-field" value={type} onChange={event => setType(event.target.value)}><option value="stock_in">Receive stock</option><option value="stock_out">Dispatch stock</option></select></label>
+      <label className="wba-input-group"><span className="wba-input-label">Quantity</span><input className="wba-input-field" type="number" min="1" step="1" required value={quantity} onChange={event => setQuantity(event.target.value)} /></label>
+      {product?.shelfLifeMonths && type === 'stock_in' && <>
+        <label className="wba-input-group"><span className="wba-input-label">Batch expiry date</span><input className="wba-input-field" type="date" required value={expiresAt} onChange={event => setExpiresAt(event.target.value)} /></label>
+        <label className="wba-input-group"><span className="wba-input-label">Lot number (optional)</span><input className="wba-input-field" value={lot} onChange={event => setLot(event.target.value)} /></label>
+      </>}
+      {error && <p role="alert" className="wba-modal-error">{error}</p>}
+      <div className="wba-qr-scanner-actions"><button type="button" className="wba-pill-btn" disabled={saving} onClick={close}>Cancel</button><button className="wba-btn-primary" disabled={saving || !products.length}>{saving ? 'Saving…' : type === 'stock_in' ? 'Receive stock' : 'Dispatch stock'}</button></div>
+    </form>
+  </section></div>;
 }

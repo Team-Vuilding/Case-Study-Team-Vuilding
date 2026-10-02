@@ -1,225 +1,40 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
-  const [review, setReview] = useState(null);
-  const [reviewing, setReviewing] = useState(false);
-  const [acknowledged, setAcknowledged] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    sku: '',
-    category: 'A',
-    fsn: 'Normal',
-    unitPrice: '',
-    physicalOnHand: '',
-    warehouseBin: '',
-    isSeasonal: false,
-    hasShelfLife: false,
-    shelfLifeMonths: '',
-  });
-
-  const signature = JSON.stringify(formData);
-  const currentReview = review?.signature === signature ? review : null;
-  const flags = currentReview?.scores && Object.entries(currentReview.scores).filter(([, score]) => score >= 0.65);
-
-  const handleReview = async () => {
-    setReviewing(true);
-    setAcknowledged(false);
-    try {
-      const response = await fetch('/api/typesafe/catalog-review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Review unavailable');
-      setReview({ signature, scores: data.scores });
-    } catch (error) {
-      setReview({ signature, error: error.message });
-    } finally {
-      setReviewing(false);
-    }
-  };
-
+  const [form, setForm] = useState({ name: '', sku: '', category: 'A', fsn: 'Normal', unitPrice: '', physicalOnHand: '0', warehouseBin: '', hasShelfLife: false, shelfLifeMonths: '', expiresAt: '', storageCostPerMonth: '0', isSeasonal: false });
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!currentReview || ((currentReview.error || flags?.length) && !acknowledged)) return;
-    if (onAddProduct) {
-      onAddProduct({
-        ...formData,
-        id: `SKU-${Math.floor(100 + Math.random() * 900)}`,
-        unitPrice: Number(formData.unitPrice) || 0,
-        physicalOnHand: Number(formData.physicalOnHand) || 0,
-        reserved: 0,
-        allocated: 0,
-        paperSpreadsheetCount: Number(formData.physicalOnHand) || 0,
-        shelfLifeMonths: formData.hasShelfLife ? Number(formData.shelfLifeMonths) || 9 : null,
-        status: 'Optimal Inventory',
-        statusSeverity: 'good',
-      });
-    }
-    onClose();
+  const update = event => setForm({ ...form, [event.target.name]: event.target.type === 'checkbox' ? event.target.checked : event.target.value });
+  const submit = async event => {
+    event.preventDefault();
+    if (saving) return;
+    setSaving(true); setError('');
+    try {
+      await onAddProduct({ ...form, unitPrice: Number(form.unitPrice), physicalOnHand: Number(form.physicalOnHand), storageCostPerMonth: Number(form.storageCostPerMonth), shelfLifeMonths: form.hasShelfLife ? Number(form.shelfLifeMonths) : null, expiresAt: form.hasShelfLife && Number(form.physicalOnHand) > 0 ? form.expiresAt : null });
+      setForm({ name: '', sku: '', category: 'A', fsn: 'Normal', unitPrice: '', physicalOnHand: '0', warehouseBin: '', hasShelfLife: false, shelfLifeMonths: '', expiresAt: '', storageCostPerMonth: '0', isSeasonal: false });
+      onClose();
+    } catch (reason) { setError(reason.message); } finally { setSaving(false); }
   };
-
-  return (
-    <div className="wba-dash-modal-overlay" onClick={onClose}>
-      <div className="wba-dash-modal-card" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className="wba-modal-close-btn"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-
-        <div style={{ marginBottom: '18px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--wba-inline-strong)' }}>
-            Add Inventory Item
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--wba-inline-accent)', marginTop: '4px' }}>
-            Configure item classification, warehouse bin location, and shelf-life tracking parameters.
-          </p>
+  return <div className="wba-dash-modal-overlay" onClick={() => { if (!saving) onClose(); }}>
+    <section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="add-product-title" onClick={event => event.stopPropagation()}>
+      <button type="button" className="wba-modal-close-btn" disabled={saving} onClick={onClose} aria-label="Close product form">×</button>
+      <h2 id="add-product-title">Add inventory item</h2><p>Enter the product details and initial stock.</p>
+      <form onSubmit={submit}>
+        <div className="wba-form-grid">
+          {[['name', 'Product name', 'text'], ['sku', 'SKU', 'text'], ['warehouseBin', 'Bin location', 'text'], ['unitPrice', 'Unit price (₱)', 'number'], ['physicalOnHand', 'Initial stock', 'number'], ['storageCostPerMonth', 'Storage cost per unit / month (₱)', 'number']].map(([name, label, type]) =>
+            <label className="wba-input-group" key={name}><span className="wba-input-label">{label}</span><input className="wba-input-field" name={name} type={type} required value={form[name]} onChange={update} min={type === 'number' ? 0 : undefined} step={name === 'physicalOnHand' ? 1 : type === 'number' ? '0.01' : undefined} /></label>)}
+          <label className="wba-input-group"><span className="wba-input-label">Classification</span><select className="wba-input-field" name="category" value={form.category} onChange={update}><option value="A">A — High value</option><option value="B">B — Mid value</option><option value="C">C — Consumable</option></select></label>
+          <label className="wba-input-group"><span className="wba-input-label">Stock movement</span><select className="wba-input-field" name="fsn" value={form.fsn} onChange={update}>{['Fast', 'Normal', 'Slow', 'Non-moving'].map(value => <option key={value}>{value}</option>)}</select></label>
+          <label><input name="hasShelfLife" type="checkbox" checked={form.hasShelfLife} onChange={update} /> Track batches and expiry</label>
+          {form.hasShelfLife && <>
+            <label className="wba-input-group"><span className="wba-input-label">Shelf life (months)</span><input className="wba-input-field" name="shelfLifeMonths" type="number" min="1" max="120" required value={form.shelfLifeMonths} onChange={update} /></label>
+            {Number(form.physicalOnHand) > 0 && <label className="wba-input-group"><span className="wba-input-label">Initial batch expiry date</span><input className="wba-input-field" name="expiresAt" type="date" required value={form.expiresAt} onChange={update} /></label>}
+          </>}
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="wba-form-grid">
-            <div className="wba-input-group full-width">
-              <label className="wba-input-label">Product Name</label>
-              <input
-                className="wba-input-field"
-                type="text"
-                required
-                placeholder="e.g. Smart Climate Controller Pro"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">SKU Code</label>
-              <input
-                className="wba-input-field"
-                type="text"
-                required
-                placeholder="WBA-SKU-..."
-                value={formData.sku}
-                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-              />
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">Bin Location</label>
-              <input
-                className="wba-input-field"
-                type="text"
-                required
-                placeholder="e.g. BAY-03 (Zone 1)"
-                value={formData.warehouseBin}
-                onChange={(e) => setFormData({ ...formData, warehouseBin: e.target.value })}
-              />
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">ABC Classification</label>
-              <select
-                className="wba-input-field"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              >
-                <option value="A">Category A (High Value / Critical Control)</option>
-                <option value="B">Category B (Moderate Velocity & Value)</option>
-                <option value="C">Category C (Fast Moving / Consumable)</option>
-              </select>
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">Initial Scanned On-Hand</label>
-              <input
-                className="wba-input-field"
-                type="number"
-                required
-                min="0"
-                placeholder="0"
-                value={formData.physicalOnHand}
-                onChange={(e) => setFormData({ ...formData, physicalOnHand: e.target.value })}
-              />
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">Unit Price (₱)</label>
-              <input
-                className="wba-input-field"
-                type="number"
-                required
-                min="0"
-                placeholder="0.00"
-                value={formData.unitPrice}
-                onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
-              />
-            </div>
-
-            <div className="wba-input-group">
-              <label className="wba-input-label">Perishable / Shelf Life?</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '42px' }}>
-                <input
-                  type="checkbox"
-                  id="hasShelfLife"
-                  checked={formData.hasShelfLife}
-                  onChange={(e) => setFormData({ ...formData, hasShelfLife: e.target.checked })}
-                />
-                <label htmlFor="hasShelfLife" style={{ fontSize: '0.82rem', color: 'var(--wba-inline-accent)', cursor: 'pointer' }}>
-                  Enable FIFO / FEFO Tracking
-                </label>
-              </div>
-            </div>
-
-            {formData.hasShelfLife && (
-              <div className="wba-input-group full-width">
-                <label className="wba-input-label">Shelf Life Limit (Months)</label>
-                <input
-                  className="wba-input-field"
-                  type="number"
-                  placeholder="e.g. 9 months"
-                  value={formData.shelfLifeMonths}
-                  onChange={(e) => setFormData({ ...formData, shelfLifeMonths: e.target.value })}
-                />
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginTop: '18px', padding: '14px', border: '1px solid rgba(168, 85, 247, 0.35)', borderRadius: '10px', color: 'var(--wba-inline-accent)', fontSize: '0.82rem' }}>
-            <strong style={{ color: 'var(--wba-inline-strong)' }}>Jev catalog guardrail</strong>
-            <p style={{ margin: '6px 0 10px' }}>Review product identity, shelf-life tracking, and bin location before adding. This is advice; verify flagged details yourself.</p>
-            <button type="button" className="wba-pill-btn" onClick={handleReview} disabled={reviewing || !formData.name.trim() || !formData.sku.trim() || !formData.warehouseBin.trim()}>
-              {reviewing ? 'Reviewing…' : currentReview ? 'Review again' : 'Review with Jev'}
-            </button>
-            {currentReview?.scores && (
-              <p role="status" style={{ marginTop: '10px', color: flags.length ? 'var(--wba-inline-warning)' : 'var(--wba-inline-good)' }}>
-                {flags.length ? `Check: ${flags.map(([key]) => ({ shelf_life_mismatch: 'shelf-life tracking', vague_identity: 'product name', location_mismatch: 'bin location' })[key]).join(', ')}.` : 'No semantic concerns flagged. Please confirm the item details.'}
-              </p>
-            )}
-            {currentReview?.error && <p role="status" style={{ marginTop: '10px', color: 'var(--wba-inline-warning)' }}>{currentReview.error}</p>}
-            {currentReview && (currentReview.error || flags?.length > 0) && (
-              <label style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center' }}>
-                <input type="checkbox" checked={acknowledged} onChange={(e) => setAcknowledged(e.target.checked)} />
-                I checked these details and want to continue.
-              </label>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-            <button
-              type="button"
-              className="wba-pill-btn"
-              style={{ border: '1px solid rgba(168, 85, 247, 0.3)', color: 'var(--wba-inline-accent)' }}
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="wba-btn-primary" disabled={reviewing || !currentReview || ((currentReview.error || flags?.length > 0) && !acknowledged)}>
-              Add to Catalog
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+        {error && <p role="alert" className="wba-modal-error">{error}</p>}
+        <div className="wba-accounts-form-actions"><button type="button" className="wba-pill-btn" disabled={saving} onClick={onClose}>Cancel</button><button className="wba-btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Add to catalog'}</button></div>
+      </form>
+    </section>
+  </div>;
 }
