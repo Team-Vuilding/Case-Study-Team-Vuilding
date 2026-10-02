@@ -147,7 +147,6 @@ export default function AuditLogsSection({ currentUser }) {
                 <br />
                 {log.description}
               </div>
-              <div className="wba-audit-action">↳ {log.actionTaken}</div>
             </div>
           ))}
         </div>
