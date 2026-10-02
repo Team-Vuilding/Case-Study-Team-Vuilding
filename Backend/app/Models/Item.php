@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * Item Model (Inventory Catalog Master)
  *
  * Represents catalog items, stock quantities, and valuation metadata.
- * Mirrors the enterprise data structure in WBA frontend (mockInventoryData.js).
+ * Stores the persistent inventory catalog and stock balances.
  *
  * Authorization:
  * - Admin: Full catalog CRUD and pricing adjustments
@@ -68,7 +68,7 @@ class Item extends Model
     ];
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     /**

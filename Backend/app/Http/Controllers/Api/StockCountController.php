@@ -2,63 +2,39 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
-/**
- * StockCountController
- *
- * Physical inventory counts, discrepancy auditing, and reconciliation workflows.
- * Authorization: Warehouse Staff & Admin.
- */
-class StockCountController extends Controller
+class StockCountController extends ApiController
 {
-    /**
-     * List all physical count sessions and their audit statuses.
-     */
-    public function index(): JsonResponse
+    public function reconcile(Request $request, Item $item): JsonResponse
     {
-        // TODO: Query stock_counts with relations
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockCounts.index (no functionality yet)',
-        ]);
+        $data = $request->validate(['quantity' => 'required|integer|min:0|max:100000000', 'reason' => 'required|string|max:500']);
+        DB::transaction(function () use ($request, $item, $data) {
+            $item = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
+            abort_if($data['quantity'] < $item->reserved + $item->allocated, 422, 'Count is below committed stock. Resolve reservations first.');
+            abort_if($item->shelf_life_months && $data['quantity'] !== $item->physical_on_hand, 422, 'Perishable quantity changes require batch-level adjustments.');
+            $previous = $item->physical_on_hand;
+            $id = DB::table('stock_counts')->insertGetId(['count_reference' => 'COUNT-'.Str::uuid(), 'user_id' => $request->user()->id,
+                'status' => 'reconciled', 'started_at' => now(), 'completed_at' => now(), 'notes' => $data['reason'], 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('stock_count_items')->insert(['stock_count_id' => $id, 'item_id' => $item->id,
+                'system_quantity' => $item->paper_spreadsheet_count, 'counted_quantity' => $data['quantity'],
+                'variance' => $data['quantity'] - $item->paper_spreadsheet_count, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('reconciliation_logs')->insert(['stock_count_id' => $id, 'item_id' => $item->id, 'user_id' => $request->user()->id,
+                'previous_quantity' => $previous, 'adjusted_quantity' => $data['quantity'], 'variance' => $data['quantity'] - $previous,
+                'reason' => $data['reason'], 'created_at' => now(), 'updated_at' => now()]);
+            $item->update(['physical_on_hand' => $data['quantity'], 'paper_spreadsheet_count' => $data['quantity']]);
+            $this->audit($request, 'LEDGER_RECONCILED', $item->name.' counted: '.$data['quantity'].'. '.$data['reason'], $item->sku);
+        }, 3);
+
+        return response()->json(['data' => $this->itemData($item->fresh())]);
     }
 
-    /**
-     * Start a new physical count session.
-     *
-     * Expected Request Payload:
-     * - count_reference: string (optional, auto-generated if blank)
-     * - notes: string (optional)
-     */
-    public function store(Request $request): JsonResponse
+    public function counts(Request $request): JsonResponse
     {
-        // TODO: Create stock_count session and snapshot current item system_quantities
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockCounts.store (no functionality yet)',
-        ], 201);
-    }
-
-    /**
-     * Reconcile discrepancies and update physical inventory balances.
-     *
-     * Authorization: Admin oversight required for large discrepancy approvals.
-     *
-     * Expected Request Payload:
-     * - adjustments: array of { item_id, counted_quantity, reason }
-     *
-     * Expected Effect:
-     * - Updates item `physical_on_hand`
-     * - Creates `reconciliation_logs` entries for full auditability
-     */
-    public function reconcile(Request $request, string $id): JsonResponse
-    {
-        // TODO: Validate adjustments, execute DB transaction, log reconciliation
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockCounts.reconcile (no functionality yet)',
-            'stock_count_id' => $id,
-            'guide' => 'Reconcile counted variance with items on-hand and create audit logs.',
-        ]);
+        return response()->json(['data' => DB::table('stock_counts')->orderByDesc('id')->get()]);
     }
 }

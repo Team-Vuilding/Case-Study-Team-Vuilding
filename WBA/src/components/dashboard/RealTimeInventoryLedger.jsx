@@ -1,97 +1,22 @@
-import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
+import React, { useState } from 'react';
+import { apiRequest, refreshData } from '../../services/api';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ currentUser, onTriggerAudit }, ref) {
-  const [items, setItems] = useState(INITIAL_INVENTORY_ITEMS);
+export default function RealTimeInventoryLedger({ items, currentUser }) {
   const [reconcilingId, setReconcilingId] = useState(null);
-
-  const accessLevel = currentUser?.accessLevel || 'admin';
+  const [error, setError] = useState('');
+  const accessLevel = currentUser.accessLevel;
   const canFixCount = hasPermission(accessLevel, PERMISSIONS.FIX_COUNT);
-
-  const receiveQrScan = useCallback((scan) => {
-    if (accessLevel !== 'warehouse') return;
-    if (!Number.isSafeInteger(scan?.quantity) || scan.quantity < 1 || typeof scan.code !== 'string') return;
-    const scanCode = scan.code.toLowerCase();
-    const matchingItem = items.find((item) => item.sku.toLowerCase() === scanCode);
-    if (!matchingItem) {
-      if (onTriggerAudit) {
-        onTriggerAudit({
-          id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
-          timestamp: new Date().toLocaleTimeString(),
-          eventType: 'QR_SCAN_NOT_FOUND',
-          severity: 'warning',
-          actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
-          sku: scan.code,
-          description: `QR scan could not be added because SKU ${scan.code} is not in the inventory ledger.`,
-          actionTaken: 'No stock count was changed.',
-        });
-      }
-      return;
-    }
-    setItems((previousItems) => previousItems.map((item) => item.id === matchingItem.id ? {
-      ...item,
-      physicalOnHand: item.physicalOnHand + scan.quantity,
-      paperSpreadsheetCount: item.paperSpreadsheetCount + scan.quantity,
-      status: 'Synced',
-      statusSeverity: 'good',
-    } : item));
-    if (onTriggerAudit) {
-      onTriggerAudit({
-        id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
-        timestamp: new Date().toLocaleTimeString(),
-        eventType: 'QR_STOCK_RECEIVED',
-        severity: 'good',
-        actor: `${currentUser?.name || 'Warehouse Staff'} (${currentUser?.role || 'Warehouse Staff'})`,
-        sku: matchingItem.sku,
-        description: `${scan.quantity} unit${scan.quantity === 1 ? '' : 's'} added to ${matchingItem.name} from a QR scan.${scan.originalLabel && scan.originalLabel.toLowerCase() !== matchingItem.sku.toLowerCase() ? ` Confirmed label: ${scan.originalLabel}.` : ''}`,
-        actionTaken: 'On-hand and ledger counts were updated.',
-      });
-    }
-  }, [accessLevel, currentUser?.name, currentUser?.role, items, onTriggerAudit]);
-
-  useImperativeHandle(ref, () => ({ receiveQrScan }), [receiveQrScan]);
-
-  const handleReconcile = (id) => {
-    // Action guard: abort if unauthorized role tries to reconcile
-    if (!canFixCount) {
-      console.warn(`[RBAC] Reconciliation action blocked for accessLevel: ${accessLevel}`);
-      return;
-    }
-
-    setReconcilingId(id);
-    setTimeout(() => {
-      setItems((prev) =>
-        prev.map((item) => {
-          if (item.id === id) {
-            return {
-              ...item,
-              paperSpreadsheetCount: item.physicalOnHand,
-              status: 'Synced',
-              statusSeverity: 'good',
-            };
-          }
-          return item;
-        })
-      );
-      setReconcilingId(null);
-      if (onTriggerAudit) {
-        onTriggerAudit({
-          id: `LOG-${Math.floor(1000 + Math.random() * 9000)}`,
-          timestamp: new Date().toLocaleTimeString(),
-          eventType: 'Stock Count Corrected',
-          severity: 'good',
-          actor: `${currentUser?.name || 'Staff'} (${currentUser?.role || 'User'})`,
-          sku: id,
-          description: `Stock count discrepancy resolved for ${id}. System count updated to match physical count.`,
-          actionTaken: 'Records corrected and synced.',
-        });
-      }
-    }, 800);
+  const handleReconcile = async id => {
+    const item = items.find(row => row.id === id);
+    setReconcilingId(id); setError('');
+    try { await apiRequest('warehouse/items/' + id + '/reconcile', { method: 'POST', body: { quantity: item.physicalOnHand, reason: 'Physical count verified by ' + currentUser.name } }); refreshData(); }
+    catch (reason) { setError(reason.message); }
+    finally { setReconcilingId(null); }
   };
-
   return (
     <div className="wba-glow-card">
+      {error && <p role="alert">{error}</p>}
       <div className="wba-card-title-bar">
         <div className="wba-card-title-group">
           <div className="wba-card-heading">
@@ -126,6 +51,7 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
             </tr>
           </thead>
           <tbody>
+            {items.length === 0 && <tr><td colSpan={9}>No products yet. An administrator can add the first product.</td></tr>}
             {items.map((item) => {
               const available = Math.max(0, item.physicalOnHand - item.reserved - item.allocated);
               const variance = item.physicalOnHand - item.paperSpreadsheetCount;
@@ -207,7 +133,5 @@ const RealTimeInventoryLedger = forwardRef(function RealTimeInventoryLedger({ cu
       </div>
     </div>
   );
-});
-
-export default RealTimeInventoryLedger;
+}
 

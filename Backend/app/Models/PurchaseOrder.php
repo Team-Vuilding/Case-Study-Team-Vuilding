@@ -49,7 +49,7 @@ class PurchaseOrder extends Model
     ];
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     public function supplier()

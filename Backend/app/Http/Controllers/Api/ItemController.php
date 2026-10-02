@@ -2,111 +2,63 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
-/**
- * ItemController
- *
- * Master inventory catalog, pricing valuation, and stock status endpoints.
- *
- * Authorization:
- * - Admin: Full CRUD, pricing adjustments, category assignments
- * - Warehouse Staff: Read-only access to catalog details
- * - Sales Staff: Read-only pricing, catalog, and stock availability
- */
-class ItemController extends Controller
+class ItemController extends ApiController
 {
-    /**
-     * Display a listing of catalog items with stock quantities and metrics.
-     * Supports filtering by category, search term, stock severity, or FSN velocity.
-     *
-     * Expected Response:
-     * - 200 OK: { data: [ { id, sku, name, unitPrice, physicalOnHand, reserved, allocated, ... } ] }
-     */
-    public function index(Request $request): JsonResponse
+    public function items(Request $request): JsonResponse
     {
-        // TODO: Query items with optional category filters, pagination, and sorting
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.index (no functionality yet)',
-            'guide' => 'Return catalog items with real-time on-hand, reserved, and allocated quantities.',
-        ]);
+        return response()->json(['data' => Item::orderBy('name')->get()->map(fn ($item) => $this->itemData($item))]);
     }
 
-    /**
-     * Store a newly created item in the master catalog.
-     *
-     * Authorization: Admin only.
-     *
-     * Expected Request Payload:
-     * - sku: string (required, unique)
-     * - name: string (required)
-     * - unit_price: numeric (required)
-     * - category_classification: string ('A', 'B', 'C')
-     * - warehouse_bin: string
-     * - storage_cost_per_month: numeric
-     * - lead_time_days: integer
-     */
-    public function store(Request $request): JsonResponse
+    public function item(Request $request, Item $item): JsonResponse
     {
-        // TODO: Validate item fields, ensure unique SKU, and insert into items table
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.store (no functionality yet)',
-        ], 201);
+        return response()->json(['data' => $this->itemData($item)]);
     }
 
-    /**
-     * Display single item specifications and current inventory state.
-     */
-    public function show(string $id): JsonResponse
+    public function saveItem(Request $request, ?Item $item = null): JsonResponse
     {
-        // TODO: Fetch item by ID or SKU
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.show (no functionality yet)',
-            'item_id' => $id,
-        ]);
+        $data = $request->validate(['name' => 'required|string|max:200',
+            'sku' => ['required', 'string', 'max:80', Rule::unique('items')->ignore($item?->id)],
+            'category' => ['required', Rule::in(['A', 'B', 'C'])], 'fsn' => ['required', Rule::in(['Fast', 'Normal', 'Slow', 'Non-moving'])],
+            'unitPrice' => 'required|numeric|min:0|max:9999999999', 'warehouseBin' => 'required|string|max:120',
+            'physicalOnHand' => $item ? 'prohibited' : 'required|integer|min:0|max:100000000',
+            'hasShelfLife' => 'required|boolean', 'shelfLifeMonths' => 'nullable|required_if:hasShelfLife,true|integer|min:1|max:120',
+            'isSeasonal' => 'sometimes|boolean', 'storageCostPerMonth' => 'sometimes|numeric|min:0|max:100000000',
+            'expiresAt' => 'nullable|date|after_or_equal:today']);
+        abort_if(! $item && $data['hasShelfLife'] && $data['physicalOnHand'] > 0 && empty($data['expiresAt']), 422, 'Enter the actual initial batch expiry date.');
+        $saved = DB::transaction(function () use ($request, $data, $item) {
+            $saved = $item ?? new Item;
+            $saved->fill(['name' => trim($data['name']), 'sku' => trim($data['sku']), 'category_classification' => $data['category'],
+                'fsn' => $data['fsn'], 'unit_price' => $data['unitPrice'], 'warehouse_bin' => trim($data['warehouseBin']),
+                'shelf_life_months' => $data['hasShelfLife'] ? $data['shelfLifeMonths'] : null,
+                'is_seasonal' => $data['isSeasonal'] ?? false, 'storage_cost_per_month' => $data['storageCostPerMonth'] ?? 0]);
+            if (! $item) {
+                $saved->physical_on_hand = $saved->paper_spreadsheet_count = $data['physicalOnHand'];
+            }
+            $saved->save();
+            if (! $item && $saved->physical_on_hand > 0) {
+                $this->movement($request, $saved, 'stock_in', $saved->physical_on_hand, 'Initial stock');
+                $this->receiveBatch($saved, $saved->physical_on_hand, $data['expiresAt'] ?? null);
+            }
+            $this->audit($request, $item ? 'Product updated' : 'PRODUCT_CATALOG_ADDED', $saved->name.' saved in the catalog.', $saved->sku);
+
+            return $saved;
+        });
+
+        return response()->json(['data' => $this->itemData($saved)], $item ? 200 : 201);
     }
 
-    /**
-     * Update item details, pricing, or catalog metadata.
-     *
-     * Authorization: Admin only.
-     * Direct stock quantity edits should be performed via stock movement or count reconciliation.
-     */
-    public function update(Request $request, string $id): JsonResponse
+    public function deleteItem(Request $request, Item $item): JsonResponse
     {
-        // TODO: Apply updates to non-quantity attributes (pricing, category, bin location)
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.update (no functionality yet)',
-            'item_id' => $id,
-        ]);
-    }
+        abort_if($item->stockMovements()->exists() || $item->purchaseOrderItems()->exists() || $item->countRecords()->exists() || $item->physical_on_hand > 0, 422, 'Products with stock or history must be retained.');
+        $this->audit($request, 'Product deleted', 'Removed '.$item->name, $item->sku);
+        $item->delete();
 
-    /**
-     * Archive or delete an item from the active catalog.
-     *
-     * Authorization: Admin only.
-     */
-    public function destroy(string $id): JsonResponse
-    {
-        // TODO: Soft delete or check for existing movement constraints before deletion
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.destroy (no functionality yet)',
-            'item_id' => $id,
-        ]);
-    }
-
-    /**
-     * Return inventory valuation metrics, FIFO summary, and category breakdowns.
-     */
-    public function valuationSummary(): JsonResponse
-    {
-        // TODO: Aggregate total inventory value (sum of unit_price * physical_on_hand),
-        // holding costs, and category A/B/C breakdown metrics.
-        return response()->json([
-            'message' => 'Endpoint scaffolded: items.valuationSummary (no functionality yet)',
-            'guide' => 'Aggregate total valuation, holding costs, and category metrics.',
-        ]);
+        return response()->json(['message' => 'Product removed.']);
     }
 }

@@ -1,6 +1,6 @@
 /**
  * WBA Role-Based Access Control (RBAC) Module
- * Reuses the existing accessLevel defined in authAccounts.js:
+ * UI permissions mirror roles enforced by the Laravel API:
  * - 'admin'      : Admin (Full administrative access)
  * - 'warehouse'  : Warehouse Staff (Operations, ledger, cycle counts, Fix Count, FIFO)
  * - 'purchasing' : Purchasing Manager (Procurement, POs, suppliers, ROP forecasting)

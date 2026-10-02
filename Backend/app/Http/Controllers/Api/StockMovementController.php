@@ -2,76 +2,66 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
-/**
- * StockMovementController
- *
- * Warehouse operations for receiving and shipping movements.
- * Required per PROJECT_SCOPE.md:
- * - Restricted to Warehouse Staff & Admin
- * - Barcode/QR scanning integration
- * - Traceable adjustments for any inventory update
- */
-class StockMovementController extends Controller
+class StockMovementController extends ApiController
 {
-    /**
-     * List recent stock movements (receiving/shipping audit history).
-     *
-     * Authorization: Warehouse Staff (their movements) & Admin (global).
-     */
-    public function index(Request $request): JsonResponse
+    public function stock(Request $request): JsonResponse
     {
-        // TODO: Query stock_movements with relations to item and user
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockMovements.index (no functionality yet)',
-            'guide' => 'Fetch traceable Stock In / Stock Out history.',
-        ]);
+        $data = $request->validate(['code' => 'required|string|max:80', 'quantity' => 'required|integer|min:1|max:100000000',
+            'type' => ['sometimes', Rule::in(['stock_in', 'stock_out'])], 'expiresAt' => 'nullable|date|after_or_equal:today',
+            'lot' => 'nullable|string|max:120|unique:batches,lot', 'reference' => 'nullable|string|max:120']);
+        $item = DB::transaction(function () use ($request, $data) {
+            $item = Item::where('sku', $data['code'])->lockForUpdate()->firstOrFail();
+            $type = $data['type'] ?? 'stock_in';
+            $quantity = (int) $data['quantity'];
+            if ($type === 'stock_out') {
+                abort_if($quantity > $item->physical_on_hand - $item->reserved - $item->allocated, 422, 'Insufficient available stock.');
+                if ($item->shelf_life_months) {
+                    $batches = DB::table('batches')->where('item_id', $item->id)->where('quantity', '>', 0)
+                        ->where('expires_at', '>=', today()->toDateString())->orderBy('expires_at')->orderBy('received_at')->get();
+                    abort_if($batches->sum('quantity') < $quantity, 422, 'Insufficient unexpired batch stock.');
+                    $remaining = $quantity;
+                    foreach ($batches as $batch) {
+                        $take = min($remaining, $batch->quantity);
+                        DB::table('batches')->where('id', $batch->id)->decrement('quantity', $take);
+                        $remaining -= $take;
+                        if (! $remaining) {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'Enter the actual batch expiry date.');
+                $this->receiveBatch($item, $quantity, $data['expiresAt'] ?? null, $data['lot'] ?? null);
+            }
+            $delta = $type === 'stock_in' ? $quantity : -$quantity;
+            $item->increment('physical_on_hand', $delta);
+            $item->increment('paper_spreadsheet_count', $delta);
+            $this->movement($request, $item, $type, $quantity, $data['reference'] ?? null);
+            $this->audit($request, $type === 'stock_in' ? 'QR_STOCK_RECEIVED' : 'Stock dispatched',
+                $quantity.' units '.($type === 'stock_in' ? 'received for ' : 'dispatched for ').$item->name, $item->sku);
+
+            return $item->fresh();
+        }, 3);
+
+        return response()->json(['data' => $this->itemData($item)], 201);
     }
 
-    /**
-     * Record a new Stock In or Stock Out movement.
-     *
-     * Expected Request Payload:
-     * - item_id: integer (required)
-     * - type: string ('stock_in' | 'stock_out') (required)
-     * - quantity: integer (required, > 0)
-     * - reference_number: string (optional, e.g. PO number)
-     * - scanned_barcode: string (optional, barcode value if scanned)
-     * - notes: string (optional)
-     *
-     * Business Logic Guide:
-     * - For stock_in: increment `items.physical_on_hand`
-     * - For stock_out: verify available stock and decrement `items.physical_on_hand`
-     */
-    public function store(Request $request): JsonResponse
+    public function scan(Request $request): JsonResponse
     {
-        // TODO: Validate movement, update item physicalOnHand in a DB transaction, and log movement
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockMovements.store (no functionality yet)',
-        ], 201);
+        $data = $request->validate(['code' => 'required|string|max:80']);
+
+        return response()->json(['data' => $this->itemData(Item::where('sku', $data['code'])->firstOrFail())]);
     }
 
-    /**
-     * Scan Barcode or QR Code to quickly identify or receive/ship an item.
-     *
-     * Authorization: Restricted strictly to Warehouse Staff and Admin.
-     *
-     * Expected Request Payload:
-     * - barcode: string (required)
-     * - action: string ('lookup' | 'stock_in' | 'stock_out')
-     *
-     * Expected Response:
-     * - 200 OK: { matched_item: {...}, match_type: 'exact'|'fuzzy', confidence: 0.95 }
-     */
-    public function scanBarcode(Request $request): JsonResponse
+    public function movements(Request $request): JsonResponse
     {
-        // TODO: Lookup SKU or barcode against items table and return match details
-        return response()->json([
-            'message' => 'Endpoint scaffolded: stockMovements.scanBarcode (no functionality yet)',
-            'guide' => 'Process QR/barcode scan event for Warehouse receiving/shipping workflow.',
-        ]);
+        return response()->json(['data' => DB::table('stock_movements')->join('items', 'items.id', '=', 'stock_movements.item_id')
+            ->select('stock_movements.*', 'items.sku', 'items.name')->orderByDesc('stock_movements.id')->limit(1000)->get()]);
     }
 }

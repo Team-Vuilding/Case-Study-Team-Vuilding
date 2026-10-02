@@ -9,6 +9,7 @@ import NotificationDrawer from './NotificationDrawer';
 import ManageAccountsSection from './ManageAccountsSection';
 import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
+import useApiData from '../../services/useApiData';
 
 export default function AdminDashboard({ currentUser, onLogout, theme, onToggleTheme }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
@@ -42,7 +43,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
 
   const [activeTab, setActiveTab] = useState(resolveInitialTab);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [liveLogs, setLiveLogs] = useState([]);
+  const alerts = useApiData('dashboard/alerts');
 
   // Sync state with URL hash and listen for direct manual URL changes
   useEffect(() => {
@@ -95,9 +96,6 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
     }
   };
 
-  const handleAddAuditLog = (newLog) => {
-    setLiveLogs((prev) => [newLog, ...prev]);
-  };
 
   const PAGE_TITLES = {
     dashboard: 'Dashboard',
@@ -135,11 +133,11 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
       case 'dashboard':
         return <DashboardOverview currentUser={currentUser} />;
       case 'inventory':
-        return <InventorySection currentUser={currentUser} onTriggerAudit={handleAddAuditLog} />;
+        return <InventorySection currentUser={currentUser} />;
       case 'purchase-history':
         return <PurchaseHistorySection currentUser={currentUser} />;
       case 'audit-logs':
-        return <AuditLogsSection currentUser={currentUser} externalLogs={liveLogs} />;
+        return <AuditLogsSection currentUser={currentUser} />;
       case 'manage-accounts':
         return <ManageAccountsSection currentUser={currentUser} />;
       case 'help-center':
@@ -204,7 +202,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
             pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
-            unreadAlertCount={accessLevel === 'sales' ? 1 : accessLevel === 'purchasing' ? 1 : accessLevel === 'warehouse' ? 2 : 3}
+            unreadAlertCount={alerts.data?.length || 0}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
             onLogout={onLogout}
             theme={theme}
@@ -223,6 +221,10 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
         currentUser={currentUser}
+        notifications={alerts.data || []}
+        loading={alerts.loading}
+        error={alerts.error}
+        onRetry={alerts.reload}
       />
     </div>
   );

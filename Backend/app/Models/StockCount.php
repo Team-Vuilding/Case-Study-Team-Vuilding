@@ -41,7 +41,7 @@ class StockCount extends Model
     ];
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     public function user()

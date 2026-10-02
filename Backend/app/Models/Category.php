@@ -31,7 +31,7 @@ class Category extends Model
     ];
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     /**

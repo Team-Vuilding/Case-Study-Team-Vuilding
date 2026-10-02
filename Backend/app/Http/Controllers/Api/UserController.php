@@ -2,110 +2,55 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
-/**
- * UserController
- *
- * User management and role permission administration.
- * Authorization: Restricted strictly to Admin role.
- */
-class UserController extends Controller
+class UserController extends ApiController
 {
-    /**
-     * List all system users with their roles and status.
-     *
-     * Authorization: Admin only.
-     *
-     * Expected Response:
-     * - 200 OK: { data: [ { id, name, email, role, department, access_level, is_active } ] }
-     */
-    public function index(): JsonResponse
+    public function users(Request $request): JsonResponse
     {
-        // TODO: Query users table with pagination or filter by role
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.index (no functionality yet)',
-            'guide' => 'Fetch all registered users. Restricted to Admin role.',
-        ]);
+        return response()->json(['data' => User::orderBy('name')->get()->map(fn ($user) => $this->account($user))]);
     }
 
-    /**
-     * Create a new user account with role assignment.
-     *
-     * Expected Request Payload:
-     * - name: string (required)
-     * - email: string (required, unique)
-     * - password: string (required, min:8)
-     * - role: string ('Admin', 'Warehouse Staff', 'Purchasing Manager', 'Sales Staff')
-     * - department: string (optional)
-     *
-     * Expected Response:
-     * - 201 Created: { user: {...}, message: "User created successfully" }
-     */
-    public function store(Request $request): JsonResponse
+    public function saveUser(Request $request, ?User $user = null): JsonResponse
     {
-        // TODO: Validate user input, hash password, and persist record
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.store (no functionality yet)',
-        ], 201);
+        $data = $request->validate(['name' => 'required|string|max:200', 'email' => ['required', 'email', 'max:200', Rule::unique('users')->ignore($user?->id)],
+            'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))], 'password' => ($user ? 'nullable' : 'required').'|string|min:12|max:128',
+            'status' => ['sometimes', Rule::in(['active', 'inactive'])]]);
+        abort_if($user?->id === $request->user()->id && ($data['accessLevel'] !== 'admin' || ($data['status'] ?? 'active') !== 'active'), 422, 'You cannot demote or deactivate yourself.');
+        $saved = DB::transaction(function () use ($request, $user, $data) {
+            $saved = $user ?? new User;
+            [$role, $department] = self::ROLES[$data['accessLevel']];
+            $saved->fill(['name' => trim($data['name']), 'email' => strtolower(trim($data['email'])), 'access_level' => $data['accessLevel'],
+                'role' => $role, 'department' => $department, 'initials' => collect(explode(' ', trim($data['name'])))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode(''),
+                'is_active' => ($data['status'] ?? ($user?->is_active === false ? 'inactive' : 'active')) === 'active']);
+            if (! empty($data['password'])) {
+                $saved->password = $data['password'];
+            }
+            $saved->save();
+            if ($user && (! empty($data['password']) || ! $saved->is_active || $saved->wasChanged('access_level'))) {
+                DB::table('api_tokens')->where('user_id', $saved->id)->delete();
+            }
+            $this->audit($request, $user ? 'Updated account' : 'Created account', $saved->name.' account saved.', $saved->email);
+
+            return $saved;
+        });
+
+        return response()->json(['data' => $this->account($saved)], $user ? 200 : 201);
     }
 
-    /**
-     * Retrieve single user details.
-     */
-    public function show(string $id): JsonResponse
+    public function deactivateUser(Request $request, User $user): JsonResponse
     {
-        // TODO: Fetch user by primary key
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.show (no functionality yet)',
-            'user_id' => $id,
-        ]);
-    }
+        abort_if($user->id === $request->user()->id, 422, 'You cannot deactivate yourself.');
+        DB::transaction(function () use ($request, $user) {
+            $user->update(['is_active' => false]);
+            DB::table('api_tokens')->where('user_id', $user->id)->delete();
+            $this->audit($request, 'Deactivated account', $user->name.' deactivated.', $user->email);
+        });
 
-    /**
-     * Update user details or reassign system roles.
-     *
-     * Expected Request Payload:
-     * - name: string (optional)
-     * - role: string (optional)
-     * - department: string (optional)
-     * - is_active: boolean (optional)
-     */
-    public function update(Request $request, string $id): JsonResponse
-    {
-        // TODO: Validate updates and apply changes
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.update (no functionality yet)',
-            'user_id' => $id,
-        ]);
-    }
-
-    /**
-     * Remove or deactivate a user account.
-     */
-    public function destroy(string $id): JsonResponse
-    {
-        // TODO: Soft delete or deactivate user
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.destroy (no functionality yet)',
-            'user_id' => $id,
-        ]);
-    }
-
-    /**
-     * Retrieve global user activity & audit logs.
-     *
-     * Authorization: Admin only.
-     * Note: Per PROJECT_SCOPE.md, Warehouse Staff must NOT access global audit logs.
-     */
-    public function activityLogs(): JsonResponse
-    {
-        // TODO: Return paginated audit events
-        return response()->json([
-            'message' => 'Endpoint scaffolded: users.activityLogs (no functionality yet)',
-            'guide' => 'Expose system audit trails to Admin only.',
-        ]);
+        return response()->json(['message' => 'Account deactivated.']);
     }
 }

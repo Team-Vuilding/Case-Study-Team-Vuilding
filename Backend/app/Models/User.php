@@ -64,7 +64,7 @@ class User extends Authenticatable
     }
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     /**

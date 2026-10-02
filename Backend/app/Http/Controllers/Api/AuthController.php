@@ -2,72 +2,41 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
-/**
- * AuthController
- *
- * Handles authentication and session operations for WBA users.
- * Supported roles: Admin, Warehouse Staff, Purchasing Manager, Sales Staff.
- */
-class AuthController extends Controller
+class AuthController extends ApiController
 {
-    /**
-     * Authenticate user credentials and return an API token or session.
-     *
-     * Expected Request Payload:
-     * - email: string (required)
-     * - password: string (required)
-     *
-     * Expected Response:
-     * - 200 OK: { user: {...}, token: string, message: "Login successful" }
-     * - 401 Unauthorized: { error: "Invalid credentials" }
-     *
-     * Guide: In production, validate credentials against the `users` table and return
-     * a Sanctum personal access token or initialize a secure session.
-     */
     public function login(Request $request): JsonResponse
     {
-        // TODO: Validate credentials, verify hash, and generate auth token
-        return response()->json([
-            'message' => 'Endpoint scaffolded: auth.login (no functionality yet)',
-            'guide' => 'Validate email + password, then return auth token with user role permissions.',
-        ]);
+        $data = $request->validate(['email' => 'required|email', 'password' => 'required|string', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))]]);
+        $user = User::where('email', strtolower(trim($data['email'])))->first();
+        if (! $user || ! Hash::check($data['password'], $user->password) || ! $user->is_active || $user->access_level !== $data['accessLevel']) {
+            return response()->json(['message' => 'The credentials do not match an active account for this role.'], 422);
+        }
+        $token = Str::random(64);
+        DB::table('api_tokens')->where('expires_at', '<=', now())->delete();
+        DB::table('api_tokens')->insert(['user_id' => $user->id, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addHours(12)]);
+        $request->setUserResolver(fn () => $user);
+        $this->audit($request, 'Signed in', 'Signed in to the workspace.', $user->email);
+
+        return response()->json(['user' => $this->account($user), 'token' => $token]);
     }
 
-    /**
-     * Log out current user and revoke active tokens.
-     *
-     * Expected Headers:
-     * - Authorization: Bearer <token>
-     *
-     * Expected Response:
-     * - 200 OK: { message: "Successfully logged out" }
-     */
-    public function logout(Request $request): JsonResponse
-    {
-        // TODO: Invalidate current access token / session
-        return response()->json([
-            'message' => 'Endpoint scaffolded: auth.logout (no functionality yet)',
-        ]);
-    }
-
-    /**
-     * Get the authenticated user's profile and active permissions.
-     *
-     * Expected Headers:
-     * - Authorization: Bearer <token>
-     *
-     * Expected Response:
-     * - 200 OK: { user: { id, name, email, role, department, accessLevel, avatar } }
-     */
     public function me(Request $request): JsonResponse
     {
-        // TODO: Return currently authenticated user data and assigned capabilities
-        return response()->json([
-            'message' => 'Endpoint scaffolded: auth.me (no functionality yet)',
-        ]);
+        return response()->json(['user' => $this->account($request->user())]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        DB::table('api_tokens')->where('id', $request->attributes->get('token_id'))->delete();
+
+        return response()->json(['message' => 'Signed out.']);
     }
 }

@@ -42,7 +42,7 @@ class ReconciliationLog extends Model
     ];
 
     // ---------------------------------------------------------------------
-    // Relationship Placeholders (No functionality yet)
+    // Relationships
     // ---------------------------------------------------------------------
 
     public function stockCount()

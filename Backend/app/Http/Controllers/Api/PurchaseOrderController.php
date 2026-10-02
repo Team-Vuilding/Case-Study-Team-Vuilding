@@ -2,88 +2,80 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\Item;
+use App\Models\PurchaseOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
-/**
- * PurchaseOrderController
- *
- * Purchase order lifecycle, budget approvals, and demand forecasting.
- *
- * Authorization:
- * - Purchasing Manager: Create POs, manage reorder alerts
- * - Admin: Approve high-value purchase orders, view procurement budgets
- * - Warehouse Staff: Restricted (linked only to receiving movement)
- */
-class PurchaseOrderController extends Controller
+class PurchaseOrderController extends ApiController
 {
-    /**
-     * List purchase orders.
-     */
-    public function index(Request $request): JsonResponse
+    public function orders(Request $request): JsonResponse
     {
-        // TODO: Query purchase_orders with supplier and line item relations
-        return response()->json([
-            'message' => 'Endpoint scaffolded: purchaseOrders.index (no functionality yet)',
-        ]);
+        return response()->json(['data' => PurchaseOrder::with(['supplier', 'items.item'])->latest()->get()->map(function ($order) use ($request) {
+            $canViewCosts = in_array($request->user()->access_level, ['admin', 'purchasing'], true);
+
+            return ['id' => $order->id, 'number' => $order->po_number, 'supplier' => $order->supplier->name, 'status' => $order->status,
+                'orderDate' => $order->order_date?->toDateString(), 'expectedDelivery' => $order->expected_delivery_date?->toDateString(),
+                'notes' => $order->notes, 'totalCost' => $canViewCosts ? (float) $order->total_amount : null,
+                'lines' => $order->items->map(fn ($line) => ['id' => $line->id, 'sku' => $line->item->sku, 'product' => $line->item->name,
+                    'quantity' => $line->quantity_ordered, 'received' => $line->quantity_received, 'unitCost' => $canViewCosts ? (float) $line->unit_price : null])];
+        })]);
     }
 
-    /**
-     * Create a new purchase order.
-     *
-     * Expected Request Payload:
-     * - supplier_id: integer (required)
-     * - expected_delivery_date: date
-     * - items: array of { item_id, quantity_ordered, unit_price }
-     */
-    public function store(Request $request): JsonResponse
+    public function createOrder(Request $request): JsonResponse
     {
-        // TODO: Validate items, calculate total amount, persist PO and lines
-        return response()->json([
-            'message' => 'Endpoint scaffolded: purchaseOrders.store (no functionality yet)',
-        ], 201);
+        $data = $request->validate(['supplier_id' => 'required|exists:suppliers,id', 'expected_delivery_date' => 'nullable|date|after_or_equal:today',
+            'notes' => 'nullable|string|max:1000', 'items' => 'required|array|min:1|max:100', 'items.*.item_id' => 'required|distinct|exists:items,id',
+            'items.*.quantity' => 'required|integer|min:1|max:1000000', 'items.*.unit_price' => 'required|numeric|min:0|max:100000000']);
+        $id = DB::transaction(function () use ($request, $data) {
+            $id = DB::table('purchase_orders')->insertGetId(['po_number' => 'PO-'.Str::uuid(), 'supplier_id' => $data['supplier_id'],
+                'user_id' => $request->user()->id, 'status' => 'pending_approval', 'order_date' => today(),
+                'expected_delivery_date' => $data['expected_delivery_date'] ?? null, 'notes' => $data['notes'] ?? null,
+                'total_amount' => collect($data['items'])->sum(fn ($line) => round($line['quantity'] * $line['unit_price'], 2)), 'created_at' => now(), 'updated_at' => now()]);
+            foreach ($data['items'] as $line) {
+                DB::table('purchase_order_items')->insert(['purchase_order_id' => $id, 'item_id' => $line['item_id'], 'quantity_ordered' => $line['quantity'],
+                    'unit_price' => $line['unit_price'], 'subtotal' => round($line['quantity'] * $line['unit_price'], 2), 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $this->audit($request, 'Purchase order created', 'Purchase order '.$id.' submitted for approval.');
+
+            return $id;
+        });
+
+        return response()->json(['id' => $id], 201);
     }
 
-    /**
-     * Show PO details and line items.
-     */
-    public function show(string $id): JsonResponse
+    public function orderStatus(Request $request, int $id): JsonResponse
     {
-        // TODO: Return PO with relations
-        return response()->json([
-            'message' => 'Endpoint scaffolded: purchaseOrders.show (no functionality yet)',
-            'purchase_order_id' => $id,
-        ]);
-    }
+        $data = $request->validate(['status' => ['required', Rule::in(['approved', 'cancelled', 'received'])], 'expiresAt' => 'nullable|date|after_or_equal:today']);
+        DB::transaction(function () use ($request, $id, $data) {
+            $order = DB::table('purchase_orders')->where('id', $id)->lockForUpdate()->first();
+            abort_unless($order, 404);
+            $status = $data['status'];
+            $role = $request->user()->access_level;
+            abort_if(($status === 'approved' && $role !== 'admin') || ($status === 'received' && ! in_array($role, ['admin', 'warehouse'], true))
+                || ($status === 'cancelled' && ! in_array($role, ['admin', 'purchasing'], true)), 403);
+            abort_if(($status === 'approved' && $order->status !== 'pending_approval') || ($status === 'received' && $order->status !== 'approved')
+                || ($status === 'cancelled' && ! in_array($order->status, ['draft', 'pending_approval', 'approved'], true)), 422, 'Invalid order status transition.');
+            if ($status === 'received') {
+                foreach (DB::table('purchase_order_items')->where('purchase_order_id', $id)->get() as $line) {
+                    $item = Item::whereKey($line->item_id)->lockForUpdate()->firstOrFail();
+                    abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'An actual expiry date is required for perishable deliveries.');
+                    $quantity = $line->quantity_ordered - $line->quantity_received;
+                    $item->increment('physical_on_hand', $quantity);
+                    $item->increment('paper_spreadsheet_count', $quantity);
+                    $this->receiveBatch($item, $quantity, $data['expiresAt'] ?? null);
+                    $this->movement($request, $item, 'stock_in', $quantity, $order->po_number);
+                    DB::table('purchase_order_items')->where('id', $line->id)->update(['quantity_received' => $line->quantity_ordered]);
+                }
+            }
+            DB::table('purchase_orders')->where('id', $id)->update(['status' => $status, 'updated_at' => now(),
+                'approved_by_id' => $status === 'approved' ? $request->user()->id : $order->approved_by_id]);
+            $this->audit($request, 'Purchase order '.$status, $order->po_number.' '.$status.'.');
+        }, 3);
 
-    /**
-     * Update PO status (e.g., submit for approval, approve by Admin, mark received).
-     *
-     * Expected Request Payload:
-     * - status: string ('approved', 'received', 'cancelled')
-     * - notes: string (optional)
-     */
-    public function updateStatus(Request $request, string $id): JsonResponse
-    {
-        // TODO: Check role authorization (Admin required for approval) and transition status
-        return response()->json([
-            'message' => 'Endpoint scaffolded: purchaseOrders.updateStatus (no functionality yet)',
-            'purchase_order_id' => $id,
-        ]);
-    }
-
-    /**
-     * Demand forecasting & reorder point analytics.
-     *
-     * Computes safety stock, peak season multipliers, and suggested PO quantities.
-     */
-    public function forecasting(): JsonResponse
-    {
-        // TODO: Analyze avgDailyDemand, leadTimeDays, and seasonal peak factors to suggest replenishments
-        return response()->json([
-            'message' => 'Endpoint scaffolded: purchaseOrders.forecasting (no functionality yet)',
-            'guide' => 'Compute demand forecasts and safety-stock replenishment alerts.',
-        ]);
+        return response()->json(['message' => 'Order updated.']);
     }
 }

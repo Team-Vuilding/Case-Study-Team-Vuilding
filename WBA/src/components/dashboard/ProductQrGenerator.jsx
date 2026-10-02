@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { INITIAL_INVENTORY_ITEMS } from '../../data/mockInventoryData';
 
-export default function ProductQrGenerator({ isOpen, onClose }) {
-  const [selectedSku, setSelectedSku] = useState(INITIAL_INVENTORY_ITEMS[0]?.sku || '');
+
+export default function ProductQrGenerator({ isOpen, onClose, products }) {
+  const [choice, setSelectedSku] = useState('');
+  const selectedSku = products.some(item => item.sku === choice) ? choice : products[0]?.sku || '';
   const [svg, setSvg] = useState('');
   const [error, setError] = useState('');
-  const product = INITIAL_INVENTORY_ITEMS.find((item) => item.sku === selectedSku);
+  const product = products.find((item) => item.sku === selectedSku);
 
   useEffect(() => {
     if (!isOpen || !selectedSku) return undefined;
@@ -57,7 +58,7 @@ export default function ProductQrGenerator({ isOpen, onClose }) {
         <div className="wba-input-group">
           <label className="wba-input-label" htmlFor="qr-product">Product</label>
           <select id="qr-product" className="wba-input-field" value={selectedSku} onChange={(event) => { setSelectedSku(event.target.value); setSvg(''); }}>
-            {INITIAL_INVENTORY_ITEMS.map((item) => (
+            {products.map((item) => (
               <option key={item.sku} value={item.sku}>{item.name} — {item.sku}</option>
             ))}
           </select>
@@ -65,7 +66,7 @@ export default function ProductQrGenerator({ isOpen, onClose }) {
 
         <div className="wba-qr-label-preview" aria-live="polite">
           <div className="wba-qr-preview-code">
-            {svg ? <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} alt={`QR code for ${product?.name}, SKU ${selectedSku}`} /> : <span>{error || 'Generating QR code…'}</span>}
+            {svg ? <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`} alt={`QR code for ${product?.name}, SKU ${selectedSku}`} /> : <span>{!selectedSku ? 'Add a product before generating a QR label.' : error || 'Generating QR code…'}</span>}
           </div>
           <div className="wba-qr-preview-details">
             <span>Ready to label</span>
@@ -77,7 +78,7 @@ export default function ProductQrGenerator({ isOpen, onClose }) {
         {error && <p className="wba-qr-scanner-error" role="alert">{error}</p>}
         <div className="wba-qr-scanner-actions">
           <button type="button" className="wba-pill-btn" onClick={onClose}>Close</button>
-          <button type="button" className="wba-btn-primary" onClick={downloadLabel} disabled={!svg}>Download QR (SVG)</button>
+          <button type="button" className="wba-btn-primary" onClick={downloadLabel} disabled={!svg || !product}>Download QR (SVG)</button>
         </div>
       </div>
     </div>

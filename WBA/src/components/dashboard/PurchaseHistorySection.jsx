@@ -1,247 +1,83 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { apiRequest, refreshData } from '../../services/api';
+import useApiData from '../../services/useApiData';
+import ApiStatus from '../ApiStatus';
 
-const PURCHASE_ORDERS = [
-  {
-    id: 'WBA-PO-2026-55',
-    sku: 'WBA-AC-INV-15',
-    product: 'Portable Inverter AC 1.5HP',
-    supplier: 'CoolBreeze Manufacturing Corp.',
-    quantity: 750,
-    unitCost: 12800,
-    totalCost: 9600000,
-    orderDate: '2026-04-10',
-    expectedDelivery: '2026-05-01',
-    status: 'Delivered',
-    notes: 'Pre-summer buffer order. Staggered: 400 units Apr, 350 units May.',
-  },
-  {
-    id: 'WBA-PO-2026-48',
-    sku: 'WBA-CF-FLT-9M',
-    product: 'Active Carbon Replacement Filter',
-    supplier: 'PureAir Filtration Supplies',
-    quantity: 200,
-    unitCost: 780,
-    totalCost: 156000,
-    orderDate: '2026-03-02',
-    expectedDelivery: '2026-03-12',
-    status: 'Delivered',
-    notes: 'Replenishment order. FIFO lot LOT-2026-03-C created on arrival.',
-  },
-  {
-    id: 'WBA-PO-2026-41',
-    sku: 'WBA-PUR-H13-AIR',
-    product: 'Medical-Grade Air Purifier H13',
-    supplier: 'HealthAir Solutions Inc.',
-    quantity: 50,
-    unitCost: 6200,
-    totalCost: 310000,
-    orderDate: '2026-02-15',
-    expectedDelivery: '2026-03-05',
-    status: 'Delivered',
-    notes: 'Standard cycle replenishment based on ROP threshold.',
-  },
-  {
-    id: 'WBA-PO-2026-62',
-    sku: 'WBA-SMT-TH-PRO',
-    product: 'Smart Climate Thermostat v2',
-    supplier: 'TechComfort Distributors',
-    quantity: 40,
-    unitCost: 4100,
-    totalCost: 164000,
-    orderDate: '2026-08-20',
-    expectedDelivery: '2026-09-03',
-    status: 'In Transit',
-    notes: 'Emergency restock after physical discrepancy audit (−33 unit variance resolved).',
-  },
-  {
-    id: 'WBA-PO-2025-88',
-    sku: 'WBA-AC-INV-15',
-    product: 'Portable Inverter AC 1.5HP',
-    supplier: 'CoolBreeze Manufacturing Corp.',
-    quantity: 920,
-    unitCost: 12800,
-    totalCost: 11776000,
-    orderDate: '2025-08-05',
-    expectedDelivery: '2025-08-28',
-    status: 'Delivered',
-    noteSeverity: 'warning',
-    notes: '⚠️ Off-season panic order. Caused ₱48,500/mo holding cost penalty. ROP engine now prevents this.',
-  },
-];
-
-const STATUS_STYLE = {
-  Delivered: { background: 'rgba(16, 185, 129, 0.15)', color: 'var(--wba-inline-good)', border: '1px solid rgba(16, 185, 129, 0.4)' },
-  'In Transit': { background: 'rgba(56, 189, 248, 0.15)', color: 'var(--wba-inline-info)', border: '1px solid rgba(56, 189, 248, 0.4)' },
-  Pending: { background: 'rgba(245, 158, 11, 0.15)', color: 'var(--wba-inline-warning)', border: '1px solid rgba(245, 158, 11, 0.4)' },
-};
+function OrderForm({ onClose }) {
+  const products = useApiData('items');
+  const suppliers = useApiData('purchasing/suppliers');
+  const [form, setForm] = useState({ supplier_id: '', item_id: '', quantity: '1', unit_price: '', expected_delivery_date: '', notes: '' });
+  const [supplierName, setSupplierName] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const submit = async event => {
+    event.preventDefault(); if (saving) return; setSaving(true); setError('');
+    try {
+      await apiRequest('purchasing/purchase-orders', { method: 'POST', body: {
+        supplier_id: Number(form.supplier_id), expected_delivery_date: form.expected_delivery_date || null, notes: form.notes,
+        items: [{ item_id: Number(form.item_id), quantity: Number(form.quantity), unit_price: Number(form.unit_price) }],
+      } });
+      refreshData(); onClose();
+    } catch (reason) { setError(reason.message); } finally { setSaving(false); }
+  };
+  const addSupplier = async () => {
+    if (!supplierName.trim() || saving) return;
+    setSaving(true); setError('');
+    try { const result = await apiRequest('purchasing/suppliers', { method: 'POST', body: { name: supplierName.trim() } }); setForm({ ...form, supplier_id: String(result.data.id) }); setSupplierName(''); suppliers.reload(); }
+    catch (reason) { setError(reason.message); } finally { setSaving(false); }
+  };
+  const update = event => setForm({ ...form, [event.target.name]: event.target.value });
+  return <div className="wba-dash-modal-overlay" onClick={() => { if (!saving) onClose(); }}><section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="po-title" onClick={event => event.stopPropagation()}>
+    <button type="button" className="wba-modal-close-btn" onClick={onClose} disabled={saving} aria-label="Close order form">×</button><h2 id="po-title">New purchase order</h2>
+    {products.loading || suppliers.loading || products.error || suppliers.error ? <ApiStatus loading={products.loading || suppliers.loading} error={products.error || suppliers.error} onRetry={() => { products.reload(); suppliers.reload(); }} /> : <>
+      <label className="wba-input-group"><span className="wba-input-label">Add a supplier</span><input className="wba-input-field" value={supplierName} onChange={event => setSupplierName(event.target.value)} placeholder="Supplier name" /></label>
+      <button type="button" className="wba-pill-btn" disabled={saving || !supplierName.trim()} onClick={addSupplier}>Save supplier</button>
+      <form onSubmit={submit}>
+        <label className="wba-input-group"><span className="wba-input-label">Supplier</span><select className="wba-input-field" name="supplier_id" required value={form.supplier_id} onChange={update}><option value="">Select a supplier</option>{suppliers.data.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <label className="wba-input-group"><span className="wba-input-label">Product</span><select className="wba-input-field" name="item_id" required value={form.item_id} onChange={update}><option value="">Select a product</option>{products.data.map(item => <option key={item.id} value={item.id}>{item.name} — {item.sku}</option>)}</select></label>
+        <div className="wba-form-grid">{[['quantity', 'Quantity', 'number'], ['unit_price', 'Unit cost (₱)', 'number'], ['expected_delivery_date', 'Expected delivery', 'date']].map(([name, label, type]) => <label key={name} className="wba-input-group"><span className="wba-input-label">{label}</span><input className="wba-input-field" name={name} type={type} required={name !== 'expected_delivery_date'} value={form[name]} onChange={update} min={name === 'quantity' ? 1 : name === 'unit_price' ? 0 : undefined} step={name === 'unit_price' ? '0.01' : undefined} /></label>)}</div>
+        <label className="wba-input-group"><span className="wba-input-label">Notes</span><textarea className="wba-input-field" name="notes" value={form.notes} onChange={update} /></label>
+        <button className="wba-btn-primary" disabled={saving || !products.data.length}>{saving ? 'Saving…' : 'Submit for approval'}</button>
+      </form>
+    </>}
+    {error && <p role="alert" className="wba-modal-error">{error}</p>}
+  </section></div>;
+}
 
 export default function PurchaseHistorySection({ currentUser }) {
+  const orders = useApiData('purchasing/purchase-orders');
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
-  const accessLevel = currentUser?.accessLevel || 'admin';
-
-  // Hard guard for Sales Staff
-  if (accessLevel === 'sales') {
-    return (
-      <div className="wba-grid-container">
-        <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
-          <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
-          <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem' }}>
-            Sales Staff accounts do not have permission to view procurement records or purchase orders.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const isWarehouse = accessLevel === 'warehouse';
-
-  const filtered = PURCHASE_ORDERS.filter((po) => {
-    const matchSearch =
-      po.id.toLowerCase().includes(search.toLowerCase()) ||
-      po.product.toLowerCase().includes(search.toLowerCase()) ||
-      po.supplier.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === 'All' || po.status === filter;
-    return matchSearch && matchFilter;
-  });
-
-  const totalSpend = filtered.reduce((sum, po) => sum + po.totalCost, 0);
-  const totalUnits = filtered.reduce((sum, po) => sum + po.quantity, 0);
-
-  return (
-    <div className="wba-grid-container">
-      {/* Header */}
-      <div className="wba-section-page-header">
-        <div>
-          <h2 className="wba-section-page-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-              <polyline points="12 7 12 12 15 15" />
-            </svg>
-            {isWarehouse ? 'Purchase Order Deliveries' : 'Purchase History & Orders'}
-          </h2>
-          <p className="wba-section-page-desc">
-            {isWarehouse
-              ? 'Track expected supplier shipments, delivery receipts, and warehouse receiving schedules.'
-              : 'All purchase orders — view supplier details, procurement amounts, and delivery status.'}
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <input
-            className="wba-input-field"
-            type="text"
-            placeholder="Search PO, product, supplier..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '220px', fontSize: '0.84rem' }}
-          />
-          {['All', 'Delivered', 'In Transit', 'Pending'].map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`wba-pill-btn ${filter === f ? 'active' : ''}`}
-              style={{ border: '1px solid rgba(168,85,247,0.3)', color: filter === f ? '#fff' : 'var(--wba-inline-accent)', fontSize: '0.8rem' }}
-              onClick={() => setFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Summary Strip */}
-      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-        {[
-          { label: 'Total POs', val: filtered.length },
-          isWarehouse
-            ? { label: 'Total Units Expected', val: `${totalUnits.toLocaleString()} units` }
-            : { label: 'Total Spend', val: `₱${totalSpend.toLocaleString()}` },
-          { label: 'Delivered (Received)', val: filtered.filter(p => p.status === 'Delivered').length },
-          { label: 'In Transit', val: filtered.filter(p => p.status === 'In Transit').length },
-        ].map((s) => (
-          <div key={s.label} className="wba-glow-card" style={{ flex: '1', minWidth: '140px', padding: '14px 18px' }}>
-            <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{s.val}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Purchase Orders Table */}
-      <div className="wba-glow-card" style={{ padding: '0' }}>
-        <div className="wba-table-container" style={{ padding: '0 4px' }}>
-          <table className="wba-table">
-            <thead>
-              <tr>
-                <th>PO Number</th>
-                <th>Product</th>
-                <th>Supplier</th>
-                <th>Qty</th>
-                <th>Unit Cost</th>
-                <th>Total Cost</th>
-                <th>Order Date</th>
-                <th>ETA / Delivered</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((po) => (
-                <React.Fragment key={po.id}>
-                  <tr>
-                    <td>
-                      <span style={{ fontFamily: 'monospace', color: 'var(--wba-inline-accent)', fontWeight: 700 }}>{po.id}</span>
-                    </td>
-                    <td>
-                      <span className="wba-sku-name">{po.product}</span>
-                      <span className="wba-sku-code">{po.sku}</span>
-                    </td>
-                    <td style={{ color: 'var(--wba-inline-accent)' }}>{po.supplier}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{po.quantity.toLocaleString()}</td>
-                    <td>₱{po.unitCost.toLocaleString()}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>₱{po.totalCost.toLocaleString()}</td>
-                    <td>{po.orderDate}</td>
-                    <td>{po.expectedDelivery}</td>
-                    <td>
-                      <span style={{
-                        ...(STATUS_STYLE[po.status] || {}),
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        display: 'inline-block',
-                      }}>
-                        {po.status}
-                      </span>
-                    </td>
-                  </tr>
-                  {po.notes && (
-                    <tr>
-                      <td colSpan={9} style={{ paddingTop: '0', paddingBottom: '10px' }}>
-                        <div style={{
-                          fontSize: '0.75rem',
-                          color: po.noteSeverity === 'warning' ? 'var(--wba-inline-warning)' : 'var(--wba-inline-muted)',
-                          background: po.noteSeverity === 'warning' ? 'rgba(245,158,11,0.08)' : 'transparent',
-                          borderLeft: `2px solid ${po.noteSeverity === 'warning' ? '#f59e0b' : 'rgba(168,85,247,0.3)'}`,
-                          paddingLeft: '10px',
-                          borderRadius: '2px',
-                        }}>
-                          {po.notes}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--wba-inline-muted)' }}>
-              No purchase orders match your search.
-            </div>
-          )}
-        </div>
-      </div>
+  const [filter, setFilter] = useState('all');
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(null);
+  const [delivery, setDelivery] = useState(null);
+  const [expiry, setExpiry] = useState('');
+  const role = currentUser.accessLevel;
+  const canCreate = ['admin', 'purchasing'].includes(role);
+  const costs = canCreate;
+  const changeStatus = async (order, status, expiresAt = null) => {
+    if (pending) return;
+    setPending(order.id); setError('');
+    try { await apiRequest('purchasing/purchase-orders/' + order.id + '/status', { method: 'PUT', body: { status, expiresAt } }); refreshData(); setDelivery(null); setExpiry(''); }
+    catch (reason) { setError(reason.message); } finally { setPending(null); }
+  };
+  if (orders.loading || orders.error) return <ApiStatus loading={orders.loading} error={orders.error} onRetry={orders.reload} />;
+  const filtered = orders.data.filter(order => (filter === 'all' || order.status === filter) && (order.number + order.supplier + order.lines.map(line => line.product).join(' ')).toLowerCase().includes(search.toLowerCase()));
+  return <div className="wba-grid-container">
+    <div className="wba-section-page-header"><div><h2 className="wba-section-page-title">Purchase orders</h2><p className="wba-section-page-desc">Supplier orders, approvals, and recorded deliveries.</p></div>{canCreate && <button type="button" className="wba-btn-primary" onClick={() => setOpen(true)}>+ New order</button>}</div>
+    <div className="wba-accounts-filters"><input className="wba-input-field" type="search" aria-label="Search purchase orders" placeholder="Search order, product, supplier" value={search} onChange={event => setSearch(event.target.value)} /><select className="wba-input-field" aria-label="Order status" value={filter} onChange={event => setFilter(event.target.value)}>{['all', 'pending_approval', 'approved', 'received', 'cancelled'].map(status => <option key={status} value={status}>{status.replaceAll('_', ' ')}</option>)}</select></div>
+    {error && <p role="alert">{error}</p>}
+    <div className="wba-glow-card"><p>{filtered.length} orders{costs ? ' · ₱' + filtered.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString() + ' total' : ''}</p>
+      {!filtered.length && <p>No purchase orders match your filters.</p>}
+      <div className="wba-table-container"><table className="wba-table"><thead><tr><th>Order / supplier</th><th>Products</th><th>Delivery</th>{costs && <th>Amount</th>}<th>Status</th><th>Actions</th></tr></thead><tbody>{filtered.map(order => <tr key={order.id}>
+        <td><strong>{order.number}</strong><span className="wba-sku-code">{order.supplier}</span></td><td>{order.lines.map(line => <div key={line.id}>{line.product} · {line.quantity} units{costs ? ' × ₱' + line.unitCost.toLocaleString() : ''}</div>)}</td><td>{order.expectedDelivery || 'Not scheduled'}</td>{costs && <td>₱{order.totalCost.toLocaleString()}</td>}<td>{order.status.replaceAll('_', ' ')}</td><td>
+          {role === 'admin' && order.status === 'pending_approval' && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => changeStatus(order, 'approved')}>Approve</button>}
+          {['admin', 'warehouse'].includes(role) && order.status === 'approved' && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => setDelivery(order)}>Receive delivery</button>}
+          {canCreate && ['pending_approval', 'approved'].includes(order.status) && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => changeStatus(order, 'cancelled')}>Cancel</button>}
+        </td></tr>)}</tbody></table></div>
     </div>
-  );
+    {open && <OrderForm onClose={() => setOpen(false)} />}
+    {delivery && <div className="wba-dash-modal-overlay"><section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="delivery-title"><h2 id="delivery-title">Confirm delivery</h2><p>{delivery.number}</p><p>Confirm all ordered units have arrived. For perishable products, enter the actual expiry date.</p><label className="wba-input-group"><span className="wba-input-label">Expiry date (if perishable)</span><input className="wba-input-field" type="date" value={expiry} onChange={event => setExpiry(event.target.value)} /></label>{error && <p role="alert">{error}</p>}<div className="wba-accounts-form-actions"><button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => setDelivery(null)}>Back</button><button type="button" className="wba-btn-primary" disabled={Boolean(pending)} onClick={() => changeStatus(delivery, 'received', expiry || null)}>{pending ? 'Saving…' : 'Confirm receipt'}</button></div></section></div>}
+  </div>;
 }
