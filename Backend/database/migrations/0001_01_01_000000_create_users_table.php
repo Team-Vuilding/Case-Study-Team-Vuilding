@@ -17,6 +17,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('Admin'); // Admin, Warehouse Staff, Purchasing Manager, Sales Staff
+            $table->string('department')->nullable(); // e.g. System & User Management, Warehouse Operations
+            $table->string('initials', 10)->nullable(); // e.g. CV, MC, BV, VA
+            $table->string('access_level')->default('admin'); // admin, warehouse, purchasing, sales
+            $table->string('avatar')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
