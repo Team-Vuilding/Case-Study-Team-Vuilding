@@ -37,6 +37,9 @@ class User extends Authenticatable
         'access_level', // admin | warehouse | purchasing | sales
         'avatar',
         'is_active',
+        'account_status', // 'active' | 'deactivated'
+        'deactivated_at',
+        'deletion_at',
     ];
 
     /**
@@ -60,7 +63,77 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'deactivated_at' => 'datetime',
+            'deletion_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if account is currently marked as deactivated.
+     */
+    public function isDeactivated(): bool
+    {
+        return $this->account_status === 'deactivated' || ! $this->is_active;
+    }
+
+    /**
+     * Check if the account's 30-day recovery deadline has passed.
+     */
+    public function isExpired(): bool
+    {
+        return $this->isDeactivated() && $this->deletion_at && $this->deletion_at->isPast();
+    }
+
+    /**
+     * Seconds remaining before permanent deletion.
+     */
+    public function remainingSeconds(): ?int
+    {
+        if (! $this->deletion_at) {
+            return null;
+        }
+
+        return max(0, now()->diffInSeconds($this->deletion_at, false));
+    }
+
+    /**
+     * Days remaining before permanent deletion.
+     */
+    public function remainingDays(): ?int
+    {
+        $seconds = $this->remainingSeconds();
+        if ($seconds === null) {
+            return null;
+        }
+
+        return (int) ceil($seconds / 86400);
+    }
+
+    /**
+     * Deactivate this account and set the 30-day deletion deadline.
+     */
+    public function deactivate(int $days = 30): void
+    {
+        $deactivatedAt = now();
+        $this->update([
+            'is_active' => false,
+            'account_status' => 'deactivated',
+            'deactivated_at' => $deactivatedAt,
+            'deletion_at' => $deactivatedAt->copy()->addDays($days),
+        ]);
+    }
+
+    /**
+     * Reactivate this account and clear deactivation deadlines.
+     */
+    public function reactivate(): void
+    {
+        $this->update([
+            'is_active' => true,
+            'account_status' => 'active',
+            'deactivated_at' => null,
+            'deletion_at' => null,
+        ]);
     }
 
     // ---------------------------------------------------------------------

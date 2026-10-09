@@ -15,9 +15,26 @@ class ApiController extends Controller
 
     protected function account(User $user): array
     {
-        return ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'accessLevel' => $user->access_level,
-            'role' => $user->role, 'department' => $user->department, 'initials' => $user->initials, 'avatar' => $user->avatar,
-            'status' => $user->is_active ? 'active' : 'inactive'];
+        $status = $user->account_status ?? ($user->is_active ? 'active' : 'deactivated');
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'accessLevel' => $user->access_level,
+            'role' => $user->role,
+            'department' => $user->department,
+            'initials' => $user->initials,
+            'avatar' => $user->avatar,
+            'status' => $status,
+            'accountStatus' => $status,
+            'isActive' => (bool) $user->is_active,
+            'deactivatedAt' => $user->deactivated_at?->toISOString(),
+            'deletionAt' => $user->deletion_at?->toISOString(),
+            'remainingSeconds' => $user->remainingSeconds(),
+            'remainingDays' => $user->remainingDays(),
+            'canReactivate' => $user->deletion_at ? $user->deletion_at->isFuture() : false,
+        ];
     }
 
     protected function audit(Request $request, string $event, string $description, ?string $target = null): void

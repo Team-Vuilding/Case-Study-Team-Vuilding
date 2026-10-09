@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { authApi } from '../../services/api';
 
 export default function DashboardHeader({
   isSidebarCollapsed,
@@ -12,7 +13,56 @@ export default function DashboardHeader({
   theme,
   onToggleTheme,
 }) {
-  const initials = currentUser?.initials || currentUser?.name?.split(' ').map(n => n[0]).join('') || 'A';
+  const initials = currentUser?.initials || currentUser?.name?.split(' ').map((n) => n[0]).join('') || 'A';
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [deactivatePassword, setDeactivatePassword] = useState('');
+  const [deactivateError, setDeactivateError] = useState('');
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close user dropdown menu when clicking outside
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
+
+  const scheduledDeletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const handleOpenDeactivateModal = () => {
+    setIsMenuOpen(false);
+    setDeactivatePassword('');
+    setDeactivateError('');
+    setIsDeactivateModalOpen(true);
+  };
+
+  const handleConfirmDeactivation = async (event) => {
+    event.preventDefault();
+    if (!deactivatePassword || isDeactivating) return;
+    setIsDeactivating(true);
+    setDeactivateError('');
+    try {
+      await authApi.deactivate(deactivatePassword);
+      setIsDeactivateModalOpen(false);
+      if (onLogout) {
+        onLogout();
+      }
+    } catch (err) {
+      setDeactivateError(err.message || 'Failed to deactivate account.');
+    } finally {
+      setIsDeactivating(false);
+    }
+  };
 
   return (
     <header className="wba-header">
@@ -50,7 +100,7 @@ export default function DashboardHeader({
           <span>{currentRole}</span>
         </div>
 
-        {/* Notification Bell */}
+        {/* Theme Toggle */}
         <button
           type="button"
           className="wba-icon-btn wba-dashboard-theme-toggle"
@@ -60,6 +110,8 @@ export default function DashboardHeader({
         >
           <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
         </button>
+
+        {/* Notification Bell */}
         <button
           type="button"
           className="wba-icon-btn"
@@ -74,14 +126,21 @@ export default function DashboardHeader({
           {unreadAlertCount > 0 && <span className="wba-notification-badge" />}
         </button>
 
-        {/* User Avatar with logout tooltip */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div
+        {/* User Avatar with Profile & Account Menu */}
+        <div ref={menuRef} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
             className="wba-user-avatar"
-            title={`${currentUser?.name || 'Admin'} · ${currentUser?.department || ''}`}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-expanded={isMenuOpen}
+            aria-haspopup="true"
+            aria-label="User account menu"
+            title={`${currentUser?.name || 'User'} (${currentUser?.email}) - Click for options`}
+            style={{ cursor: 'pointer', border: 'none' }}
           >
             {initials}
-          </div>
+          </button>
+
           {onLogout && (
             <button
               type="button"
@@ -98,8 +157,191 @@ export default function DashboardHeader({
               </svg>
             </button>
           )}
+
+          {/* User Menu Dropdown */}
+          {isMenuOpen && (
+            <div
+              className="wba-account-menu-popover"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 10px)',
+                right: 0,
+                width: '260px',
+                background: '#130d24',
+                border: '1px solid rgba(168, 85, 247, 0.35)',
+                borderRadius: '12px',
+                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
+                padding: '16px',
+                zIndex: 60,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              <div style={{ borderBottom: '1px solid rgba(168, 85, 247, 0.18)', paddingBottom: '10px' }}>
+                <strong style={{ display: 'block', color: '#fff', fontSize: '0.9rem' }}>{currentUser?.name}</strong>
+                <span style={{ display: 'block', color: '#a79cb8', fontSize: '0.78rem', marginTop: '2px', wordBreak: 'break-all' }}>{currentUser?.email}</span>
+                <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '0.7rem', color: '#c084fc', background: 'rgba(192, 132, 252, 0.12)', padding: '2px 8px', borderRadius: '6px' }}>
+                  {currentUser?.role || currentRole}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenDeactivateModal}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    color: '#fbbf24',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span aria-hidden="true">⚠️</span>
+                  <span>Deactivate Account</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(168, 85, 247, 0.2)',
+                    background: 'transparent',
+                    color: '#e9d5ff',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span aria-hidden="true">🚪</span>
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Account Deactivation Modal */}
+      {isDeactivateModalOpen && (
+        <div className="wba-dash-modal-overlay" onClick={() => setIsDeactivateModalOpen(false)}>
+          <div
+            className="wba-dash-modal-card"
+            style={{ maxWidth: '500px', border: '1.5px solid rgba(245, 158, 11, 0.5)' }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="deactivate-dialog-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="wba-modal-close-btn"
+              onClick={() => setIsDeactivateModalOpen(false)}
+              aria-label="Close deactivation modal"
+            >
+              &times;
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+              <h2 id="deactivate-dialog-title" style={{ color: '#fff', fontSize: '1.25rem', margin: 0 }}>
+                Deactivate Your Account
+              </h2>
+            </div>
+
+            <div
+              style={{
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.35)',
+                borderRadius: '10px',
+                padding: '14px',
+                margin: '14px 0',
+                fontSize: '0.85rem',
+                lineHeight: 1.55,
+                color: '#fef3c7',
+              }}
+            >
+              <p style={{ margin: '0 0 8px 0', fontWeight: 600 }}>
+                30-Day Recovery Period Policy:
+              </p>
+              <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <li>Your access will be suspended immediately upon confirmation.</li>
+                <li>You will have <strong>30 days</strong> to recover your account simply by signing back in.</li>
+                <li>
+                  Permanent deletion deadline: <strong>{scheduledDeletionDate}</strong>.
+                </li>
+                <li>
+                  After this deadline, the server will <strong>permanently and irreversibly delete</strong> your account.
+                </li>
+              </ul>
+            </div>
+
+            <form onSubmit={handleConfirmDeactivation} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <label className="wba-input-group">
+                <span className="wba-input-label" style={{ color: '#e9d5ff' }}>
+                  Confirm your password to proceed
+                </span>
+                <input
+                  type="password"
+                  className="wba-input-field"
+                  required
+                  autoComplete="current-password"
+                  placeholder="Enter your current password"
+                  value={deactivatePassword}
+                  onChange={(e) => {
+                    setDeactivatePassword(e.target.value);
+                    setDeactivateError('');
+                  }}
+                />
+              </label>
+
+              {deactivateError && (
+                <p className="wba-modal-error" role="alert" style={{ color: '#f87171', margin: 0, fontSize: '0.84rem' }}>
+                  {deactivateError}
+                </p>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  className="wba-pill-btn"
+                  onClick={() => setIsDeactivateModalOpen(false)}
+                  disabled={isDeactivating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="wba-btn-primary"
+                  style={{
+                    background: '#dc2626',
+                    borderColor: '#ef4444',
+                    color: '#fff',
+                  }}
+                  disabled={isDeactivating}
+                >
+                  {isDeactivating ? 'Deactivating…' : 'Confirm Deactivation'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

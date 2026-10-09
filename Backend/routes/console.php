@@ -44,3 +44,7 @@ Artisan::command('wba:create-admin {--generate : Generate credentials for a loca
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Scheduled background task: checks and permanently removes accounts exceeding the 30-day recovery period
+\Illuminate\Support\Facades\Schedule::command('accounts:purge-expired')->daily();
+

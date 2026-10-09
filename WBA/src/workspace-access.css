@@ -180,3 +180,226 @@ html[data-theme='light'] .wba-access-demo code { color: #453064; }
 @media (prefers-reduced-motion: reduce) {
   .wba-access-page * { transition-duration: 0.01ms !important; }
 }
+
+/* -------------------------------------------------------------
+ * Account Deactivation & 30-Day Recovery Styles
+ * ------------------------------------------------------------- */
+.wba-recovery-card {
+  margin-top: 20px;
+  padding: 22px;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.wba-recovery-card.expired {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.08);
+}
+
+.wba-recovery-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wba-recovery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.wba-recovery-card.expired .wba-recovery-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.wba-recovery-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.wba-recovery-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d1d5db;
+  margin: 0;
+}
+
+.wba-recovery-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  font-size: 0.78rem;
+}
+
+.wba-recovery-date-item span {
+  display: block;
+  color: #9ca3af;
+  margin-bottom: 3px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.wba-recovery-date-item strong {
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+.wba-countdown-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wba-countdown-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.wba-countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.wba-countdown-box {
+  background: rgba(17, 24, 39, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.wba-countdown-box strong {
+  display: block;
+  font-size: 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800;
+  color: #fbbf24;
+  line-height: 1.1;
+}
+
+.wba-countdown-box span {
+  display: block;
+  font-size: 0.65rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.wba-recovery-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.wba-reactivate-btn {
+  min-height: 44px;
+  border: 1px solid #10b981;
+  border-radius: 9px;
+  background: #059669;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.wba-reactivate-btn:hover:not(:disabled) {
+  background: #10b981;
+}
+
+.wba-reactivate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wba-recovery-cancel-btn {
+  background: none;
+  border: 0;
+  color: #9ca3af;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.wba-recovery-cancel-btn:hover {
+  color: #fff;
+}
+
+.wba-recovery-success {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+html[data-theme='light'] .wba-recovery-card {
+  background: rgba(245, 158, 11, 0.07);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+html[data-theme='light'] .wba-recovery-title {
+  color: #1f2937;
+}
+
+html[data-theme='light'] .wba-recovery-desc {
+  color: #4b5563;
+}
+
+html[data-theme='light'] .wba-recovery-dates {
+  background: #f3f4f6;
+}
+
+html[data-theme='light'] .wba-recovery-date-item strong {
+  color: #111827;
+}
+
+html[data-theme='light'] .wba-countdown-box {
+  background: #ffffff;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+html[data-theme='light'] .wba-countdown-box strong {
+  color: #d97706;
+}
+

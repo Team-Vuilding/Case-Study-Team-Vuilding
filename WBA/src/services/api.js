@@ -17,15 +17,28 @@ export async function apiRequest(endpoint, { method = 'GET', body } = {}) {
       setToken(null);
       window.dispatchEvent(new Event('wba-auth-expired'));
     }
-    throw new Error(Object.values(data.errors || {}).flat()[0] || data.message || 'Request failed. Please try again.');
+    const message = Object.values(data.errors || {}).flat()[0] || data.message || 'Request failed. Please try again.';
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
   return data;
 }
+
 export const authApi = {
   login: async credentials => {
     const result = await apiRequest('auth/login', { method: 'POST', body: credentials });
     setToken(result.token);
     return result.user;
+  },
+  reactivate: async credentials => {
+    const result = await apiRequest('auth/reactivate', { method: 'POST', body: credentials });
+    setToken(result.token);
+    return result;
+  },
+  deactivate: async password => {
+    return await apiRequest('auth/deactivate', { method: 'POST', body: { password } });
   },
   me: async () => (await apiRequest('auth/me')).user,
   logout: () => apiRequest('auth/logout', { method: 'POST' }),

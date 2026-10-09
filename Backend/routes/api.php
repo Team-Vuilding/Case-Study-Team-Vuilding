@@ -12,9 +12,11 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
+Route::post('auth/reactivate', [AuthController::class, 'reactivate'])->middleware('throttle:6,1');
 Route::middleware('access')->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
+    Route::post('auth/deactivate', [AuthController::class, 'deactivate']);
     Route::get('items', [ItemController::class, 'items']);
     Route::get('items/{item}', [ItemController::class, 'item'])->whereNumber('item');
     Route::get('dashboard/metrics', [DashboardController::class, 'metrics']);
@@ -28,6 +30,7 @@ Route::middleware('access:admin')->group(function () {
     Route::post('users', [UserController::class, 'saveUser']);
     Route::put('users/{user}', [UserController::class, 'saveUser'])->whereNumber('user');
     Route::delete('users/{user}', [UserController::class, 'deactivateUser'])->whereNumber('user');
+    Route::post('users/{user}/reactivate', [UserController::class, 'reactivateUser'])->whereNumber('user');
     Route::post('items', [ItemController::class, 'saveItem']);
     Route::put('items/{item}', [ItemController::class, 'saveItem'])->whereNumber('item');
     Route::delete('items/{item}', [ItemController::class, 'deleteItem'])->whereNumber('item');

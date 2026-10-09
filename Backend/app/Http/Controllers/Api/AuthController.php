@@ -16,9 +16,40 @@ class AuthController extends ApiController
     {
         $data = $request->validate(['email' => 'required|email', 'password' => 'required|string', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))]]);
         $user = User::where('email', strtolower(trim($data['email'])))->first();
-        if (! $user || ! Hash::check($data['password'], $user->password) || ! $user->is_active || $user->access_level !== $data['accessLevel']) {
-            return response()->json(['message' => 'The credentials do not match an active account for this role.'], 422);
+        if (! $user || ! Hash::check($data['password'], $user->password) || $user->access_level !== $data['accessLevel']) {
+            return response()->json(['message' => 'The credentials do not match an account for this role.'], 422);
         }
+
+        // Handle deactivated account state
+        if ($user->isDeactivated()) {
+            if ($user->isExpired()) {
+                return response()->json([
+                    'message' => 'The 30-day recovery deadline has expired. This account is scheduled for permanent deletion.',
+                    'accountStatus' => 'expired',
+                    'canReactivate' => false,
+                ], 422);
+            }
+
+            $remainingDays = $user->remainingDays() ?? 30;
+
+            return response()->json([
+                'message' => sprintf(
+                    'This account is deactivated. You have until %s (%d day%s remaining) to reactivate it.',
+                    $user->deletion_at?->format('M d, Y g:i A') ?? 'the scheduled deadline',
+                    $remainingDays,
+                    $remainingDays === 1 ? '' : 's'
+                ),
+                'accountStatus' => 'deactivated',
+                'deactivatedAt' => $user->deactivated_at?->toISOString(),
+                'deletionAt' => $user->deletion_at?->toISOString(),
+                'remainingSeconds' => $user->remainingSeconds(),
+                'remainingDays' => $remainingDays,
+                'canReactivate' => true,
+                'email' => $user->email,
+                'accessLevel' => $user->access_level,
+            ], 422);
+        }
+
         $token = Str::random(64);
         DB::table('api_tokens')->where('expires_at', '<=', now())->delete();
         DB::table('api_tokens')->insert(['user_id' => $user->id, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addHours(12)]);
@@ -26,6 +57,77 @@ class AuthController extends ApiController
         $this->audit($request, 'Signed in', 'Signed in to the workspace.', $user->email);
 
         return response()->json(['user' => $this->account($user), 'token' => $token]);
+    }
+
+    public function reactivate(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))],
+        ]);
+
+        $user = User::where('email', strtolower(trim($data['email'])))->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password) || $user->access_level !== $data['accessLevel']) {
+            return response()->json(['message' => 'Invalid recovery credentials provided.'], 422);
+        }
+
+        if (! $user->isDeactivated()) {
+            return response()->json(['message' => 'This account is already active.'], 422);
+        }
+
+        if ($user->isExpired()) {
+            return response()->json([
+                'message' => 'The 30-day recovery deadline has expired. This account can no longer be reactivated.',
+                'accountStatus' => 'expired',
+                'canReactivate' => false,
+            ], 403);
+        }
+
+        // Reactivate account and reset deadlines
+        $user->reactivate();
+
+        $token = Str::random(64);
+        DB::table('api_tokens')->where('expires_at', '<=', now())->delete();
+        DB::table('api_tokens')->insert(['user_id' => $user->id, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addHours(12)]);
+        $request->setUserResolver(fn () => $user);
+        $this->audit($request, 'Reactivated account', 'Account reactivated by user within 30-day recovery window.', $user->email);
+
+        return response()->json([
+            'message' => 'Account successfully reactivated. Welcome back!',
+            'user' => $this->account($user->fresh()),
+            'token' => $token,
+        ]);
+    }
+
+    public function deactivate(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (! Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Incorrect password.'], 422);
+        }
+
+        // Guard against deactivating the last active administrator
+        if ($user->access_level === 'admin' && User::where('access_level', 'admin')->where('is_active', true)->count() <= 1) {
+            return response()->json(['message' => 'You cannot deactivate the only active system administrator account.'], 422);
+        }
+
+        $user->deactivate(30);
+        DB::table('api_tokens')->where('user_id', $user->id)->delete();
+        $this->audit($request, 'Deactivated account', $user->name.' deactivated their own account with a 30-day recovery deadline.', $user->email);
+
+        return response()->json([
+            'message' => 'Account deactivated. You have 30 days to reactivate it before permanent deletion.',
+            'deactivatedAt' => $user->deactivated_at?->toISOString(),
+            'deletionAt' => $user->deletion_at?->toISOString(),
+            'remainingDays' => 30,
+        ]);
     }
 
     public function me(Request $request): JsonResponse
