@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vercel Web Design Guidelines"
+  short_description: "Review interface code with Vercel Web Interface Guidelines. "
+  default_prompt: "Use $vercel-web-design-guidelines for the requested scope."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Simplify"
+  short_description: "Simplify a specified diff or recently changed code while pre"
+  default_prompt: "Use $code-simplify for the requested scope."

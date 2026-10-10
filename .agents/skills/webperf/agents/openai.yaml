@@ -1,0 +1,4 @@
+interface:
+  display_name: "Webperf"
+  short_description: "Audit browser-facing web performance using Addy Osmani workf"
+  default_prompt: "Use $webperf for the requested scope."

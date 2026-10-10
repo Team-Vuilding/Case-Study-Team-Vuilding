@@ -1,0 +1,4 @@
+interface:
+  display_name: "System Performance And Quality"
+  short_description: "Apply the requested production quality profile to web change"
+  default_prompt: "Use $system-performance-and-quality for the requested scope."

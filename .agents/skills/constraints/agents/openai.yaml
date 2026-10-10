@@ -1,0 +1,4 @@
+interface:
+  display_name: "Constraints"
+  short_description: "Define or check mechanical project quality bounds, guard aga"
+  default_prompt: "Use $constraints for the requested scope."

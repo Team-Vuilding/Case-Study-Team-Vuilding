@@ -1,0 +1,316 @@
+{
+  "project": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding",
+  "project_skill_count": 34,
+  "records": [
+    {
+      "name": "api-and-interface-design",
+      "trigger": "$api-and-interface-design",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\api-and-interface-design\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "baseline-ui",
+      "trigger": "$baseline-ui",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\baseline-ui\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "bencium-innovative-ux-designer",
+      "trigger": "$bencium-innovative-ux-designer",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\bencium-innovative-ux-designer\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "browser-testing-with-devtools",
+      "trigger": "$browser-testing-with-devtools",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\browser-testing-with-devtools\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "ci-cd-and-automation",
+      "trigger": "$ci-cd-and-automation",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\ci-cd-and-automation\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "code-review-and-quality",
+      "trigger": "$code-review-and-quality",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\code-review-and-quality\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "code-simplification",
+      "trigger": "$code-simplification",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\code-simplification\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "code-simplify",
+      "trigger": "$code-simplify",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\code-simplify\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "constraint-driven-development",
+      "trigger": "$constraint-driven-development",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\constraint-driven-development\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "constraints",
+      "trigger": "$constraints",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\constraints\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "context-engineering",
+      "trigger": "$context-engineering",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\context-engineering\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "debugging-and-error-recovery",
+      "trigger": "$debugging-and-error-recovery",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\debugging-and-error-recovery\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "deprecation-and-migration",
+      "trigger": "$deprecation-and-migration",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\deprecation-and-migration\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "documentation-and-adrs",
+      "trigger": "$documentation-and-adrs",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\documentation-and-adrs\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "doubt-driven-development",
+      "trigger": "$doubt-driven-development",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\doubt-driven-development\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "frontend-ui-engineering",
+      "trigger": "$frontend-ui-engineering",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\frontend-ui-engineering\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "git-workflow-and-versioning",
+      "trigger": "$git-workflow-and-versioning",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\git-workflow-and-versioning\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "idea-refine",
+      "trigger": "$idea-refine",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\idea-refine\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "incremental-implementation",
+      "trigger": "$incremental-implementation",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\incremental-implementation\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "interview-me",
+      "trigger": "$interview-me",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\interview-me\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "karpathy-guidelines",
+      "trigger": "$karpathy-guidelines",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\karpathy-guidelines\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "observability-and-instrumentation",
+      "trigger": "$observability-and-instrumentation",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\observability-and-instrumentation\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "performance-optimization",
+      "trigger": "$performance-optimization",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\performance-optimization\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "planning-and-task-breakdown",
+      "trigger": "$planning-and-task-breakdown",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\planning-and-task-breakdown\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "security-and-hardening",
+      "trigger": "$security-and-hardening",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\security-and-hardening\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "shipping-and-launch",
+      "trigger": "$shipping-and-launch",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\shipping-and-launch\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "source-driven-development",
+      "trigger": "$source-driven-development",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\source-driven-development\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "spec-driven-development",
+      "trigger": "$spec-driven-development",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\spec-driven-development\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "system-performance-and-quality",
+      "trigger": "$system-performance-and-quality",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\system-performance-and-quality\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "test-driven-development",
+      "trigger": "$test-driven-development",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\test-driven-development\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "typesafe-ai",
+      "trigger": "$typesafe-ai",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\typesafe-ai\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "using-agent-skills",
+      "trigger": "$using-agent-skills",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\using-agent-skills\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "vercel-web-design-guidelines",
+      "trigger": "$vercel-web-design-guidelines",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\vercel-web-design-guidelines\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "webperf",
+      "trigger": "$webperf",
+      "path": "C:\\Users\\Vincent\\Downloads\\Projects\\Case-Study-Team-Vuilding\\.agents\\skills\\webperf\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "frontend-design",
+      "trigger": "$frontend-design",
+      "path": "C:\\Users\\Vincent\\.codex\\skills\\frontend-design\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "better-ui",
+      "trigger": "$better-ui",
+      "path": "C:\\Users\\Vincent\\.codex\\skills\\better-ui\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    },
+    {
+      "name": "better-interface",
+      "trigger": "$better-interface",
+      "path": "C:\\Users\\Vincent\\.codex\\skills\\better-interface\\SKILL.md",
+      "valid": true,
+      "message": "Skill is valid!",
+      "missing_references": []
+    }
+  ],
+  "sources": {
+    "addyosmani": "https://github.com/addyosmani/agent-skills",
+    "bencium": "https://github.com/bencium/bencium-marketplace",
+    "baseline": "https://github.com/ibelick/ui-skills",
+    "karpathy": "https://github.com/multica-ai/andrej-karpathy-skills",
+    "vercel": "https://github.com/vercel-labs/web-interface-guidelines"
+  },
+  "aliases": {
+    "/webperf": "$webperf",
+    "/code-simplify": "$code-simplify",
+    "/constraints": "$constraints"
+  },
+  "discovery": "Codex scans .agents/skills and reloads installed skills automatically; available on the next turn. Restart if absent. No environment re-index command is required.",
+  "scope": "Instruction skills installed; application changes and executable CI quality gates are not part of this installation."
+}
