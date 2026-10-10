@@ -1,0 +1,13 @@
+{
+    admin off
+    auto_https off
+    frankenphp {
+        num_threads 4
+    }
+}
+
+:{$PORT:10000} {
+    root * /app/public
+    encode gzip
+    php_server
+}
