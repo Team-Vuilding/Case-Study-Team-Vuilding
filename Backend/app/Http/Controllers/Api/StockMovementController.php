@@ -36,6 +36,7 @@ class StockMovementController extends ApiController
                     }
                 }
             } else {
+                abort_if(max($item->physical_on_hand, $item->paper_spreadsheet_count) + $quantity > 2147483647, 422, 'Receipt exceeds the supported stock quantity.');
                 abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'Enter the actual batch expiry date.');
                 $this->receiveBatch($item, $quantity, $data['expiresAt'] ?? null, $data['lot'] ?? null);
             }

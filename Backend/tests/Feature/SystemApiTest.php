@@ -182,7 +182,50 @@ class SystemApiTest extends TestCase
         $this->putJson('/api/categories/'.$id, ['name' => 'Climate', 'code' => 'COOL'])->assertOk()->assertJsonPath('data.name', 'Climate');
         $this->getJson('/api/categories')->assertOk()->assertJsonPath('data.0.name', 'Climate');
         $this->deleteJson('/api/categories/'.$id)->assertOk();
-        $this->postJson('/api/items', $this->product())->assertCreated();
-        $this->deleteJson('/api/items/1')->assertUnprocessable();
+        $itemId = $this->postJson('/api/items', $this->product())->assertCreated()->json('data.id');
+        $this->deleteJson('/api/items/'.$itemId)->assertUnprocessable();
+    }
+
+    public function test_storage_cost_cannot_exceed_the_database_decimal_capacity(): void
+    {
+        $this->signIn();
+        $this->postJson('/api/items', $this->product(['storageCostPerMonth' => 100000000]))->assertUnprocessable();
+        $this->assertDatabaseCount('items', 0);
+    }
+
+    public function test_purchase_order_total_overflow_is_rejected_without_partial_writes(): void
+    {
+        $this->signIn();
+        $item = $this->postJson('/api/items', $this->product())->assertCreated()->json('data.id');
+        $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Test supplier'])->assertOk()->json('data.id');
+        $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier,
+            'items' => [['item_id' => $item, 'quantity' => 1000000, 'unit_price' => 100000000]]])->assertUnprocessable();
+        $this->assertDatabaseCount('purchase_orders', 0);
+        $this->assertDatabaseCount('purchase_order_items', 0);
+    }
+
+    public function test_uppercase_duplicate_account_email_returns_validation_error(): void
+    {
+        $admin = $this->signIn();
+        $this->postJson('/api/users', ['name' => 'Duplicate', 'email' => strtoupper($admin->email),
+            'password' => 'staff-password-123', 'accessLevel' => 'sales'])->assertUnprocessable();
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_receipts_reject_integer_overflow_without_changing_stock_or_order(): void
+    {
+        $this->signIn();
+        $item = $this->postJson('/api/items', $this->product(['physicalOnHand' => 0]))->assertCreated()->json('data.id');
+        DB::table('items')->where('id', $item)->update(['physical_on_hand' => 2147483647, 'paper_spreadsheet_count' => 2147483647]);
+        $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Test supplier'])->assertOk()->json('data.id');
+        $order = $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier,
+            'items' => [['item_id' => $item, 'quantity' => 1, 'unit_price' => 50]]])->assertCreated()->json('id');
+        $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'approved'])->assertOk();
+        $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'received'])->assertUnprocessable();
+        $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'status' => 'approved']);
+        $this->signIn('warehouse');
+        $this->postJson('/api/warehouse/movements', ['code' => 'TEST-001', 'quantity' => 1])->assertUnprocessable();
+        $this->assertDatabaseHas('items', ['id' => $item, 'physical_on_hand' => 2147483647]);
+        $this->assertDatabaseCount('stock_movements', 0);
     }
 }

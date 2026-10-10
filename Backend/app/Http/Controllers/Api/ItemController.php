@@ -28,7 +28,7 @@ class ItemController extends ApiController
             'unitPrice' => 'required|numeric|min:0|max:9999999999', 'warehouseBin' => 'required|string|max:120',
             'physicalOnHand' => $item ? 'prohibited' : 'required|integer|min:0|max:100000000',
             'hasShelfLife' => 'required|boolean', 'shelfLifeMonths' => 'nullable|required_if:hasShelfLife,true|integer|min:1|max:120',
-            'isSeasonal' => 'sometimes|boolean', 'storageCostPerMonth' => 'sometimes|numeric|min:0|max:100000000',
+            'isSeasonal' => 'sometimes|boolean', 'storageCostPerMonth' => 'sometimes|numeric|min:0|max:99999999.99',
             'expiresAt' => 'nullable|date|after_or_equal:today']);
         abort_if(! $item && $data['hasShelfLife'] && $data['physicalOnHand'] > 0 && empty($data['expiresAt']), 422, 'Enter the actual initial batch expiry date.');
         $saved = DB::transaction(function () use ($request, $data, $item) {

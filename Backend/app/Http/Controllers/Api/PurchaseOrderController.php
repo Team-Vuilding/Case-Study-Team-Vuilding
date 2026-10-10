@@ -30,11 +30,13 @@ class PurchaseOrderController extends ApiController
         $data = $request->validate(['supplier_id' => 'required|exists:suppliers,id', 'expected_delivery_date' => 'nullable|date|after_or_equal:today',
             'notes' => 'nullable|string|max:1000', 'items' => 'required|array|min:1|max:100', 'items.*.item_id' => 'required|distinct|exists:items,id',
             'items.*.quantity' => 'required|integer|min:1|max:1000000', 'items.*.unit_price' => 'required|numeric|min:0|max:100000000']);
-        $id = DB::transaction(function () use ($request, $data) {
+        $total = collect($data['items'])->sum(fn ($line) => round($line['quantity'] * $line['unit_price'], 2));
+        abort_if($total > 9999999999.99, 422, 'Purchase order total exceeds the supported amount.');
+        $id = DB::transaction(function () use ($request, $data, $total) {
             $id = DB::table('purchase_orders')->insertGetId(['po_number' => 'PO-'.Str::uuid(), 'supplier_id' => $data['supplier_id'],
                 'user_id' => $request->user()->id, 'status' => 'pending_approval', 'order_date' => today(),
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null, 'notes' => $data['notes'] ?? null,
-                'total_amount' => collect($data['items'])->sum(fn ($line) => round($line['quantity'] * $line['unit_price'], 2)), 'created_at' => now(), 'updated_at' => now()]);
+                'total_amount' => $total, 'created_at' => now(), 'updated_at' => now()]);
             foreach ($data['items'] as $line) {
                 DB::table('purchase_order_items')->insert(['purchase_order_id' => $id, 'item_id' => $line['item_id'], 'quantity_ordered' => $line['quantity'],
                     'unit_price' => $line['unit_price'], 'subtotal' => round($line['quantity'] * $line['unit_price'], 2), 'created_at' => now(), 'updated_at' => now()]);
@@ -64,6 +66,7 @@ class PurchaseOrderController extends ApiController
                     $item = Item::whereKey($line->item_id)->lockForUpdate()->firstOrFail();
                     abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'An actual expiry date is required for perishable deliveries.');
                     $quantity = $line->quantity_ordered - $line->quantity_received;
+                    abort_if(max($item->physical_on_hand, $item->paper_spreadsheet_count) + $quantity > 2147483647, 422, 'Receipt exceeds the supported stock quantity.');
                     $item->increment('physical_on_hand', $quantity);
                     $item->increment('paper_spreadsheet_count', $quantity);
                     $this->receiveBatch($item, $quantity, $data['expiresAt'] ?? null);

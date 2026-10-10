@@ -17,6 +17,9 @@ class UserController extends ApiController
 
     public function saveUser(Request $request, ?User $user = null): JsonResponse
     {
+        if (is_string($request->input('email'))) {
+            $request->merge(['email' => strtolower(trim($request->input('email')))]);
+        }
         $data = $request->validate([
             'name' => 'required|string|max:200',
             'email' => ['required', 'email', 'max:200', Rule::unique('users')->ignore($user?->id)],
