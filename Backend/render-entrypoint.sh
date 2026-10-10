@@ -10,4 +10,7 @@ if [ -n "${WBA_ADMIN_EMAIL:-}" ]; then
     php artisan wba:create-admin --from-env --no-interaction
 fi
 
+php artisan accounts:purge-expired --no-interaction
+php artisan schedule:work --no-interaction &
+
 exec "$@"

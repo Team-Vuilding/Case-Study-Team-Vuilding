@@ -101,11 +101,13 @@ minute. Supabase Free may pause after a week without database activity. Wake the
 backend and check Supabase before a presentation. Local uploaded files are not
 durable on Render Free; the current inventory data is stored in PostgreSQL.
 
-`QUEUE_CONNECTION=sync` executes queued jobs during requests. Render Free does
-not provide a background worker or scheduled Laravel task here. The daily
-`accounts:purge-expired` schedule needs a separately configured scheduler; expired
-accounts are already denied recovery but automatic physical deletion requires that
-scheduler. Do not assume it runs simply because the web service is deployed.
+`QUEUE_CONNECTION=sync` executes queued jobs during requests. The container runs
+Laravel's scheduler alongside the web server for the existing daily expired-account
+purge. Startup also purges overdue accounts to catch up after the free service has
+slept. Scheduled tasks cannot run while Render is asleep; overdue accounts are
+cleaned up when the service wakes. Expired accounts are denied recovery even before
+physical deletion. A service that must run scheduled jobs while idle needs an
+always-running paid service or an external scheduler.
 
 Use Supabase database exports/backups before schema changes. To roll back code,
 redeploy a previously working commit in Render and Vercel. Keep the same APP_KEY
