@@ -89,7 +89,9 @@ export default function ManageAccountsSection({ currentUser }) {
       setNotice('You cannot deactivate your own account here.');
       return;
     }
-    setAccountToDeactivate(account);
+    setAccountToDeactivate({ ...account, recoveryDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+      month: 'short', day: 'numeric', year: 'numeric',
+    }) });
   };
 
   const executeDeactivation = async () => {
@@ -406,7 +408,7 @@ export default function ManageAccountsSection({ currentUser }) {
             >
               <strong>30-Day Recovery Policy:</strong>
               <div style={{ marginTop: '4px' }}>
-                The account will immediately lose access. They will have <strong>30 days</strong> to recover their account. If not reactivated by <strong>{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</strong>, the server will permanently delete it.
+                The account will immediately lose access. They will have <strong>30 days</strong> to recover their account. If not reactivated by <strong>{accountToDeactivate.recoveryDeadline}</strong>, it becomes eligible for permanent deletion.
               </div>
             </div>
 

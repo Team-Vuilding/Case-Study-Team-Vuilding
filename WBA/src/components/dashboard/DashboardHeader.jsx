@@ -19,6 +19,7 @@ export default function DashboardHeader({
   const [deactivatePassword, setDeactivatePassword] = useState('');
   const [deactivateError, setDeactivateError] = useState('');
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const [scheduledDeletionDate, setScheduledDeletionDate] = useState('');
   const menuRef = useRef(null);
 
   // Close user dropdown menu when clicking outside
@@ -33,13 +34,10 @@ export default function DashboardHeader({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
-  const scheduledDeletionDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-
   const handleOpenDeactivateModal = () => {
+    setScheduledDeletionDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+      month: 'long', day: 'numeric', year: 'numeric',
+    }));
     setIsMenuOpen(false);
     setDeactivatePassword('');
     setDeactivateError('');

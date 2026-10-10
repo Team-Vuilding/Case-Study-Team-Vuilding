@@ -10,9 +10,9 @@ const ROLES = [
   { id: 'sales', name: 'Sales staff', initial: 'S', description: 'Check sellable stock and customer reservations.' },
 ];
 
-function calculateRemaining(deadline) {
+function calculateRemaining(deadline, currentTime) {
   if (!deadline) return null;
-  const diff = new Date(deadline).getTime() - Date.now();
+  const diff = new Date(deadline).getTime() - currentTime;
   if (diff <= 0) {
     return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
   }
@@ -35,7 +35,8 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
   const [deactivationInfo, setDeactivationInfo] = useState(null);
   const [isReactivating, setIsReactivating] = useState(false);
   const [reactivationSuccess, setReactivationSuccess] = useState('');
-  const [countdown, setCountdown] = useState(null);
+  const [currentTime, setCurrentTime] = useState(Date.now);
+  const countdown = calculateRemaining(deactivationInfo?.deletionAt, currentTime);
 
   const closeButtonRef = useRef(null);
   const selectedRole = ROLES.find((item) => item.id === role);
@@ -57,13 +58,9 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
 
   // Live countdown timer based on server deadline
   useEffect(() => {
-    if (!deactivationInfo?.deletionAt) {
-      setCountdown(null);
-      return undefined;
-    }
-    setCountdown(calculateRemaining(deactivationInfo.deletionAt));
+    if (!deactivationInfo?.deletionAt) return undefined;
     const interval = setInterval(() => {
-      setCountdown(calculateRemaining(deactivationInfo.deletionAt));
+      setCurrentTime(Date.now());
     }, 1000);
     return () => clearInterval(interval);
   }, [deactivationInfo?.deletionAt]);
@@ -84,6 +81,7 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
       onSuccess(user);
     } catch (err) {
       if (err.data?.accountStatus === 'deactivated' || err.data?.accountStatus === 'expired') {
+        setCurrentTime(Date.now());
         setDeactivationInfo(err.data);
       } else {
         setError(err.message);
