@@ -3,23 +3,35 @@
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Str;
 
-Artisan::command('wba:create-admin {--generate : Generate credentials for a local administrator}', function () {
+Artisan::command('wba:create-admin {--generate : Generate credentials for a local administrator} {--from-env : Create the first administrator from WBA_ADMIN_* environment variables}', function () {
+    $fromEnv = $this->option('from-env');
+    $generate = $this->option('generate');
+    if ($fromEnv && $generate) {
+        $this->error('Choose either --from-env or --generate.');
+
+        return 1;
+    }
+    if ($fromEnv && User::where('access_level', 'admin')->exists()) {
+        $this->info('Administrator already provisioned.');
+
+        return 0;
+    }
     if (User::where('access_level', 'admin')->where('is_active', true)->exists()) {
         $this->error('An active administrator already exists. Create additional users from Manage Accounts.');
 
         return 1;
     }
-    $generate = $this->option('generate');
     if ($generate && ! app()->environment('local')) {
         $this->error('Generated local accounts are only available in the local environment.');
 
         return 1;
     }
-    $name = $generate ? 'Local Administrator' : $this->ask('Administrator name');
-    $email = $generate ? 'admin@wba.local' : strtolower(trim($this->ask('Administrator email')));
-    $password = $generate ? Str::random(24) : $this->secret('Password (at least 12 characters)');
+    $name = $fromEnv ? env('WBA_ADMIN_NAME') : ($generate ? 'Local Administrator' : $this->ask('Administrator name'));
+    $email = strtolower(trim((string) ($fromEnv ? env('WBA_ADMIN_EMAIL') : ($generate ? 'admin@wba.local' : $this->ask('Administrator email')))));
+    $password = $fromEnv ? env('WBA_ADMIN_PASSWORD') : ($generate ? Str::random(24) : $this->secret('Password (at least 12 characters)'));
     $validator = validator(compact('name', 'email', 'password'), [
         'name' => 'required|string|max:200', 'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:12|max:128',
@@ -46,5 +58,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Scheduled background task: checks and permanently removes accounts exceeding the 30-day recovery period
-\Illuminate\Support\Facades\Schedule::command('accounts:purge-expired')->daily();
-
+Schedule::command('accounts:purge-expired')->daily();
