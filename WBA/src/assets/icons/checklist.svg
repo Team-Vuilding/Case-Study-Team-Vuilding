@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clipboard body -->
+  <rect x="12" y="8" width="40" height="48" rx="6" stroke="black" stroke-width="3" fill="white" />
+  
+  <!-- Clip -->
+  <rect x="24" y="4" width="16" height="8" rx="4" stroke="black" stroke-width="3" fill="white" />
+  
+  <!-- Checklist items -->
+  <path d="M20 24 L24 28 L30 20" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <line x1="34" y1="24" x2="46" y2="24" stroke="black" stroke-width="3" stroke-linecap="round" />
+  
+  <circle cx="24" cy="34" r="3" stroke="black" stroke-width="3" />
+  <line x1="34" y1="34" x2="46" y2="34" stroke="black" stroke-width="3" stroke-linecap="round" />
+  
+  <circle cx="24" cy="44" r="3" stroke="black" stroke-width="3" />
+  <line x1="34" y1="44" x2="46" y2="44" stroke="black" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Pen -->
+  <path d="M50 56 L38 44 L44 38 L56 50 Z" fill="white" stroke="black" stroke-width="3" stroke-linejoin="round" />
+  <path d="M38 44 L32 46 L36 40 Z" fill="black" />
+</svg>

@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Yellow background shape -->
+  <circle cx="36" cy="24" r="14" fill="#FACC15" />
+  
+  <!-- Blue question marks -->
+  <path d="M12 16 C12 12, 20 12, 20 16 C20 20, 16 22, 16 26" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" />
+  <circle cx="16" cy="34" r="2.5" fill="#38BDF8" />
+  
+  <path d="M54 12 C54 8, 62 8, 62 12 C62 16, 58 18, 58 22" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" />
+  <circle cx="58" cy="30" r="2.5" fill="#38BDF8" />
+  
+  <!-- Person face and body -->
+  <circle cx="30" cy="26" r="14" stroke="black" stroke-width="3" fill="none" />
+  <path d="M10 58 C10 44, 20 40, 30 40 C40 40, 50 44, 50 58" stroke="black" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Finger / hand pointing at chin -->
+  <path d="M30 40 L30 50 C30 52, 24 52, 24 50 L24 44" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M30 38 L34 26 C35 24, 38 24, 38 26 L34 44" stroke="black" stroke-width="3" fill="white" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

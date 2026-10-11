@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThinkingIcon, ChecklistIcon, TargetIcon } from './Icons';
 
 export default function AboutSection() {
   return (
@@ -13,19 +14,19 @@ export default function AboutSection() {
 
       <div className="wba-about-grid">
         <div className="wba-about-card">
-          <div className="wba-card-icon">⚡</div>
+          <div className="wba-card-icon"><ThinkingIcon size={48} /></div>
           <h3>Know what is available</h3>
           <p>See stock on hand alongside reservations and picking activity before making a commitment.</p>
         </div>
 
         <div className="wba-about-card">
-          <div className="wba-card-icon">📊</div>
+          <div className="wba-card-icon"><ChecklistIcon size={48} /></div>
           <h3>Plan for demand</h3>
           <p>Compare seasonal demand patterns with available stock and reorder guidance.</p>
         </div>
 
         <div className="wba-about-card">
-          <div className="wba-card-icon">🔄</div>
+          <div className="wba-card-icon"><TargetIcon size={48} /></div>
           <h3>Protect older stock</h3>
           <p>Track batch age and expiry to help warehouse teams pick stock in the right order.</p>
         </div>

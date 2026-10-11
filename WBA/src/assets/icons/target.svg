@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Target -->
+  <circle cx="32" cy="18" r="14" stroke="black" stroke-width="3" fill="none" />
+  <circle cx="32" cy="18" r="6" stroke="black" stroke-width="3" fill="none" />
+  <circle cx="32" cy="18" r="2" fill="black" />
+  
+  <!-- Arrow in target -->
+  <line x1="32" y1="18" x2="48" y2="6" stroke="black" stroke-width="3" stroke-linecap="round" />
+  <path d="M40 6 L48 6 L48 14" stroke="black" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Blocks -->
+  <rect x="8" y="36" width="48" height="6" rx="1.5" stroke="black" stroke-width="3" fill="none" />
+  <rect x="8" y="46" width="32" height="6" rx="1.5" stroke="black" stroke-width="3" fill="none" />
+  <rect x="8" y="56" width="32" height="6" rx="1.5" stroke="black" stroke-width="3" fill="none" />
+  
+  <!-- Arrow pointing up -->
+  <path d="M50 58 L50 48 M50 48 L44 54 M50 48 L56 54" stroke="black" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
