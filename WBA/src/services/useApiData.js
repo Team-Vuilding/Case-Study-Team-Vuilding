@@ -30,5 +30,5 @@ export default function useApiData(endpoint) {
     window.addEventListener('wba-data-changed', reload);
     return () => window.removeEventListener('wba-data-changed', reload);
   }, [reload]);
-  return { data, loading, error, reload };
+  return { data, loading: loading && data === null, error, reload };
 }

@@ -1,9 +1,10 @@
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonTable } from '../WorkspaceSkeletons';
 
 export default function FifoExpiryQueue() {
   const { data, loading, error, reload } = useApiData('batches');
-  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} />;
+  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading batch expiry tracker…"><SkeletonTable /></ApiStatus>;
   return <div className="wba-glow-card"><h3>Batch expiry tracker</h3><p className="wba-card-desc">Batches ordered by expiry date. Dispatch consumes unexpired batches with the earliest expiry first.</p>
     {!data.length && <p>No active batches. Receive a product with expiry tracking to create a batch.</p>}
     <div className="wba-table-container"><table className="wba-table"><thead><tr><th>Product / lot</th><th>Bin</th><th>Quantity</th><th>Received</th><th>Expires</th><th>Status</th></tr></thead><tbody>

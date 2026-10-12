@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonForm, SkeletonHeading, SkeletonTable } from '../WorkspaceSkeletons';
 
 function OrderForm({ onClose }) {
   const products = useApiData('items');
@@ -29,7 +30,7 @@ function OrderForm({ onClose }) {
   const update = event => setForm({ ...form, [event.target.name]: event.target.value });
   return <div className="wba-dash-modal-overlay" onClick={() => { if (!saving) onClose(); }}><section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="po-title" onClick={event => event.stopPropagation()}>
     <button type="button" className="wba-modal-close-btn" onClick={onClose} disabled={saving} aria-label="Close order form">×</button><h2 id="po-title">New purchase order</h2>
-    {products.loading || suppliers.loading || products.error || suppliers.error ? <ApiStatus loading={products.loading || suppliers.loading} error={products.error || suppliers.error} onRetry={() => { products.reload(); suppliers.reload(); }} /> : <>
+    {products.loading || suppliers.loading || products.error || suppliers.error ? <ApiStatus loading={products.loading || suppliers.loading} error={products.error || suppliers.error} onRetry={() => { products.reload(); suppliers.reload(); }} loadingLabel="Loading purchase order options…"><SkeletonForm /></ApiStatus> : <>
       <label className="wba-input-group"><span className="wba-input-label">Add a supplier</span><input className="wba-input-field" value={supplierName} onChange={event => setSupplierName(event.target.value)} placeholder="Supplier name" /></label>
       <button type="button" className="wba-pill-btn" disabled={saving || !supplierName.trim()} onClick={addSupplier}>Save supplier</button>
       <form onSubmit={submit}>
@@ -62,7 +63,9 @@ export default function PurchaseHistorySection({ currentUser }) {
     try { await apiRequest('purchasing/purchase-orders/' + order.id + '/status', { method: 'PUT', body: { status, expiresAt } }); refreshData(); setDelivery(null); setExpiry(''); }
     catch (reason) { setError(reason.message); } finally { setPending(null); }
   };
-  if (orders.loading || orders.error) return <ApiStatus loading={orders.loading} error={orders.error} onRetry={orders.reload} />;
+  if (orders.loading || orders.error) return <ApiStatus loading={orders.loading} error={orders.error} onRetry={orders.reload} loadingLabel="Loading purchase orders…">
+    <div className="wba-grid-container"><SkeletonHeading /><SkeletonTable columns={costs ? 6 : 5} /></div>
+  </ApiStatus>;
   const filtered = orders.data.filter(order => (filter === 'all' || order.status === filter) && (order.number + order.supplier + order.lines.map(line => line.product).join(' ')).toLowerCase().includes(search.toLowerCase()));
   return <div className="wba-grid-container">
     <div className="wba-section-page-header"><div><h2 className="wba-section-page-title">Purchase orders</h2><p className="wba-section-page-desc">Supplier orders, approvals, and recorded deliveries.</p></div>{canCreate && <button type="button" className="wba-btn-primary" onClick={() => setOpen(true)}>+ New order</button>}</div>

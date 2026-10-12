@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonHeading, SkeletonList, SkeletonSummary } from '../WorkspaceSkeletons';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
 const ROLES = [
@@ -124,12 +125,20 @@ export default function ManageAccountsSection({ currentUser }) {
     return (
       <ApiStatus
         loading={users.loading || events.loading}
+        loadingLabel="Loading accounts and account activity…"
         error={users.error || events.error}
         onRetry={() => {
           users.reload();
           events.reload();
         }}
-      />
+      >
+        <div className="wba-grid-container">
+          <SkeletonHeading />
+          <SkeletonSummary />
+          <SkeletonList avatar />
+          <SkeletonList />
+        </div>
+      </ApiStatus>
     );
   }
 

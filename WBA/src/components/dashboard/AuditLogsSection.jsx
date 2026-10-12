@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonHeading, SkeletonList, SkeletonSummary } from '../WorkspaceSkeletons';
 
 const SEVERITY_LABELS = ['All', 'critical', 'warning', 'good', 'info'];
 
@@ -44,7 +45,9 @@ export default function AuditLogsSection({ currentUser }) {
     );
   }
 
-  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} />;
+  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading audit logs…">
+    <div className="wba-grid-container"><SkeletonHeading /><SkeletonSummary count={4} /><SkeletonList rows={4} /></div>
+  </ApiStatus>;
   const allLogs = data || [];
 
   const filtered = allLogs.filter((log) => {

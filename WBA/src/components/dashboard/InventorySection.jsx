@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonMetrics, SkeletonTable } from '../WorkspaceSkeletons';
 import RealTimeInventoryLedger from './RealTimeInventoryLedger';
 import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
@@ -80,11 +81,11 @@ export default function InventorySection({ currentUser }) {
           </div>
           <div className="wba-qr-tools-actions">
             {isWarehouseStaff && (
-              <button type="button" className="wba-btn-primary" onClick={() => setIsQrScannerOpen(true)}>
+              <button type="button" className="wba-btn-primary" disabled={loading || Boolean(error)} onClick={() => setIsQrScannerOpen(true)}>
                 Scan to receive
               </button>
             )}
-            <button type="button" className={isWarehouseStaff ? 'wba-qr-secondary-btn' : 'wba-btn-primary'} onClick={() => setIsQrGeneratorOpen(true)}>
+            <button type="button" className={isWarehouseStaff ? 'wba-qr-secondary-btn' : 'wba-btn-primary'} disabled={loading || Boolean(error)} onClick={() => setIsQrGeneratorOpen(true)}>
               Generate QR
             </button>
           </div>
@@ -93,13 +94,15 @@ export default function InventorySection({ currentUser }) {
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} /> : <RealTimeInventoryLedger items={items} currentUser={currentUser} />}
+        {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} />}
       </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
       <section style={{ width: '100%' }}>
         {canViewFifo ? (
           <FifoExpiryQueue />
+        ) : loading || error ? (
+          <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading available stock and reservations…"><SkeletonMetrics /></ApiStatus>
         ) : (
           <div className="wba-glow-card">
             <div className="wba-card-title-bar">

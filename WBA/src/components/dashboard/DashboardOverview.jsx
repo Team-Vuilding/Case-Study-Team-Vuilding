@@ -2,12 +2,12 @@ import MetricKpiCard from './MetricKpiCard';
 import SeasonalForecastChart from './SeasonalForecastChart';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonMetrics } from '../WorkspaceSkeletons';
 
 export default function DashboardOverview({ currentUser }) {
   const { data, loading, error, reload } = useApiData('dashboard/metrics');
-  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} />;
   const sales = currentUser.accessLevel === 'sales';
-  const cards = sales ? [
+  const cards = !data ? [] : sales ? [
     ['Available to sell', data.available + ' Units', 'Stock after reservations and picking allocations'],
     ['Customer reservations', data.reserved + ' Units', 'Units currently reserved'],
     ['Catalog products', data.products + ' SKUs', data.stockouts + ' products have no available stock'],
@@ -17,8 +17,9 @@ export default function DashboardOverview({ currentUser }) {
     ['Expiry risk', '₱' + Number(data.expiryRisk).toLocaleString(), 'Value of expired stock and batches expiring within 30 days'],
   ];
   return <div className="wba-grid-container">
-    <section className="wba-top-metrics-row" aria-label="Inventory summary">
-      {cards.map(([title, value, subtext]) => <MetricKpiCard key={title} title={title} value={value} subtext={subtext} badgeText="CURRENT" status="info" />)}
+    <section aria-label="Inventory summary">
+      {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory summary…"><SkeletonMetrics /></ApiStatus>
+        : <div className="wba-top-metrics-row">{cards.map(([title, value, subtext]) => <MetricKpiCard key={title} title={title} value={value} subtext={subtext} badgeText="CURRENT" status="info" />)}</div>}
     </section>
     <section className="wba-middle-row"><SeasonalForecastChart /></section>
   </div>;

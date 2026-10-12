@@ -21,18 +21,18 @@ export function Skeleton({
   ...props
 }) {
   const inlineStyles = {
-    ...(width ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
-    ...(height ? { height: typeof height === 'number' ? `${height}px` : height } : {}),
-    ...(borderRadius ? { borderRadius: typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius } : {}),
+    ...(width != null ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
+    ...(height != null ? { height: typeof height === 'number' ? `${height}px` : height } : {}),
+    ...(borderRadius != null ? { borderRadius: typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius } : {}),
     ...style,
   };
 
   return (
     <div
+      {...props}
       className={`wba-skeleton ${circle ? 'wba-skeleton-circle' : ''} ${className}`}
       style={inlineStyles}
       aria-hidden="true"
-      {...props}
     />
   );
 }
@@ -72,7 +72,7 @@ export function SkeletonText({
  */
 export function SkeletonCard({ className = '' }) {
   return (
-    <div className={`wba-skeleton-card ${className}`}>
+    <div className={`wba-glow-card wba-skeleton-card ${className}`}>
       {/* Icon placeholder */}
       <Skeleton width="48px" height="48px" borderRadius="12px" style={{ marginBottom: '20px' }} />
       {/* Title */}
@@ -187,11 +187,12 @@ export function SkeletonFeatures({ className = '' }) {
  */
 export function SkeletonMetric({ className = '' }) {
   return (
-    <div className={`wba-skeleton-metric-card ${className}`}>
+    <div className={`wba-glow-card wba-skeleton-metric-card ${className}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
         <Skeleton width="80px" height="14px" borderRadius="4px" />
         <Skeleton width="20px" height="20px" circle />
       </div>
+      <Skeleton width="110px" height="22px" borderRadius="9999px" style={{ marginBottom: '12px' }} />
       <Skeleton width="120px" height="32px" borderRadius="6px" style={{ marginBottom: '8px' }} />
       <Skeleton width="60%" height="12px" borderRadius="4px" />
     </div>
@@ -199,6 +200,6 @@ export function SkeletonMetric({ className = '' }) {
 }
 
 /**
- * Default export containing all subcomponents
+ * Default export for the base placeholder
  */
 export default Skeleton;

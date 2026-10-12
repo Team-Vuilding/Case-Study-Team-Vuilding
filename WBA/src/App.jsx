@@ -5,6 +5,8 @@ import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
 import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
+import ApiStatus from './components/ApiStatus';
+import { SkeletonCard } from './components/SkeletonLoader';
 import { authApi, getToken, setToken } from './services/api';
 import './App.css';
 import './landing-modern.css';
@@ -127,7 +129,7 @@ function App() {
     window.location.hash = '#/home';
   };
 
-  if (checkingSession) return <main className="wba-access-page" role="status">Checking your session…</main>;
+  if (checkingSession) return <main className="wba-access-page"><ApiStatus loading loadingLabel="Checking your session…"><div className="wba-skeleton-session"><SkeletonCard /></div></ApiStatus></main>;
   if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
   if (currentView === 'dashboard' && currentUser) {
     return (

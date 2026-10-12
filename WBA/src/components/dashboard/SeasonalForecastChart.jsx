@@ -1,9 +1,10 @@
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import { SkeletonChart } from '../WorkspaceSkeletons';
 
 export default function SeasonalForecastChart() {
   const { data, loading, error, reload } = useApiData('dashboard/activity');
-  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} />;
+  if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading monthly stock activity…"><SkeletonChart /></ApiStatus>;
   const maximum = Math.max(1, ...data.flatMap(month => [month.received, month.dispatched]));
   const points = key => data.map((month, index) => (50 + index * 78) + ',' + (190 - month[key] / maximum * 150)).join(' ');
   const hasActivity = data.some(month => month.received || month.dispatched);
