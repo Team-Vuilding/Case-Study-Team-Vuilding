@@ -453,8 +453,81 @@
 }
 
 .wba-card-icon {
-  font-size: 32px;
+  display: flex;
+  align-items: center;
   margin-bottom: 18px;
+  width: 64px;
+  height: 64px;
+}
+
+/* ── Icon 1: checkmark badge — big bounce + colour glow ── */
+.wba-icon-check {
+  animation: wba-check-pulse 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  transform-origin: 32px 46px;
+}
+
+@keyframes wba-check-pulse {
+  0%        { transform: scale(0.75);  opacity: 0.5;  filter: brightness(0.8); }
+  45%       { transform: scale(1.45);  opacity: 1;    filter: brightness(1.5); }
+  65%       { transform: scale(0.95);  opacity: 0.95; filter: brightness(1);   }
+  80%       { transform: scale(1.1);   opacity: 1;    filter: brightness(1.2); }
+  100%      { transform: scale(0.75);  opacity: 0.5;  filter: brightness(0.8); }
+}
+
+/* ── Icon 2: bars — slam from flat to full, staggered ── */
+.wba-bar {
+  animation-duration: 1.6s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-iteration-count: infinite;
+  animation-name: wba-bar-rise;
+}
+/* Updated origins match 64px SVG baseline y=52 */
+.wba-bar-1 { animation-delay: 0s;    transform-origin: 18.5px 52px; }
+.wba-bar-2 { animation-delay: 0.2s;  transform-origin: 31.5px 52px; }
+.wba-bar-3 { animation-delay: 0.4s;  transform-origin: 44.5px 52px; }
+
+@keyframes wba-bar-rise {
+  0%        { opacity: 0.2;  transform: scaleY(0.15); }
+  55%       { opacity: 1;    transform: scaleY(1.08); }
+  70%       { opacity: 0.9;  transform: scaleY(0.95); }
+  85%       { opacity: 1;    transform: scaleY(1);    }
+  100%      { opacity: 0.2;  transform: scaleY(0.15); }
+}
+
+/* ── Icon 2: trend dot — hard ping expand + snap back ── */
+.wba-trend-dot {
+  animation: wba-trend-ping 1.6s ease-out infinite;
+  transform-origin: 44.5px 14px;
+}
+
+@keyframes wba-trend-ping {
+  0%   { transform: scale(1);    opacity: 1;   }
+  40%  { transform: scale(2.8);  opacity: 0;   }
+  41%  { transform: scale(0.4);  opacity: 0;   }
+  60%  { transform: scale(1.2);  opacity: 1;   }
+  75%  { transform: scale(0.85); opacity: 0.9; }
+  100% { transform: scale(1);    opacity: 1;   }
+}
+
+/* ── Icon 3: clock minute hand — fast spin ── */
+.wba-clock-hand {
+  animation: wba-clock-spin 2s linear infinite;
+}
+
+@keyframes wba-clock-spin {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Icon 3: clock ring — slow breathe glow ── */
+.wba-clock-ring {
+  animation: wba-clock-ring-pulse 2s ease-in-out infinite;
+  transform-origin: 48px 20px;
+}
+
+@keyframes wba-clock-ring-pulse {
+  0%, 100% { opacity: 0.7;  transform: scale(1);    }
+  50%       { opacity: 1;    transform: scale(1.12); }
 }
 
 .wba-about-card h3 {
