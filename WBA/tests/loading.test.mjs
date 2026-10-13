@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createElement } from 'react';
@@ -23,6 +24,11 @@ const { default: AddProductModal } = await server.ssrLoadModule('/src/components
 const { default: NotificationDrawer } = await server.ssrLoadModule('/src/components/dashboard/NotificationDrawer.jsx');
 const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
 const render = (Component, props, children) => renderToStaticMarkup(createElement(Component, props, children));
+
+test('purchase order expected-delivery field spans the form grid', async () => {
+  const source = await readFile(new URL('../src/components/dashboard/PurchaseHistorySection.jsx', import.meta.url), 'utf8');
+  assert.match(source, /name === 'expected_delivery_date' \? 'wba-input-group full-width' : 'wba-input-group'/);
+});
 
 test('pending API data shows a skeleton and one contextual loading announcement', () => {
   const html = render(ApiStatus, { loading: true, loadingLabel: 'Loading inventory…' });
