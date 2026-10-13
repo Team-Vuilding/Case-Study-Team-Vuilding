@@ -1,43 +1,67 @@
 import { useRef, useState } from 'react';
 import PublicPageLayout from './PublicPageLayout';
-import { SUPPORT_EMAIL, createSupportEmail } from '../data/supportContact';
+import { apiRequest } from '../services/api';
+
 export default function ContactSupportPage(props) {
+  const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const noticeRef = useRef(null);
-  const submit = event => {
+  const inFlight = useRef(false);
+  const submit = async event => {
     event.preventDefault();
+    if (inFlight.current) return;
     const form = event.currentTarget;
     const values = Object.fromEntries(new FormData(form));
     for (const field of ['name', 'email', 'subject', 'message']) {
       const input = form.elements.namedItem(field);
-      input.setCustomValidity(values[field].trim() ? '' : 'Please enter a value.');
+      values[field] = values[field].trim();
+      input.setCustomValidity(values[field] ? '' : 'Please enter a value.');
       if (!input.reportValidity()) return;
     }
-    window.location.href = createSupportEmail(values);
-    setNotice('Email draft requested. Send it from your email app to contact support. If no app opens, use the direct email address beside this form. Your message is still here.');
-    requestAnimationFrame(() => noticeRef.current?.focus());
+    inFlight.current = true;
+    setSending(true); setError(''); setNotice(''); setFieldErrors({});
+    try {
+      const result = await apiRequest('support/contact', { method: 'POST', body: { ...values, consent: values.consent === 'on' } });
+      if (!result.data?.reference || result.data.status !== 'sent') throw new Error('Support did not confirm your request. Your form has been kept. Please try again later.');
+      setNotice(`Request sent. Your reference is ${result.data.reference}. Keep it for follow-up. Support will reply using the email address you provided.`);
+      form.reset();
+    } catch (reason) {
+      setError(reason.status === 429 ? 'You have reached the request limit. Please wait one hour before trying again.' : reason.status ? reason.message : 'Could not reach support. Your form has been kept. Check your connection and try again later.');
+      setFieldErrors(reason.data?.errors || {});
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+      requestAnimationFrame(() => noticeRef.current?.focus());
+    }
   };
-  return <PublicPageLayout {...props} title="Contact Support" description="Tell us what you need help with, and include the details that will help us investigate.">
+  const accessibility = name => ({ 'aria-invalid': Boolean(fieldErrors[name]), 'aria-describedby': fieldErrors[name] ? `contact-${name}-error` : name === 'message' ? 'contact-privacy' : undefined });
+  const fieldError = name => fieldErrors[name] && <span className="wba-public-field-error" id={`contact-${name}-error`}>{fieldErrors[name][0]}</span>;
+  return <PublicPageLayout {...props} title="Contact Support" description="Submit a complaint or ask a question. This is the place to contact the WBA support team.">
     <div className="wba-public-contact-grid">
       <section className="wba-public-panel" aria-labelledby="contact-form-title">
-        <h2 id="contact-form-title">How can we help?</h2><p>All fields are required. This form prepares an email draft for you to send.</p>
-        <form className="wba-public-form" onSubmit={submit} onInput={event => { event.target.setCustomValidity?.(''); setNotice(''); }}>
-          <div className="wba-public-form-row">
-            <label htmlFor="contact-name">Name<input id="contact-name" name="name" autoComplete="name" defaultValue={props.currentUser?.name || ''} required maxLength={100} /></label>
-            <label htmlFor="contact-email">Email<input id="contact-email" name="email" type="email" autoComplete="email" defaultValue={props.currentUser?.email || ''} required maxLength={254} /></label>
-          </div>
-          <label htmlFor="contact-category">Category<select id="contact-category" name="category" required defaultValue="Technical">{['Technical', 'Billing', 'Account', 'Feedback'].map(category => <option key={category}>{category}</option>)}</select></label>
-          <label htmlFor="contact-subject">Subject<input id="contact-subject" name="subject" required maxLength={120} /></label>
-          <label htmlFor="contact-message">Message<textarea id="contact-message" name="message" rows={7} required maxLength={5000} aria-describedby="contact-privacy" /></label>
-          <p id="contact-privacy" className="wba-public-form-note">Include the affected page, error message, and steps to reproduce the issue. Leave out passwords, tokens, and confidential customer data. See our <a href="#/privacy">Privacy Policy</a>.</p>
-          <button type="submit" className="wba-btn-primary">Open email draft</button>
-          {notice && <p ref={noticeRef} tabIndex={-1} role="status" className="wba-public-notice">{notice}</p>}
+        <h2 id="contact-form-title">How can we help?</h2><p>All fields are required. You can send a request without signing in.</p>
+        {(notice || error) && <p ref={noticeRef} tabIndex={-1} role={error ? 'alert' : 'status'} className="wba-public-notice">{error || notice}</p>}
+        <form className="wba-public-form" onSubmit={submit} aria-busy={sending} onInput={event => { event.target.setCustomValidity?.(''); setFieldErrors(previous => ({ ...previous, [event.target.name]: undefined })); }}>
+          <fieldset disabled={sending}>
+            <legend className="wba-help-sr-only">Support request details</legend>
+            <div className="wba-public-form-row">
+              <label htmlFor="contact-name">Name<input id="contact-name" name="name" autoComplete="name" defaultValue={props.currentUser?.name || ''} required maxLength={100} {...accessibility('name')} />{fieldError('name')}</label>
+              <label htmlFor="contact-email">Email<input id="contact-email" name="email" type="email" autoComplete="email" defaultValue={props.currentUser?.email || ''} required maxLength={254} {...accessibility('email')} />{fieldError('email')}</label>
+            </div>
+            <label htmlFor="contact-category">Category<select id="contact-category" name="category" required defaultValue="Technical" {...accessibility('category')}>{['Technical', 'Billing', 'Account', 'Feedback'].map(category => <option key={category}>{category}</option>)}</select>{fieldError('category')}</label>
+            <label htmlFor="contact-subject">Subject<input id="contact-subject" name="subject" required maxLength={120} {...accessibility('subject')} />{fieldError('subject')}</label>
+            <label htmlFor="contact-message">Message<textarea id="contact-message" name="message" rows={7} required minLength={10} maxLength={5000} {...accessibility('message')} />{fieldError('message')}</label>
+            <p id="contact-privacy" className="wba-public-form-note">Include the affected page, error message, and steps to reproduce the issue. Leave out passwords, tokens, and confidential customer data. Your contact details and message are shared with support to answer your request. See our <a href="#/privacy">Privacy Policy</a>.</p>
+            <label className="wba-public-consent" htmlFor="contact-consent"><input id="contact-consent" name="consent" type="checkbox" required {...accessibility('consent')} />I agree to share these details with support.</label>{fieldError('consent')}
+            <button type="submit" className="wba-btn-primary" disabled={sending}>{sending ? 'Sending request...' : 'Send request'}</button>
+          </fieldset>
         </form>
       </section>
-      <aside className="wba-public-panel wba-public-contact-details" aria-label="Other ways to get help">
-        <h2>Direct support</h2><p>Email the support inbox with your question.</p><a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
-        <h2>Chat support</h2><p>Live chat is not currently available. Use email for assistance, or send a support ticket from your signed-in workspace.</p>
-        {props.currentUser && <a href="#/help-center">Open workspace support tickets</a>}
+      <aside className="wba-public-panel wba-public-contact-details" aria-label="Support guidance">
+        <h2>What to include</h2><p>Tell us what happened, what you expected, and when the issue occurred. Include a product SKU or request reference where relevant.</p>
+        <h2>After you submit</h2><p>A successful submission shows a reference number. Keep it for follow-up and check the email address you provided for a reply.</p>
         <h2>Find an answer</h2><p>Browse guides on inventory, accounts, stock counts, and billing.</p><a href="#/help">Visit the Help Center</a>
       </aside>
     </div>

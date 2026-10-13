@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
+import { isDialogBackdrop } from '../src/utils/dialogBackdrop.js';
 
 const server = await createServer({
   root: fileURLToPath(new URL('../', import.meta.url)),
@@ -89,6 +90,19 @@ test('notification cards separate severity and expiry details and retain viewed 
   assert.match(html, /Expires tomorrow · 5 units/);
   assert.match(html, /<dt>Batch<\/dt><dd>LOT-long-identifier<\/dd>/);
   assert.ok(html.includes('<time dateTime="' + expiry + '">'));
+});
+
+test('notification dismissal detects backdrop taps without dismissing panel content', () => {
+  const dialog = { getBoundingClientRect: () => ({ left: 280, right: 728, top: 0, bottom: 874 }) };
+  const pointer = (clientX, clientY, target = dialog) => ({ target, currentTarget: dialog, clientX, clientY });
+  assert.equal(isDialogBackdrop(pointer(100, 400)), true);
+  assert.equal(isDialogBackdrop(pointer(740, 400)), true);
+  assert.equal(isDialogBackdrop(pointer(400, -1)), true);
+  assert.equal(isDialogBackdrop(pointer(400, 875)), true);
+  assert.equal(isDialogBackdrop(pointer(400, 400)), false);
+  assert.equal(isDialogBackdrop(pointer(280, 400)), false);
+  assert.equal(isDialogBackdrop(pointer(728, 400)), false);
+  assert.equal(isDialogBackdrop(pointer(400, 400, {})), false);
 });
 
 test('unclassified products are not mislabeled as perishable', () => {

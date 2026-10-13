@@ -1262,6 +1262,55 @@
   z-index: 300;
 }
 
+.wba-purchase-order-overlay .wba-dash-modal-card {
+  display: grid;
+  gap: 16px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+
+.wba-purchase-order-overlay h2 {
+  padding-right: 32px;
+  text-wrap: balance;
+}
+
+.wba-purchase-order-overlay form {
+  display: grid;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--wba-border-subtle);
+}
+
+.wba-purchase-order-overlay .wba-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 16px;
+  margin-top: 0;
+}
+
+.wba-purchase-order-overlay .wba-input-group,
+.wba-purchase-order-overlay .wba-input-field {
+  min-width: 0;
+}
+
+.wba-purchase-order-overlay .wba-input-field {
+  width: 100%;
+}
+
+.wba-purchase-order-overlay .wba-pill-btn,
+.wba-purchase-order-overlay .wba-btn-primary {
+  justify-self: start;
+}
+
+@media (max-width: 600px) {
+  .wba-purchase-order-overlay .wba-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wba-purchase-order-overlay .wba-input-group.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
 .wba-purchase-order-overlay button:focus-visible,
 .wba-purchase-order-overlay input:focus-visible,
 .wba-purchase-order-overlay select:focus-visible,

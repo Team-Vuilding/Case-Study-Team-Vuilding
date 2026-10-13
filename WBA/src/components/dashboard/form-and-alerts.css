@@ -26,7 +26,7 @@ dialog.wba-product-form {
 }
 .wba-account-password button:hover { background: var(--wba-bg-card-hover); }
 dialog.wba-alert-drawer {
-  margin: 0 0 0 auto; inset: 0 0 0 auto; width: min(28rem, 100%);
+  margin: 0 0 0 auto; inset: 0 0 0 auto; width: min(28rem, calc(100% - 2rem));
   max-width: 100%; height: 100dvh; max-height: 100dvh; padding: 0;
   color: var(--wba-inline-strong); border: 0; border-left: 1px solid var(--wba-border-subtle);
   border-radius: 0; display: flex; flex-direction: column;

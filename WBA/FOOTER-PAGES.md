@@ -8,10 +8,13 @@ and login navigation continues through the existing application state.
 All four pages are readable without signing in or waiting for the backend.
 Styles reuse the light/dark CSS variables in src/index.css.
 
-Contact Support prepares a mailto draft addressed to the existing support
-inbox. Users must send the draft in their email client; opening the draft
-is not a delivery confirmation. Authenticated API support tickets remain
-available in the workspace Help Center. No live-chat provider is configured.
+Contact Support is the only support submission screen. Public and workspace
+Help Centers link to it; direct email links and the separate ticket form
+have been removed. The form posts to /api/support/contact without requiring
+sign-in. The endpoint validates contact details and consent, limits requests
+to five per hour per IP, and uses the existing backend delivery service.
+Success is shown only after delivery confirmation; failures retain the form.
+Backend Gmail credentials must be configured for delivery.
 
 The legal copy is starter product content. The service owner should verify
 it against actual processing, retention, contracts, and applicable policies
