@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
@@ -28,7 +29,7 @@ function OrderForm({ onClose }) {
     catch (reason) { setError(reason.message); } finally { setSaving(false); }
   };
   const update = event => setForm({ ...form, [event.target.name]: event.target.value });
-  return <div className="wba-dash-modal-overlay" onClick={() => { if (!saving) onClose(); }}><section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="po-title" onClick={event => event.stopPropagation()}>
+  return createPortal(<div className="wba-dash-modal-overlay wba-purchase-order-overlay" onClick={() => { if (!saving) onClose(); }}><section className="wba-dash-modal-card" role="dialog" aria-modal="true" aria-labelledby="po-title" onClick={event => event.stopPropagation()}>
     <button type="button" className="wba-modal-close-btn" onClick={onClose} disabled={saving} aria-label="Close order form">×</button><h2 id="po-title">New purchase order</h2>
     {products.loading || suppliers.loading || products.error || suppliers.error ? <ApiStatus loading={products.loading || suppliers.loading} error={products.error || suppliers.error} onRetry={() => { products.reload(); suppliers.reload(); }} loadingLabel="Loading purchase order options…"><SkeletonForm /></ApiStatus> : <>
       <label className="wba-input-group"><span className="wba-input-label">Add a supplier</span><input className="wba-input-field" value={supplierName} onChange={event => setSupplierName(event.target.value)} placeholder="Supplier name" /></label>
@@ -42,7 +43,7 @@ function OrderForm({ onClose }) {
       </form>
     </>}
     {error && <p role="alert" className="wba-modal-error">{error}</p>}
-  </section></div>;
+  </section></div>, document.body);
 }
 
 export default function PurchaseHistorySection({ currentUser }) {

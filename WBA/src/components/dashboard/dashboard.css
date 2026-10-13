@@ -1258,6 +1258,18 @@
   padding: 20px;
 }
 
+.wba-purchase-order-overlay {
+  z-index: 300;
+}
+
+.wba-purchase-order-overlay button:focus-visible,
+.wba-purchase-order-overlay input:focus-visible,
+.wba-purchase-order-overlay select:focus-visible,
+.wba-purchase-order-overlay textarea:focus-visible {
+  outline: 2px solid #b898ff;
+  outline-offset: 2px;
+}
+
 .wba-dash-modal-card {
   background: #110722;
   border: 1.5px solid rgba(192, 132, 252, 0.4);
