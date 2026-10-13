@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import PublicFooter from './components/PublicFooter';
+import { PrivacyPolicyPage, TermsOfServicePage } from './components/LegalPages';
+import ContactSupportPage from './components/ContactSupportPage';
 import Navbar from './components/Navbar';
 import BackToTop from './components/BackToTop';
 import darkLogo from './assets/wba-logo-dark.png';
@@ -26,6 +30,7 @@ function getAccessRoute() {
 }
 
 function App() {
+  const location = useLocation();
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('wba_theme') || 'dark';
@@ -149,7 +154,15 @@ function App() {
     window.location.hash = '#/home';
   };
 
-  if (currentView === 'general-help') return <GeneralHelpPage currentUser={currentUser} theme={theme} onToggleTheme={toggleTheme} onSignIn={showRolePickerFromLogin} />;
+  if (['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''))) {
+    const pageProps = { currentUser, theme, onToggleTheme: toggleTheme };
+    return <Routes>
+      <Route path="/privacy" element={<PrivacyPolicyPage {...pageProps} />} />
+      <Route path="/terms" element={<TermsOfServicePage {...pageProps} />} />
+      <Route path="/help" element={<GeneralHelpPage {...pageProps} onSignIn={showRolePickerFromLogin} />} />
+      <Route path="/contact" element={<ContactSupportPage {...pageProps} />} />
+    </Routes>;
+  }
   if (checkingSession) return <main className="wba-access-page"><ApiStatus loading loadingLabel="Checking your session…"><div className="wba-skeleton-session"><SkeletonCard /></div></ApiStatus></main>;
   if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
   if (currentView === 'dashboard' && currentUser) {
@@ -200,17 +213,7 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="wba-footer">
-        <div className="wba-footer-content">
-          <p>&copy; {new Date().getFullYear()} WBA Inc. All rights reserved.</p>
-          <div className="wba-footer-links">
-            <a href="#privacy">Privacy Policy</a>
-            <a href="#terms">Terms of Service</a>
-            <a href="#/help">Help Center</a>
-            <a href="#contact">Contact Support</a>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
       <BackToTop onBackToTop={() => setActiveSection('home')} />
 
