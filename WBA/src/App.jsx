@@ -13,7 +13,7 @@ import FeaturesSection from './components/FeaturesSection';
 import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import GeneralHelpPage from './components/GeneralHelpPage';
-import SessionLoader from './components/SessionLoader';
+import PageRefreshLoader from './components/PageRefreshLoader';
 import { authApi, getToken, setToken } from './services/api';
 import { animateNavigation } from './utils/navigationMotion';
 import './App.css';
@@ -173,19 +173,22 @@ function App() {
     onClose={() => setIsRolePickerOpen(false)}
   />;
 
-  if (['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''))) {
+  const isPublicPage = ['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''));
+  const renderPage = content => <PageRefreshLoader pending={checkingSession && !isPublicPage}>{content}</PageRefreshLoader>;
+
+  if (isPublicPage) {
     const pageProps = { currentUser, theme, onToggleTheme: toggleTheme };
-    return <><Routes>
+    return renderPage(<><Routes>
       <Route path="/privacy" element={<PrivacyPolicyPage {...pageProps} />} />
       <Route path="/terms" element={<TermsOfServicePage {...pageProps} />} />
       <Route path="/help" element={<GeneralHelpPage {...pageProps} onSignIn={showRoleSelection} />} />
       <Route path="/contact" element={<ContactSupportPage {...pageProps} />} />
-    </Routes>{rolePicker}</>;
+    </Routes>{rolePicker}</>);
   }
-  if (checkingSession) return <SessionLoader />;
-  if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
+  if (checkingSession) return renderPage(null);
+  if (sessionError) return renderPage(<main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>);
   if (currentView === 'dashboard' && currentUser) {
-    return (
+    return renderPage(
       <AdminDashboard
         currentUser={currentUser}
         onLogout={handleLogout}
@@ -196,7 +199,7 @@ function App() {
   }
 
   if (currentView === 'role-login') {
-    return (
+    return renderPage(
       <WorkspaceAccess
         key={selectedRole}
         role={selectedRole}
@@ -210,7 +213,7 @@ function App() {
     );
   }
 
-  return (
+  return renderPage(
     <div className="wba-landing-page">
       {/* Background Ambient Glows */}
       <div className="wba-bg-ambient-top" />
