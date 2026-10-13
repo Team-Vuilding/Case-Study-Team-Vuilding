@@ -166,6 +166,13 @@ Apply your company's retention policy to the support mailbox.
 
 ## Compatibility checks
 
+Sign-in and account recovery share a failed-credentials limiter keyed by
+normalized email and network address. Six failures within three minutes start
+a 180-second cooldown; retrying during that cooldown does not extend it.
+Successful credential verification clears the failure counter. Other accounts
+on the same network remain independent. A blocked request returns HTTP 429 with
+`retryAfter` in seconds and a matching `Retry-After` header.
+
 ### Product codes and notification views
 
 New product forms omit `sku` and `category`. The server assigns a SKU from

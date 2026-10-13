@@ -36,7 +36,13 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
   const [isReactivating, setIsReactivating] = useState(false);
   const [reactivationSuccess, setReactivationSuccess] = useState('');
   const [currentTime, setCurrentTime] = useState(Date.now);
+  const [cooldown, setCooldown] = useState({ email: '', until: 0 });
   const countdown = calculateRemaining(deactivationInfo?.deletionAt, currentTime);
+  const cooldownSeconds = Math.max(0, Math.ceil((cooldown.until - currentTime) / 1000));
+  const hasCooldown = cooldownSeconds > 0;
+  const isCoolingDown = cooldown.email === email.trim().toLowerCase() && hasCooldown;
+  const retryTime = Math.floor(cooldownSeconds / 60) + ':' + String(cooldownSeconds % 60).padStart(2, '0');
+  const errorNotice = isCoolingDown ? <p className="wba-modal-error" role="alert">Too many sign-in attempts. <span aria-live="off">Try again in {retryTime}.</span></p> : error ? <p className="wba-modal-error" role="alert">{error}</p> : null;
 
   const closeButtonRef = useRef(null);
   const selectedRole = ROLES.find((item) => item.id === role);
@@ -58,16 +64,24 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
 
   // Live countdown timer based on server deadline
   useEffect(() => {
-    if (!deactivationInfo?.deletionAt) return undefined;
+    if (!deactivationInfo?.deletionAt && !hasCooldown) return undefined;
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
     }, 1000);
     return () => clearInterval(interval);
-  }, [deactivationInfo?.deletionAt]);
+  }, [deactivationInfo?.deletionAt, hasCooldown]);
+
+  const handleCooldown = failure => {
+    const seconds = Number(failure.data?.retryAfter);
+    const now = Date.now();
+    setCurrentTime(now);
+    setCooldown({ email: email.trim().toLowerCase(), until: now + (Number.isInteger(seconds) && seconds > 0 && seconds <= 180 ? seconds : 180) * 1000 });
+    setError('');
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!selectedRole || isSubmitting) return;
+    if (!selectedRole || isSubmitting || isCoolingDown) return;
     setError('');
     setDeactivationInfo(null);
     setReactivationSuccess('');
@@ -80,7 +94,9 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
       }
       onSuccess(user);
     } catch (err) {
-      if (err.data?.accountStatus === 'deactivated' || err.data?.accountStatus === 'expired') {
+      if (err.status === 429) {
+        handleCooldown(err);
+      } else if (err.data?.accountStatus === 'deactivated' || err.data?.accountStatus === 'expired') {
         setCurrentTime(Date.now());
         setDeactivationInfo(err.data);
       } else {
@@ -92,7 +108,7 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
   };
 
   const handleReactivate = async () => {
-    if (!selectedRole || isReactivating || !deactivationInfo?.canReactivate) return;
+    if (!selectedRole || isReactivating || isCoolingDown || !deactivationInfo?.canReactivate) return;
     setIsReactivating(true);
     setError('');
     try {
@@ -106,7 +122,8 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
         onSuccess(result.user);
       }, 900);
     } catch (err) {
-      setError(err.message);
+      if (err.status === 429) handleCooldown(err);
+      else setError(err.message);
       if (err.data?.accountStatus === 'expired') {
         setDeactivationInfo((prev) => ({ ...prev, canReactivate: false, accountStatus: 'expired' }));
       }
@@ -249,7 +266,7 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
                 </div>
               )}
 
-              {error && <p className="wba-modal-error" role="alert">{error}</p>}
+              {errorNotice}
 
               <div className="wba-recovery-actions">
                 {deactivationInfo.canReactivate && !countdown?.expired && !reactivationSuccess && (
@@ -257,7 +274,7 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
                     type="button"
                     className="wba-reactivate-btn"
                     onClick={handleReactivate}
-                    disabled={isReactivating}
+                    disabled={isReactivating || isCoolingDown}
                   >
                     {isReactivating ? 'Reactivating account…' : 'Reactivate My Account'}
                   </button>
@@ -315,8 +332,8 @@ export default function WorkspaceAccess({ role, onSelectRole, onClose, onBack, o
                   </button>
                 </div>
               </div>
-              {error && <p className="wba-modal-error" role="alert">{error}</p>}
-              <button type="submit" className="wba-access-submit" disabled={isSubmitting}>
+              {errorNotice}
+              <button type="submit" className="wba-access-submit" disabled={isSubmitting || isCoolingDown}>
                 {isSubmitting ? 'Signing in…' : `Sign in as ${selectedRole.name}`}
               </button>
             </form>
