@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Item Model (Inventory Catalog Master)
@@ -64,8 +66,57 @@ class Item extends Model
         'physical_on_hand' => 'integer',
         'reserved' => 'integer',
         'allocated' => 'integer',
+        'paper_spreadsheet_count' => 'integer',
+        'archived_at' => 'datetime',
+        'has_batch_stock' => 'boolean',
+        'has_batch_history' => 'boolean',
         'lead_time_days' => 'integer',
     ];
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->whereNull('archived_at');
+    }
+
+    public function scopeWithArchiveEligibility(Builder $query): void
+    {
+        $query->select('items.*')->selectRaw('EXISTS (SELECT 1 FROM batches WHERE batches.item_id = items.id AND batches.quantity > 0) as has_batch_stock')
+            ->selectRaw('EXISTS (SELECT 1 FROM batches WHERE batches.item_id = items.id) as has_batch_history')
+            ->withExists(['stockMovements as has_movements', 'purchaseOrderItems as has_order_history', 'countRecords as has_count_history',
+                'purchaseOrderItems as has_open_orders' => fn (Builder $lines) => $lines->whereHas('purchaseOrder', fn (Builder $orders) => $orders->whereIn('status', ['draft', 'pending_approval', 'approved']))]);
+    }
+
+    public function hasStockBalance(): bool
+    {
+        return $this->physical_on_hand !== 0 || $this->paper_spreadsheet_count !== 0 || $this->reserved !== 0 || $this->allocated !== 0;
+    }
+
+    public function archiveBlockReason(): ?string
+    {
+        if ($this->archived_at) {
+            return 'This product is already archived.';
+        }
+        if ($this->hasStockBalance()) {
+            return 'Stock, ledger count, reservations, and picking allocations must be zero.';
+        }
+        if ($this->has_batch_stock ?? DB::table('batches')->where('item_id', $this->id)->where('quantity', '>', 0)->exists()) {
+            return 'Resolve remaining batch stock before archiving.';
+        }
+        if ($this->has_open_orders ?? $this->purchaseOrderItems()->whereHas('purchaseOrder', fn (Builder $orders) => $orders->whereIn('status', ['draft', 'pending_approval', 'approved']))->exists()) {
+            return 'Finish or cancel open purchase orders before archiving.';
+        }
+
+        return null;
+    }
+
+    public function canDeletePermanently(): bool
+    {
+        return ! $this->hasStockBalance()
+            && ! ($this->has_movements ?? $this->stockMovements()->exists())
+            && ! ($this->has_order_history ?? $this->purchaseOrderItems()->exists())
+            && ! ($this->has_count_history ?? $this->countRecords()->exists())
+            && ! ($this->has_batch_history ?? DB::table('batches')->where('item_id', $this->id)->exists());
+    }
 
     // ---------------------------------------------------------------------
     // Relationships

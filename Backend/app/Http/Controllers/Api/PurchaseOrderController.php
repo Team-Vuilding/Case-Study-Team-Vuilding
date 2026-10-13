@@ -33,6 +33,10 @@ class PurchaseOrderController extends ApiController
         $total = collect($data['items'])->sum(fn ($line) => round($line['quantity'] * $line['unit_price'], 2));
         abort_if($total > 9999999999.99, 422, 'Purchase order total exceeds the supported amount.');
         $id = DB::transaction(function () use ($request, $data, $total) {
+            foreach (collect($data['items'])->pluck('item_id')->sort()->unique() as $itemId) {
+                $item = Item::whereKey($itemId)->lockForUpdate()->firstOrFail();
+                abort_if($item->archived_at, 422, 'Archived products cannot be added to purchase orders.');
+            }
             $id = DB::table('purchase_orders')->insertGetId(['po_number' => 'PO-'.Str::uuid(), 'supplier_id' => $data['supplier_id'],
                 'user_id' => $request->user()->id, 'status' => 'pending_approval', 'order_date' => today(),
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null, 'notes' => $data['notes'] ?? null,
@@ -62,8 +66,9 @@ class PurchaseOrderController extends ApiController
             abort_if(($status === 'approved' && $order->status !== 'pending_approval') || ($status === 'received' && $order->status !== 'approved')
                 || ($status === 'cancelled' && ! in_array($order->status, ['draft', 'pending_approval', 'approved'], true)), 422, 'Invalid order status transition.');
             if ($status === 'received') {
-                foreach (DB::table('purchase_order_items')->where('purchase_order_id', $id)->get() as $line) {
+                foreach (DB::table('purchase_order_items')->where('purchase_order_id', $id)->orderBy('item_id')->get() as $line) {
                     $item = Item::whereKey($line->item_id)->lockForUpdate()->firstOrFail();
+                    abort_if($item->archived_at, 422, 'Restore this product before receiving its delivery.');
                     abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'An actual expiry date is required for perishable deliveries.');
                     $quantity = $line->quantity_ordered - $line->quantity_received;
                     abort_if(max($item->physical_on_hand, $item->paper_spreadsheet_count) + $quantity > 2147483647, 422, 'Receipt exceeds the supported stock quantity.');

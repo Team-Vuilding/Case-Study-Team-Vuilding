@@ -22,7 +22,7 @@ class DashboardController extends ApiController
 
     public function metrics(Request $request): JsonResponse
     {
-        $items = Item::all();
+        $items = Item::active()->get();
         $data = ['products' => $items->count(), 'onHand' => $items->sum('physical_on_hand'), 'reserved' => $items->sum('reserved'),
             'allocated' => $items->sum('allocated'), 'available' => $items->sum(fn ($item) => max(0, $item->physical_on_hand - $item->reserved - $item->allocated)),
             'stockouts' => $items->filter(fn ($item) => $item->physical_on_hand - $item->reserved - $item->allocated <= 0)->count()];
@@ -49,7 +49,7 @@ class DashboardController extends ApiController
 
     public function alerts(Request $request): JsonResponse
     {
-        $alerts = Item::all()->filter(fn ($item) => $item->physical_on_hand <= $item->safety_stock_off_peak)->map(fn ($item) => [
+        $alerts = Item::active()->get()->filter(fn ($item) => $item->physical_on_hand <= $item->safety_stock_off_peak)->map(fn ($item) => [
             'id' => 'stock-'.$item->id, 'title' => 'Low stock: '.$item->name, 'severity' => 'warning',
             'description' => $item->physical_on_hand.' units on hand; safety stock '.$item->safety_stock_off_peak.'.',
         ])->values();

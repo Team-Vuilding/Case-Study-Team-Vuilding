@@ -17,6 +17,7 @@ class StockMovementController extends ApiController
             'lot' => 'nullable|string|max:120|unique:batches,lot', 'reference' => 'nullable|string|max:120']);
         $item = DB::transaction(function () use ($request, $data) {
             $item = Item::where('sku', $data['code'])->lockForUpdate()->firstOrFail();
+            abort_if($item->archived_at, 422, 'Restore this product before recording stock movements.');
             $type = $data['type'] ?? 'stock_in';
             $quantity = (int) $data['quantity'];
             if ($type === 'stock_out') {
@@ -57,7 +58,10 @@ class StockMovementController extends ApiController
     {
         $data = $request->validate(['code' => 'required|string|max:80']);
 
-        return response()->json(['data' => $this->itemData(Item::where('sku', $data['code'])->firstOrFail())]);
+        $item = Item::where('sku', $data['code'])->firstOrFail();
+        abort_if($item->archived_at, 422, 'This product is archived. An administrator must restore it first.');
+
+        return response()->json(['data' => $this->itemData($item)]);
     }
 
     public function movements(Request $request): JsonResponse

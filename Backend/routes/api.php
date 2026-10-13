@@ -25,6 +25,9 @@ Route::middleware('access')->group(function () {
     Route::get('categories', [ReferenceController::class, 'references'])->defaults('kind', 'categories');
 });
 Route::middleware('access:admin')->group(function () {
+    Route::get('items/archived', [ItemController::class, 'archived']);
+    Route::post('items/{item}/archive', [ItemController::class, 'archive'])->whereNumber('item');
+    Route::post('items/{item}/restore', [ItemController::class, 'restore'])->whereNumber('item');
     Route::get('users', [UserController::class, 'users']);
     Route::get('users/activity-logs', [AuditController::class, 'audits']);
     Route::post('users', [UserController::class, 'saveUser']);

@@ -15,6 +15,7 @@ class StockCountController extends ApiController
         $data = $request->validate(['quantity' => 'required|integer|min:0|max:100000000', 'reason' => 'required|string|max:500']);
         DB::transaction(function () use ($request, $item, $data) {
             $item = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
+            abort_if($item->archived_at, 422, 'Restore this product before recording a stock count.');
             abort_if($data['quantity'] < $item->reserved + $item->allocated, 422, 'Count is below committed stock. Resolve reservations first.');
             abort_if($item->shelf_life_months && $data['quantity'] !== $item->physical_on_hand, 422, 'Perishable quantity changes require batch-level adjustments.');
             $previous = $item->physical_on_hand;

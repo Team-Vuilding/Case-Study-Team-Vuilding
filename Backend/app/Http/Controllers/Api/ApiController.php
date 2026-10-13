@@ -45,11 +45,17 @@ class ApiController extends Controller
 
     protected function itemData(Item $item): array
     {
+        $archiveBlockReason = $item->archiveBlockReason();
+
         return ['id' => $item->id, 'sku' => $item->sku, 'name' => $item->name, 'category' => $item->category_classification,
             'fsn' => $item->fsn, 'unitPrice' => (float) $item->unit_price, 'physicalOnHand' => $item->physical_on_hand,
             'reserved' => $item->reserved, 'allocated' => $item->allocated, 'paperSpreadsheetCount' => $item->paper_spreadsheet_count,
             'warehouseBin' => $item->warehouse_bin, 'shelfLifeMonths' => $item->shelf_life_months,
-            'isSeasonal' => $item->is_seasonal, 'status' => $item->status, 'statusSeverity' => $item->status_severity];
+            'isSeasonal' => $item->is_seasonal, 'status' => $item->status, 'statusSeverity' => $item->status_severity,
+            'isArchived' => (bool) $item->archived_at, 'archivedAt' => $item->archived_at?->toISOString(),
+            'archivedBy' => $item->archived_by_name, 'archiveReason' => $item->archive_reason,
+            'canArchive' => $archiveBlockReason === null, 'archiveBlockReason' => $archiveBlockReason,
+            'canDelete' => $item->canDeletePermanently()];
     }
 
     protected function movement(Request $request, Item $item, string $type, int $quantity, ?string $reference = null): void
