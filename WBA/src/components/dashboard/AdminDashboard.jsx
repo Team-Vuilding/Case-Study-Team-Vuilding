@@ -151,10 +151,6 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
 
   return (
     <div className="wba-dashboard-app">
-      {/* Background Ambient Violet Glows */}
-      <div className="wba-ambient-blur-1" />
-      <div className="wba-ambient-blur-2" />
-
       {/* Left Sidebar Navigation */}
       <DashboardSidebar
         isCollapsed={isSidebarCollapsed}

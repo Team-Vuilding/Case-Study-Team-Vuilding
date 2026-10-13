@@ -1,0 +1,125 @@
+.wba-app-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  background: var(--bg-dark);
+}
+
+.wba-ambient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.wba-app-shell > :is(.wba-landing-page, .wba-dashboard-app, .wba-public-page, .wba-access-page) {
+  position: relative;
+  z-index: 1;
+}
+
+/* One backdrop remains visible through every page and section canvas. */
+.wba-app-shell.wba-app-shell :is(
+  .wba-landing-page, .wba-dashboard-app, .wba-public-page,
+  .wba-access-page, .wba-dashboard-frame, .wba-footer, .wba-section
+) { background: transparent; }
+
+.wba-ambient-background .wba-bg-ambient-top {
+  top: -15%;
+  right: 15%;
+  opacity: 0.34;
+  animation-duration: 8s;
+}
+
+.wba-ambient-background .wba-bg-ambient-right {
+  top: 25%;
+  right: -10%;
+  opacity: 0.3;
+  animation-duration: 10s;
+}
+
+.wba-ambient-background .wba-bg-ambient-center {
+  top: 15%;
+  left: 5%;
+  opacity: 0.28;
+}
+
+.wba-ambient-background .wba-bg-ambient-center::before { animation-duration: 12s; }
+.wba-app-shell .wba-hero-visual::before { animation-duration: 6s; }
+
+html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-top {
+  opacity: 0.42;
+  background:
+    radial-gradient(circle at 40% 40%, rgba(147, 51, 234, 0.5), transparent 60%),
+    radial-gradient(circle at 65% 60%, rgba(79, 70, 229, 0.36), transparent 60%);
+}
+html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-right {
+  opacity: 0.38;
+  background:
+    radial-gradient(circle at 55% 40%, rgba(219, 39, 119, 0.4), transparent 60%),
+    radial-gradient(circle at 35% 65%, rgba(147, 51, 234, 0.46), transparent 60%);
+}
+html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-center { opacity: 0.36; }
+html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-center::before {
+  background:
+    radial-gradient(circle at 40% 45%, rgba(79, 70, 229, 0.36), transparent 65%),
+    radial-gradient(circle at 65% 55%, rgba(124, 58, 237, 0.44), transparent 70%);
+}
+
+.wba-cursor-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: clip;
+  pointer-events: none;
+}
+.wba-cursor-thread {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 180px;
+  height: 100px;
+  opacity: 0;
+}
+.wba-cursor-thread::before,
+.wba-cursor-thread::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.wba-cursor-thread::before {
+  transform: translateY(-12px);
+  background: radial-gradient(ellipse, rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0.12) 35%, transparent 65%);
+}
+.wba-cursor-thread::after {
+  transform: translateY(12px);
+  background: radial-gradient(ellipse, rgba(236, 72, 153, 0.22), transparent 65%);
+}
+html[data-theme='light'] .wba-cursor-thread::before {
+  background: radial-gradient(ellipse, rgba(124, 58, 237, 0.24), rgba(79, 70, 229, 0.1) 35%, transparent 65%);
+}
+html[data-theme='light'] .wba-cursor-thread::after {
+  background: radial-gradient(ellipse, rgba(219, 39, 119, 0.18), transparent 65%);
+}
+.wba-app-shell[data-ambient-paused='true'] .wba-cursor-glow { opacity: 0; will-change: auto; }
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .wba-cursor-glow { display: none; }
+}
+
+.wba-app-shell[data-ambient-paused='true'] :is(.wba-bg-ambient-top, .wba-bg-ambient-right),
+.wba-app-shell[data-ambient-paused='true'] .wba-bg-ambient-center::before,
+.wba-app-shell[data-ambient-paused='true'] .wba-hero-visual::before {
+  animation-play-state: paused;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wba-ambient-background :is(.wba-bg-ambient-top, .wba-bg-ambient-right),
+  .wba-ambient-background .wba-bg-ambient-center::before,
+  .wba-app-shell .wba-hero-visual::before {
+    animation-play-state: paused;
+    will-change: auto;
+  }
+}
