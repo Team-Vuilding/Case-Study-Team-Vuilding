@@ -4,6 +4,7 @@ import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
 import { SkeletonHeading, SkeletonList, SkeletonSummary } from '../WorkspaceSkeletons';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
+import './form-and-alerts.css';
 
 const ROLES = [
   { value: 'admin', label: 'Admin', department: 'System & User Management', summary: 'Users, inventory catalog, oversight, purchasing approvals' },
@@ -28,6 +29,7 @@ export default function ManageAccountsSection({ currentUser }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Confirmation modal state for 30-day deactivation
   const [accountToDeactivate, setAccountToDeactivate] = useState(null);
@@ -40,6 +42,7 @@ export default function ManageAccountsSection({ currentUser }) {
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setShowPassword(false);
     setError('');
     setIsFormOpen(true);
   };
@@ -47,6 +50,7 @@ export default function ManageAccountsSection({ currentUser }) {
   const openEdit = (account) => {
     setEditingId(account.id);
     setForm({ name: account.name, email: account.email, accessLevel: account.accessLevel, password: '' });
+    setShowPassword(false);
     setError('');
     setIsFormOpen(true);
   };
@@ -310,7 +314,7 @@ export default function ManageAccountsSection({ currentUser }) {
             </button>
             <h2 id="wba-account-form-title">{editingId ? 'Edit account' : 'Add user'}</h2>
             <p className="wba-accounts-form-intro">Choose a role to apply its approved page and action permissions.</p>
-            <form onSubmit={handleSave} className="wba-account-form">
+            <form onSubmit={handleSave} className="wba-account-form" autoComplete="off">
               <label className="wba-input-group">
                 <span className="wba-input-label">Full name</span>
                 <input
@@ -345,19 +349,29 @@ export default function ManageAccountsSection({ currentUser }) {
                   ))}
                 </select>
               </label>
-              <label className="wba-input-group">
-                <span className="wba-input-label">{editingId ? 'New password (optional)' : 'Temporary password'}</span>
+              <div className="wba-input-group">
+                <label htmlFor="account-secret" className="wba-input-label">{editingId ? 'New password (optional)' : 'Temporary password'}</label>
+                <div className="wba-account-password">
                 <input
+                  id="account-secret"
+                  name="account-secret"
                   className="wba-input-field"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   minLength={12}
+                  maxLength={128}
                   required={!editingId}
                   value={form.password}
                   onChange={(event) => setForm({ ...form, password: event.target.value })}
-                  autoComplete="new-password"
+                  autoComplete="off"
+                  spellCheck={false}
+                  data-1p-ignore="true"
+                  data-lpignore="true"
+                  aria-describedby="account-secret-help"
                 />
-              </label>
-              <p className="wba-accounts-role-help">{ROLES.find((role) => role.value === form.accessLevel)?.summary}</p>
+                <button type="button" aria-controls="account-secret" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)}>{showPassword ? 'Hide' : 'Show'}</button>
+                </div>
+                <small id="account-secret-help" className="wba-field-help">At least 12 characters.{editingId && ' Leave blank to keep the current password.'}</small>
+              </div>
               {error && <p className="wba-modal-error" role="alert">{error}</p>}
               <div className="wba-accounts-form-actions">
                 <button type="button" className="wba-pill-btn" onClick={() => setIsFormOpen(false)}>

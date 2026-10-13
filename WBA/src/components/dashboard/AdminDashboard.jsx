@@ -184,7 +184,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}
             pageTitle={PAGE_TITLES[activeTab] || 'Dashboard'}
-            unreadAlertCount={alerts.data?.length || 0}
+            unreadAlertCount={alerts.data?.filter(alert => !alert.isRead).length || 0}
             onOpenNotifications={() => setIsNotificationsOpen(true)}
             onLogout={onLogout}
             theme={theme}
@@ -207,6 +207,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
         loading={alerts.loading}
         error={alerts.error}
         onRetry={alerts.reload}
+        onViewed={alerts.reload}
       />
     </div>
   );

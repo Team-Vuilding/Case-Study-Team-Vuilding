@@ -19,6 +19,8 @@ const { default: ProductLifecycleDialog } = await server.ssrLoadModule('/src/com
 const { default: ProductReportsDialog } = await server.ssrLoadModule('/src/components/dashboard/ProductReportsDialog.jsx');
 const { default: DashboardSidebar } = await server.ssrLoadModule('/src/components/dashboard/DashboardSidebar.jsx');
 const { default: AuditLogsSection } = await server.ssrLoadModule('/src/components/dashboard/AuditLogsSection.jsx');
+const { default: AddProductModal } = await server.ssrLoadModule('/src/components/dashboard/AddProductModal.jsx');
+const { default: NotificationDrawer } = await server.ssrLoadModule('/src/components/dashboard/NotificationDrawer.jsx');
 const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
 const render = (Component, props, children) => renderToStaticMarkup(createElement(Component, props, children));
 
@@ -57,6 +59,36 @@ test('placeholder primitives stay decorative and respect zero dimensions', () =>
 
 const product = { id: 1, name: 'Test appliance', sku: 'TEST-001', category: 'A', warehouseBin: 'BIN-01', unitPrice: 100,
   physicalOnHand: 0, paperSpreadsheetCount: 0, reserved: 0, allocated: 0, canArchive: true };
+
+test('product entry provides a read-only SKU preview and explains movement rate without classification', () => {
+  const html = render(AddProductModal, { isOpen: true, onClose: () => {}, onAddProduct: () => {} });
+  assert.match(html, /SKU · generated automatically/);
+  assert.match(html, /readOnly=""[^>]*aria-describedby="product-sku-help"/);
+  assert.match(html, /Track batches and expiry/);
+  assert.match(html, /How quickly stock usually sells or is used/);
+  assert.doesNotMatch(html, /name="sku"|name="category"|Classification/);
+});
+
+test('notification cards separate severity and expiry details and retain viewed alerts', () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const expiry = [tomorrow.getFullYear(), String(tomorrow.getMonth() + 1).padStart(2, '0'), String(tomorrow.getDate()).padStart(2, '0')].join('-');
+  const html = render(NotificationDrawer, { isOpen: true, notifications: [{ id: 'expiry-1', version: 'one', isRead: true,
+    type: 'expiry', product: 'Air Conditioner', sku: 'WBA-EXP-001', severity: 'critical', lot: 'LOT-long-identifier',
+    expiresAt: expiry, daysLeft: 1, quantity: 5 }], onClose: () => {}, onViewed: () => {} });
+  assert.match(html, /No new notifications/);
+  assert.match(html, /<details[^>]*><summary>Viewed alerts/);
+  assert.match(html, /Critical/);
+  assert.match(html, /Expires tomorrow · 5 units/);
+  assert.match(html, /<dt>Batch<\/dt><dd>LOT-long-identifier<\/dd>/);
+  assert.ok(html.includes('<time dateTime="' + expiry + '">'));
+});
+
+test('unclassified products are not mislabeled as perishable', () => {
+  const html = render(InventoryLedger, { items: [{ ...product, category: 'U' }], currentUser: { accessLevel: 'admin' } });
+  assert.match(html, /Unclassified/);
+  assert.doesNotMatch(html, /Perishable/);
+});
 
 test('ledger keeps count status separate from actions and archive descriptions inside the dialog', () => {
   const html = render(InventoryLedger, { items: [product, { ...product, id: 2, name: 'Stocked appliance', physicalOnHand: 1,

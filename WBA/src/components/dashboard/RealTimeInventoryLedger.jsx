@@ -95,10 +95,10 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
                           ? 'wba-cat-a'
                           : item.category === 'B'
                           ? 'wba-cat-b'
-                          : 'wba-cat-c'
+                          : item.category === 'C' ? 'wba-cat-c' : ''
                       }`}
                     >
-                      {item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : 'Perishable'}
+                      {item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : item.category === 'C' ? 'Perishable' : 'Unclassified'}
                     </span>
                   </td>
                   {accessLevel === 'sales' && (
