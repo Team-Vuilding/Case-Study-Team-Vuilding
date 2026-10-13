@@ -12,9 +12,10 @@ export default function DashboardSidebar({
   currentUser,
 }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
+  const collapsed = isCollapsed && !isMobileOpen;
 
   const sidebar = (
-    <aside className={`wba-dash-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? '' : 'mobile-closed'}`}>
+    <aside className={`wba-dash-sidebar ${collapsed ? 'collapsed' : ''} ${isMobileOpen ? '' : 'mobile-closed'}`}>
       {/* Brand Logo matching reference */}
       <div className="wba-dash-sidebar-header">
         <Logo className="wba-dash-sidebar-logo" />
@@ -30,7 +31,7 @@ export default function DashboardSidebar({
       </div>
 
       {/* Section Title */}
-      {!isCollapsed && <div className="wba-dash-section-title">Overview</div>}
+      {!collapsed && <div className="wba-dash-section-title">Overview</div>}
 
       {/* Main Nav Items */}
       <nav className="wba-dash-nav">
@@ -55,7 +56,7 @@ export default function DashboardSidebar({
             <rect x="14" y="14" width="7" height="7" rx="1.5" />
             <rect x="3" y="14" width="7" height="7" rx="1.5" />
           </svg>
-          {!isCollapsed && <span className="wba-dash-nav-label">Dashboard</span>}
+          {!collapsed && <span className="wba-dash-nav-label">Dashboard</span>}
         </button>
 
         {/* Inventory */}
@@ -77,7 +78,7 @@ export default function DashboardSidebar({
             <path d="m12 3 9 5v8l-9 5-9-5V8z" />
             <path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5" />
           </svg>
-          {!isCollapsed && <span className="wba-dash-nav-label">Inventory</span>}
+          {!collapsed && <span className="wba-dash-nav-label">Inventory</span>}
         </button>
 
         {/* Purchase history */}
@@ -101,7 +102,7 @@ export default function DashboardSidebar({
               <path d="M3 3v5h5" />
               <polyline points="12 7 12 12 15 15" />
             </svg>
-            {!isCollapsed && <span className="wba-dash-nav-label">Purchase history</span>}
+            {!collapsed && <span className="wba-dash-nav-label">Purchase history</span>}
           </button>
         )}
 
@@ -128,7 +129,7 @@ export default function DashboardSidebar({
               <line x1="16" y1="17" x2="8" y2="17" />
               <polyline points="10 9 9 9 8 9" />
             </svg>
-            {!isCollapsed && <span className="wba-dash-nav-label">Audit logs</span>}
+            {!collapsed && <span className="wba-dash-nav-label">Audit logs</span>}
           </button>
         )}
       </nav>
@@ -158,7 +159,7 @@ export default function DashboardSidebar({
                 <circle cx="7" cy="15" r="1.5" />
                 <line x1="12" y1="15" x2="18" y2="15" />
               </svg>
-              {!isCollapsed && <span className="wba-dash-nav-label">Manage Accounts</span>}
+              {!collapsed && <span className="wba-dash-nav-label">Manage Accounts</span>}
             </button>
             <div className="wba-dash-divider" />
           </>
@@ -184,7 +185,7 @@ export default function DashboardSidebar({
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          {!isCollapsed && <span className="wba-dash-nav-label">Help center</span>}
+          {!collapsed && <span className="wba-dash-nav-label">Help center</span>}
         </button>
       </div>
     </aside>

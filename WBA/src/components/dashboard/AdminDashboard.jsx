@@ -25,6 +25,13 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
     setIsSidebarCollapsed((prev) => !prev);
   };
 
+  useEffect(() => {
+    const mobileViewport = window.matchMedia('(max-width: 900px)');
+    const closeMobileOnDesktop = event => { if (!event.matches) setIsMobileSidebarOpen(false); };
+    mobileViewport.addEventListener('change', closeMobileOnDesktop);
+    return () => mobileViewport.removeEventListener('change', closeMobileOnDesktop);
+  }, []);
+
   // Helper to parse and sanitize active tab from hash or storage
   const resolveInitialTab = useCallback(() => {
     try {

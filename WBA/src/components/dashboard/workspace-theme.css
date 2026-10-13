@@ -159,11 +159,17 @@ html .wba-dashboard-app .wba-accounts-summary strong.wba-status-warning { color:
 .wba-chart-heading .wba-stock-legend { margin: 0; }
 .wba-mobile-activity { display: none; }
 html .wba-dashboard-app .wba-ledger-result-count { margin: 16px 0 0; }
-dialog.wba-sidebar-dialog { inset: 0 auto 0 0; margin: 0; width: min(280px, calc(100% - 32px)); height: 100dvh; max-height: 100dvh; padding: 18px; border-radius: 0 20px 20px 0; }
-.wba-sidebar-dialog .wba-dash-sidebar { position: static; inset: auto; width: 100%; min-width: 0; height: 100%; max-height: 100%; padding: 10px 0 max(16px, env(safe-area-inset-bottom)); background: transparent; border: 0; transform: none; }
+dialog.wba-sidebar-dialog { inset: 0 auto 0 0; margin: 0; width: min(280px, calc(100% - 32px)); height: 100dvh; max-height: 100dvh; padding: max(12px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); border-radius: 0 20px 20px 0; overflow: hidden; }
+html .wba-sidebar-dialog .wba-dash-sidebar { position: static; inset: auto; width: 100%; min-width: 0; height: 100%; max-height: 100%; padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; transform: none; overflow-y: auto; overscroll-behavior: contain; }
+html .wba-sidebar-dialog .wba-dash-sidebar-header { position: sticky; top: 0; z-index: 1; min-height: 56px; padding: 0 56px 0 12px; margin-bottom: 16px; background: var(--wba-dialog); flex-shrink: 0; }
+html .wba-sidebar-dialog .wba-dash-section-title { flex-shrink: 0; color: var(--wba-inline-muted); }
+html .wba-sidebar-dialog .wba-dash-nav { flex: 0 0 auto; gap: 8px; overflow: visible; }
+html .wba-sidebar-dialog .wba-dash-sidebar-bottom { gap: 8px; }
+html .wba-sidebar-dialog > .wba-modal-close-btn { z-index: 2; top: max(16px, env(safe-area-inset-top)); right: 16px; width: 48px; height: 48px; border: 1px solid var(--wba-edge); border-radius: 9px; background: var(--wba-input); touch-action: manipulation; }
 .wba-sidebar-dialog .wba-dash-mobile-toggle { display: none; }
-.wba-sidebar-dialog .wba-dash-nav-item { min-height: 44px; color: var(--wba-inline-muted); }
-.wba-sidebar-dialog .wba-dash-nav-item.active { color: var(--wba-inline-accent); background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); }
+html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item { min-height: 48px; flex-shrink: 0; color: var(--wba-inline-muted); touch-action: manipulation; }
+html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item.active { color: var(--wba-inline-accent); background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); }
+html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item:not(:disabled):active { background: var(--wba-bg-card-hover); }
 .wba-sidebar-dialog .wba-dash-nav-label { display: inline; }
 @supports not (backdrop-filter: blur(1px)) {
   html .wba-dashboard-app, .wba-workspace-dialog, html[data-theme] :is(.wba-dashboard-app, .wba-workspace-dialog) { --wba-glass: var(--wba-panel); --wba-panel-glass: var(--wba-panel); }
@@ -180,6 +186,9 @@ dialog.wba-sidebar-dialog { inset: 0 auto 0 0; margin: 0; width: min(280px, calc
   html .wba-dashboard-app .wba-dash-nav-label { display: inline; }
   html .wba-dashboard-app .wba-header { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
   html .wba-dashboard-app .wba-header-title { font-size: 1.35rem; white-space: normal; overflow: visible; }
+  html .wba-dashboard-app .wba-header-left { min-width: 0; gap: 10px; }
+  html .wba-dashboard-app .wba-header-title-wrap { min-width: 0; }
+  html .wba-dashboard-app .wba-header-left > .wba-toggle-btn { width: 48px; height: 48px; flex-shrink: 0; touch-action: manipulation; }
 }
 @media (max-width: 740px) {
   .wba-desktop-activity { display: none; }

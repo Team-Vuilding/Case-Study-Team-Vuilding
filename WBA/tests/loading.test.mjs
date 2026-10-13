@@ -26,6 +26,21 @@ const { default: NotificationDrawer } = await server.ssrLoadModule('/src/compone
 const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
 const render = (Component, props, children) => renderToStaticMarkup(createElement(Component, props, children));
 
+test('mobile navigation retains permitted labels after the desktop sidebar was collapsed', () => {
+  for (const role of ['admin', 'warehouse', 'purchasing', 'sales']) {
+    const html = render(DashboardSidebar, { currentUser: { accessLevel: role }, isCollapsed: true, isMobileOpen: true });
+    assert.match(html, /Workspace navigation/);
+    assert.doesNotMatch(html, /wba-dash-sidebar collapsed/);
+    for (const [tab, label] of [['dashboard', 'Dashboard'], ['inventory', 'Inventory'], ['purchase-history', 'Purchase history'], ['audit-logs', 'Audit logs'], ['manage-accounts', 'Manage Accounts'], ['help-center', 'Help center']]) {
+      const visibleLabel = `class="wba-dash-nav-label">${label}</span>`;
+      assert.equal(html.includes(visibleLabel), isTabAllowed(role, tab));
+    }
+    const desktop = render(DashboardSidebar, { currentUser: { accessLevel: role }, isCollapsed: true });
+    assert.match(desktop, /wba-dash-sidebar collapsed/);
+    assert.doesNotMatch(desktop, /class="wba-dash-nav-label"/);
+  }
+});
+
 test('purchase order expected-delivery field spans the form grid', async () => {
   const source = await readFile(new URL('../src/components/dashboard/PurchaseHistorySection.jsx', import.meta.url), 'utf8');
   assert.match(source, /name === 'expected_delivery_date' \? 'wba-input-group full-width' : 'wba-input-group'/);
