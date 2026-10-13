@@ -78,7 +78,7 @@ export default function DashboardHeader({
           </svg>
         </button>
 
-        <span className="wba-header-separator">|</span>
+        <span className="wba-header-separator" aria-hidden="true">|</span>
 
         <div className="wba-header-title-wrap">
           <svg className="wba-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

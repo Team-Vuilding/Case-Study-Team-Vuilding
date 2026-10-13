@@ -115,6 +115,27 @@ html[data-theme='light'] .wba-cursor-glow {
 }
 .wba-app-shell[data-ambient-paused='true'] .wba-cursor-glow { opacity: 0; will-change: auto; }
 
+:where(.wba-dashboard-frame, .wba-qr-tools, .wba-public-panel, .wba-about-card, .wba-features-container, .wba-preview) { position: relative; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none) and (prefers-contrast: no-preference) {
+  .wba-edge-flare::before,
+  .wba-edge-flare::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(160px circle at var(--wba-edge-x) var(--wba-edge-y), var(--wba-inline-accent, var(--accent-lavender)), transparent 75%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: var(--wba-edge-strength, 0);
+  }
+  .wba-edge-flare::before { inset: 0; padding: 8px; opacity: calc(var(--wba-edge-strength, 0) * .14); }
+}
+
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
   .wba-cursor-glow { display: none; }
 }

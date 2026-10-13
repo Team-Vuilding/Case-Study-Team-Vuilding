@@ -1,8 +1,8 @@
 /* Translucent panels share a solid fallback; text and form fields remain opaque. */
 html .wba-dashboard-app, .wba-workspace-dialog {
-  --wba-glass: rgba(19, 24, 43, .64);
+  --wba-glass: rgba(19, 24, 43, .56);
   --wba-panel: #1b2033;
-  --wba-panel-glass: rgba(27, 32, 51, .68);
+  --wba-panel-glass: rgba(27, 32, 51, .58);
   --wba-input: #20263a;
   --wba-edge: rgba(183, 191, 226, .2);
   --wba-field-edge: #747f9b;
@@ -28,9 +28,9 @@ html .wba-dashboard-app, .wba-workspace-dialog {
   color: var(--wba-inline-strong);
 }
 html[data-theme='light'] :is(.wba-dashboard-app, .wba-workspace-dialog) {
-  --wba-glass: rgba(255, 255, 255, .62);
+  --wba-glass: rgba(255, 255, 255, .54);
   --wba-panel: #ffffff;
-  --wba-panel-glass: rgba(255, 255, 255, .66);
+  --wba-panel-glass: rgba(255, 255, 255, .58);
   --wba-input: #f9faff;
   --wba-edge: rgba(81, 94, 142, .22);
   --wba-field-edge: #7b859f;

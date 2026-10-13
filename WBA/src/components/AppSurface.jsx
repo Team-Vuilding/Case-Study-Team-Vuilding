@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { trackCursorGlow } from '../utils/cursorGlow';
+import { trackPanelEdgeGlow } from '../utils/panelEdgeGlow';
 import './app-surface.css';
 
 export default function AppSurface({ children }) {
   const [paused, setPaused] = useState(false);
   const cursorRef = useRef(null);
   useEffect(() => trackCursorGlow(cursorRef.current), []);
+  useEffect(() => trackPanelEdgeGlow(), []);
   useEffect(() => {
     const syncVisibility = () => setPaused(document.hidden);
     syncVisibility();
