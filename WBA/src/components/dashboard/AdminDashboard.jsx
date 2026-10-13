@@ -7,6 +7,7 @@ import PurchaseHistorySection from './PurchaseHistorySection';
 import AuditLogsSection from './AuditLogsSection';
 import NotificationDrawer from './NotificationDrawer';
 import ManageAccountsSection from './ManageAccountsSection';
+import HelpCenterSection from './HelpCenterSection';
 import { isTabAllowed, getDefaultTab } from '../../data/rbac';
 import './dashboard.css';
 import useApiData from '../../services/useApiData';
@@ -141,27 +142,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
       case 'manage-accounts':
         return <ManageAccountsSection currentUser={currentUser} />;
       case 'help-center':
-        return (
-          <div className="wba-grid-container">
-            <div className="wba-section-page-header">
-              <div>
-                <h2 className="wba-section-page-title">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  Help Center
-                </h2>
-                <p className="wba-section-page-desc">Documentation, operational guides, and role references.</p>
-              </div>
-            </div>
-            <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📚</div>
-              <h3 style={{ color: 'var(--wba-inline-strong)', marginBottom: '8px' }}>WBA Operational Reference</h3>
-              <p style={{ color: 'var(--wba-inline-muted)', fontSize: '0.88rem' }}>Signed in as: {currentUser?.role} · Department: {currentUser?.department}</p>
-            </div>
-          </div>
-        );
+        return <HelpCenterSection currentUser={currentUser} />;
       default:
         return <DashboardOverview currentUser={currentUser} />;
     }

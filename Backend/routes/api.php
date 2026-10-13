@@ -8,12 +8,14 @@ use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\ReferenceController;
 use App\Http\Controllers\Api\StockCountController;
 use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\SupportTicketController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 Route::post('auth/reactivate', [AuthController::class, 'reactivate'])->middleware('throttle:6,1');
 Route::middleware('access')->group(function () {
+    Route::post('support/tickets', [SupportTicketController::class, 'store'])->middleware('throttle:5,60');
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::post('auth/deactivate', [AuthController::class, 'deactivate']);

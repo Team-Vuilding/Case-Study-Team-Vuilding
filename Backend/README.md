@@ -114,6 +114,46 @@ redeploy a previously working commit in Render and Vercel. Keep the same APP_KEY
 and database. Do not run `migrate:fresh`, `db:wipe` or destructive rollback commands
 against the deployed database.
 
+## Support tickets: Gmail API
+
+Help Center sends tickets to `vincentjamesguhiling@gmail.com` using Gmail's HTTPS
+API. This works with Render Free, which blocks outbound SMTP ports. `MAIL_MAILER`
+does not control support tickets. Requests require an active WBA account and are
+limited to five per account per hour. Replies go to the requesting account's
+email. Ticket contents live in the support mailbox; WBA does not maintain a ticket
+status board or store the message body in its database or logs.
+
+Configure the sender once:
+
+1. Create/select a [Google Cloud project](https://console.cloud.google.com/) and
+   enable Gmail API. Configure OAuth consent for the sender account; add that
+   account as a test user if the app is in Testing.
+2. Create an OAuth client of type **Web application**. For the setup below, add
+   `https://developers.google.com/oauthplayground` as an authorized redirect URI.
+3. Open [Google's OAuth Playground](https://developers.google.com/oauthplayground/).
+   In its settings, select **Use your own OAuth credentials**, enter the client
+   ID/secret, and keep Google endpoints and **Offline** access. Own credentials
+   avoid the Playground's default 24-hour refresh-token revocation.
+4. Authorize only `https://www.googleapis.com/auth/gmail.send` while signed in to
+   the sending Gmail account. Exchange the authorization code for tokens.
+   Save the **refresh token**, not the short-lived access token.
+5. Set `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`, and
+   `GMAIL_SENDER_EMAIL` in Render secrets and your local `Backend/.env`. The sender
+   must be the Gmail account that authorized the token. Restart/redeploy the
+   backend after changing configuration. Keep all credentials out of Vercel,
+   Git, screenshots, and support tickets.
+6. Submit a ticket through Help Center and confirm it arrives in the support
+   inbox. A successful response confirms Gmail accepted the message, not that a
+   support person has read it. Missing credentials or provider failures display
+   an error and leave the form available to copy or retry.
+
+OAuth apps in **Testing** receive refresh tokens that expire after seven days for
+this scope. Plan the appropriate production OAuth configuration before relying
+on ongoing delivery. Revocation or a Gmail password change can also require
+reauthorization. See [Google token expiration](https://developers.google.com/identity/protocols/oauth2#expiration)
+and [Gmail scope guidance](https://developers.google.com/workspace/gmail/api/auth/scopes).
+Apply your company's retention policy to the support mailbox.
+
 ## Compatibility checks
 
 Run `php artisan test --compact` and the frontend's `npm run lint` and

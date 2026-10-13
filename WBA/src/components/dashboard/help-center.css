@@ -1,0 +1,57 @@
+.wba-help-center h1 { margin: 0; }
+.wba-help-ticket-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; white-space: nowrap; }
+.wba-help-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 20px; }
+.wba-help-toolbar .wba-input-group { flex: 1; min-width: min(100%, 280px); margin: 0; }
+.wba-help-role-filter, .wba-help-consent { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: .875rem; color: var(--text-secondary); line-height: 1.5; }
+.wba-help-center input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--text-primary); }
+.wba-help-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
+.wba-help-topics { display: grid; gap: 4px; }
+.wba-help-topics button { display: grid; gap: 6px; min-height: 64px; padding: 16px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--text-secondary); text-align: left; font: inherit; cursor: pointer; }
+.wba-help-topics button strong { font-size: .875rem; font-weight: 600; }
+.wba-help-topics button span { font-size: .75rem; line-height: 1.5; }
+.wba-help-topics button:hover, .wba-help-topics button.active { background: var(--bg-surface); border-color: var(--border-subtle); color: var(--text-primary); }
+.wba-help-topics button.active { border-inline-start: 3px solid var(--text-primary); padding-inline-start: 14px; }
+.wba-help-guides, .wba-help-ticket { min-width: 0; }
+.wba-help-section-heading h2 { font-size: 1.125rem; color: var(--text-primary); margin: 0 0 8px; }
+.wba-help-section-heading p { font-size: .875rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 20px; }
+.wba-help-article { border-top: 1px solid var(--border-subtle); }
+.wba-help-article summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; cursor: pointer; list-style: none; color: var(--text-primary); }
+.wba-help-article summary::-webkit-details-marker { display: none; }
+.wba-help-article summary strong { font-size: .9rem; font-weight: 600; line-height: 1.5; }
+.wba-help-article-summary { display: block; margin-top: 6px; color: var(--text-secondary); font-size: .8rem; line-height: 1.6; }
+.wba-help-expand { flex-shrink: 0; font-size: 1.25rem; width: 24px; text-align: center; }
+.wba-help-article[open] .wba-help-expand { transform: rotate(45deg); }
+.wba-help-article-body { padding-bottom: 20px; color: var(--text-secondary); font-size: .875rem; line-height: 1.75; }
+.wba-help-article-roles { color: var(--text-primary); font-size: .75rem; margin-bottom: 16px; }
+.wba-help-article-body ol { padding-inline-start: 24px; margin: 0; }
+.wba-help-article-body li + li { margin-top: 10px; }
+.wba-help-note { margin-top: 20px; padding: 12px 16px; border-inline-start: 2px solid var(--border-subtle); background: var(--bg-surface); }
+.wba-help-empty { padding: 24px 0; color: var(--text-secondary); line-height: 1.6; }
+.wba-help-empty h3 { color: var(--text-primary); font-size: 1rem; }
+.wba-help-empty p { margin: 12px 0 20px; }
+.wba-help-ticket { scroll-margin-top: 24px; }
+.wba-help-contact { color: var(--text-secondary); line-height: 1.75; font-size: .875rem; overflow-wrap: anywhere; margin-bottom: 24px; }
+.wba-help-contact a { color: var(--text-primary); text-underline-offset: 3px; }
+.wba-help-ticket fieldset { display: grid; gap: 20px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.wba-help-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.wba-help-ticket textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+.wba-help-ticket .wba-input-group { display: grid; gap: 8px; }
+.wba-help-ticket .wba-input-field { width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; font-family: inherit; }
+.wba-help-ticket .wba-btn-primary { min-height: 44px; margin-top: 16px; }
+.wba-help-optional, .wba-help-privacy { color: var(--text-secondary); }
+.wba-help-privacy { margin: 8px 0 16px; font-size: .8rem; line-height: 1.7; }
+.wba-help-notice { padding: 16px; margin-bottom: 24px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: .875rem; line-height: 1.7; overflow-wrap: anywhere; color: var(--text-primary); }
+.wba-help-notice p { margin: 8px 0 0; }
+.wba-help-error { color: var(--wba-inline-critical); font-size: .8rem; line-height: 1.6; }
+.wba-help-center :is(button, input, select, textarea, summary, a):focus-visible, .wba-help-notice:focus, #ticket-title:focus { outline: 2px solid var(--text-primary); outline-offset: 4px; }
+.wba-help-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 1024px) { .wba-help-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } }
+@media (max-width: 768px) {
+  .wba-help-layout { grid-template-columns: minmax(0, 1fr); }
+  .wba-help-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wba-help-topics button { padding: 12px; }
+  .wba-help-topics button.active { padding-inline-start: 10px; }
+  .wba-help-topics button span { display: none; }
+  .wba-help-form-row { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 400px) { .wba-help-topics { grid-template-columns: minmax(0, 1fr); } }
