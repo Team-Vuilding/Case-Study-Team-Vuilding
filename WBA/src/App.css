@@ -94,7 +94,7 @@
 .wba-nav-list {
   display: flex;
   align-items: center;
-  gap: 48px;
+  gap: 32px;
   list-style: none;
 }
 
@@ -172,7 +172,7 @@
 
 .wba-hero-container {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1.1fr 0.9fr;
   align-items: center;
   min-height: 480px;
   gap: 40px;
@@ -189,8 +189,8 @@
   font-family: var(--font-hero);
   font-size: 68px;
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: 0.5px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: #ffffff;
   margin-bottom: 24px;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -240,6 +240,39 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 9999px;
+}
+
+/* Keep the requested hero values above the later landing stylesheet defaults. */
+.wba-landing-page .wba-hero-title {
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.wba-landing-page .wba-hero-title span { color: #e8d5ff; }
+.wba-landing-page .wba-nav-list { gap: 32px; }
+
+.wba-landing-page .wba-preview {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(168, 85, 247, 0.15);
+}
+
+.wba-landing-page .wba-preview,
+.wba-landing-page .wba-preview * {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+html[data-theme='light'] .wba-cta-secondary { border-color: var(--border-subtle); }
+
+@media (min-width: 901px) {
+  .wba-landing-page .wba-hero-container { grid-template-columns: 1.1fr 0.9fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wba-landing-page .wba-preview,
+  .wba-landing-page .wba-preview * { transition: none; }
 }
 
 .wba-cta-secondary:hover {
