@@ -1,13 +1,27 @@
 export const ROLE_NAMES = { admin: 'Admin', warehouse: 'Warehouse Staff', purchasing: 'Purchasing Manager', sales: 'Sales Staff' };
 
 export const GENERAL_HELP_TOPICS = [
+  { id: 'counts', title: 'Stock Count Mismatches', description: 'Physical counts and recorded quantities.' },
+  { id: 'billing', title: 'Billing', description: 'Payment questions and service agreements.' },
   { id: 'overview', title: 'About WBA', description: 'What the system does and who uses it.' },
-  { id: 'access', title: 'Getting access', description: 'Sign-in, accounts, and recovery.' },
-  { id: 'concepts', title: 'Inventory terminology', description: 'Understand the terms used throughout WBA.' },
+  { id: 'access', title: 'Account Settings', description: 'Sign-in, accounts, and recovery.' },
+  { id: 'concepts', title: 'Inventory Management', description: 'Understand the terms used throughout WBA.' },
   { id: 'support', title: 'General troubleshooting', description: 'Connection help and contacting support.' },
 ];
 
 export const GENERAL_HELP_ARTICLES = [
+  {
+    id: 'count-mismatch', topic: 'counts', title: 'Why does my physical stock count differ from WBA?',
+    summary: 'Review recent movements and committed units before requesting a correction.',
+    steps: ['Confirm the SKU, bin, batch, and unit of measure, then repeat the physical count.', 'Compare on-hand stock with the physical count. Available-to-sell stock excludes reserved and allocated units, so it can be lower.', 'Ask authorized Warehouse Staff to review recent receiving, dispatch, and count records and reconcile the mismatch using their workspace guide.'],
+    note: 'Record the count time and discrepancy. Do not create duplicate stock movements to force a match.',
+  },
+  {
+    id: 'billing-contact', topic: 'billing', title: 'How do I resolve a billing question or request an invoice?',
+    summary: 'Your service agreement and organization billing owner determine payment arrangements.',
+    steps: ['Ask your organization billing owner to check the applicable service agreement and invoice.', 'Contact support using the Billing category with your organization name and invoice reference, if available.', 'For pricing, renewal, cancellation, or refund questions, ask support to confirm the terms of your agreement.'],
+    note: 'WBA has no self-service billing screen. Do not send payment card numbers or banking credentials in a support request.',
+  },
   {
     id: 'overview', topic: 'overview', title: 'What is WBA?',
     summary: 'A shared workspace for inventory, warehouse operations, and purchasing.',
