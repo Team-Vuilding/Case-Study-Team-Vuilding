@@ -12,7 +12,6 @@ dialog.wba-product-form {
   backdrop-filter: blur(4px);
 }
 .wba-product-form h2 { text-wrap: balance; margin-bottom: .5rem; }
-.wba-product-form > p { color: var(--wba-inline-muted); margin-bottom: 1.5rem; }
 .wba-field-help { color: var(--wba-inline-muted); font-size: .8125rem; line-height: 1.5; text-wrap: pretty; }
 .wba-form-wide { grid-column: 1 / -1; }
 .wba-sku-preview input { font-variant-numeric: tabular-nums; }

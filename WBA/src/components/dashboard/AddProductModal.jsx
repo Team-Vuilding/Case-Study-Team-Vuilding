@@ -9,11 +9,11 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }) {
 function SkuPreview({ hasShelfLife }) {
   const { data, loading, error, reload } = useApiData('items/sku-preview?hasShelfLife=' + Number(hasShelfLife));
   return <div className="wba-input-group wba-sku-preview">
-    <label className="wba-input-label" htmlFor="product-sku-preview">SKU · generated automatically</label>
-    <input id="product-sku-preview" className="wba-input-field" readOnly value={loading ? 'Loading preview…' : data?.sku || 'Preview unavailable'} aria-describedby="product-sku-help" />
-    <small id="product-sku-help" className="wba-field-help" role="status">{error ? <>
-      Unable to load the preview. <button type="button" className="wba-pill-btn" onClick={reload}>Retry preview</button>
-    </> : 'Based on expiry tracking. The final code is assigned when saved.'}</small>
+    <label className="wba-input-label" htmlFor="product-sku-preview">SKU</label>
+    <input id="product-sku-preview" className="wba-input-field" readOnly value={data?.sku || ''} placeholder={loading ? 'Loading…' : error ? 'Unavailable' : ''} aria-busy={loading} aria-describedby={error ? 'product-sku-error' : undefined} />
+    {error && <small id="product-sku-error" className="wba-field-help" role="alert">
+      SKU preview unavailable. <button type="button" className="wba-pill-btn" onClick={reload}>Retry</button>
+    </small>}
   </div>;
 }
 
@@ -43,14 +43,14 @@ function ProductForm({ onClose, onAddProduct }) {
   };
   return <dialog ref={dialogRef} className="wba-dash-modal-card wba-product-form" aria-labelledby="add-product-title" onCancel={event => { event.preventDefault(); if (!saving) onClose(); }}>
       <button type="button" className="wba-modal-close-btn" disabled={saving} onClick={onClose} aria-label="Close product form">×</button>
-      <h2 id="add-product-title">Add inventory item</h2><p>Enter the product details and initial stock.</p>
+      <h2 id="add-product-title">Add inventory item</h2>
       <form onSubmit={submit}>
         <div className="wba-form-grid">
           <label className="wba-input-group"><span className="wba-input-label">Product name</span><input className="wba-input-field" name="name" required maxLength={200} value={form.name} onChange={update} autoFocus /></label>
           <SkuPreview key={String(form.hasShelfLife)} hasShelfLife={form.hasShelfLife} />
-          {[['warehouseBin', 'Bin location', 'text'], ['unitPrice', 'Unit price (₱)', 'number'], ['physicalOnHand', 'Initial stock', 'number'], ['storageCostPerMonth', 'Storage cost per unit / month (₱)', 'number']].map(([name, label, type]) =>
+          {[['warehouseBin', 'Bin location', 'text'], ['unitPrice', 'Unit price (₱)', 'number'], ['physicalOnHand', 'Initial stock', 'number'], ['storageCostPerMonth', 'Cost', 'number']].map(([name, label, type]) =>
             <label className="wba-input-group" key={name}><span className="wba-input-label">{label}</span><input className="wba-input-field" name={name} type={type} required value={form[name]} onChange={update} min={type === 'number' ? 0 : undefined} step={name === 'physicalOnHand' ? 1 : type === 'number' ? '0.01' : undefined} /></label>)}
-          <label className="wba-input-group wba-form-wide"><span className="wba-input-label">Movement rate</span><select className="wba-input-field" name="fsn" value={form.fsn} onChange={update} aria-describedby="movement-rate-help">{['Fast', 'Normal', 'Slow', 'Non-moving'].map(value => <option key={value}>{value}</option>)}</select><small id="movement-rate-help" className="wba-field-help">How quickly stock usually sells or is used. Choose Non-moving for products with no recent demand.</small></label>
+          <label className="wba-input-group wba-form-wide"><span className="wba-input-label">Movement rate</span><select className="wba-input-field" name="fsn" value={form.fsn} onChange={update}>{['Fast', 'Normal', 'Slow', 'Non-moving'].map(value => <option key={value}>{value}</option>)}</select></label>
           <label className="wba-expiry-toggle wba-form-wide"><input name="hasShelfLife" type="checkbox" checked={form.hasShelfLife} onChange={update} /> Track batches and expiry</label>
           {form.hasShelfLife && <>
             <label className="wba-input-group"><span className="wba-input-label">Shelf life (months)</span><input className="wba-input-field" name="shelfLifeMonths" type="number" min="1" max="120" required value={form.shelfLifeMonths} onChange={update} /></label>
