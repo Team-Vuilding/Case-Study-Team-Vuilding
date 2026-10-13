@@ -1,0 +1,72 @@
+.wba-session-loader {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 32px 20px;
+}
+
+.wba-session-loader-content { text-align: center; }
+
+.wba-session-orbit-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(300px, 80vw);
+  aspect-ratio: 1;
+  margin: 0 auto 12px;
+  isolation: isolate;
+}
+
+.wba-session-orbit-halo {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(128, 82, 245, 0.18), transparent 70%);
+  animation: wba-session-breathe 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.wba-session-orbit-plane { position: absolute; inset: 0; color: #b598ff; }
+.wba-session-orbit-plane.orbit-primary { transform: rotate(-28deg) scaleY(0.58); }
+.wba-session-orbit-plane.orbit-secondary { inset: 4%; transform: rotate(42deg) scaleY(0.62); color: #8cbded; }
+.wba-session-orbit-rotor {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: wba-session-orbit 7s cubic-bezier(0.45, 0.35, 0.55, 0.65) infinite;
+}
+.orbit-secondary .wba-session-orbit-rotor { animation-duration: 10s; animation-direction: reverse; animation-delay: -3s; }
+.wba-session-orbit-track { fill: none; stroke: currentColor; stroke-width: 0.7; opacity: 0.24; }
+.wba-session-orbit-trail { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; opacity: 0.75; }
+.wba-session-orbit-moon { fill: currentColor; filter: drop-shadow(0 0 5px currentColor); }
+.wba-session-orbit-satellite { fill: currentColor; opacity: 0.45; }
+
+.wba-session-logo-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border: 1px solid rgba(168, 139, 250, 0.18);
+  border-radius: 50%;
+  background: #0b0e19;
+  box-shadow: 0 0 40px rgba(111, 65, 230, 0.12);
+}
+.wba-session-logo-core .wba-logo-image { width: 96px; height: 96px; }
+.wba-session-loader-title { margin: 0; color: #f4f2fa; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+.wba-session-loader-caption { margin: 10px 0 0; color: #aaa6ba; font-size: 0.875rem; }
+
+html[data-theme='light'] .wba-session-loader { background: radial-gradient(circle at 50% 40%, rgba(126, 87, 204, 0.07), transparent 45%), #f7f8fc; }
+html[data-theme='light'] .wba-session-logo-core { background: #f7f8fc; border-color: #ded5ed; }
+html[data-theme='light'] .wba-session-orbit-plane { color: #7042cc; }
+html[data-theme='light'] .wba-session-orbit-plane.orbit-secondary { color: #417db2; }
+html[data-theme='light'] .wba-session-loader-title { color: #23273b; }
+html[data-theme='light'] .wba-session-loader-caption { color: #616a80; }
+
+@keyframes wba-session-orbit { to { transform: rotate(360deg); } }
+@keyframes wba-session-breathe { 0%, 100% { opacity: 0.6; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.08); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .wba-session-orbit-rotor,
+  .wba-session-orbit-halo { animation: none; }
+}

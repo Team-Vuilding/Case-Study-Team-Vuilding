@@ -13,8 +13,7 @@ import FeaturesSection from './components/FeaturesSection';
 import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import GeneralHelpPage from './components/GeneralHelpPage';
-import ApiStatus from './components/ApiStatus';
-import { SkeletonCard } from './components/SkeletonLoader';
+import SessionLoader from './components/SessionLoader';
 import { authApi, getToken, setToken } from './services/api';
 import { animateNavigation } from './utils/navigationMotion';
 import './App.css';
@@ -177,7 +176,7 @@ function App() {
       <Route path="/contact" element={<ContactSupportPage {...pageProps} />} />
     </Routes>;
   }
-  if (checkingSession) return <main className="wba-access-page"><ApiStatus loading loadingLabel="Checking your session…"><div className="wba-skeleton-session"><SkeletonCard /></div></ApiStatus></main>;
+  if (checkingSession) return <SessionLoader />;
   if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
   if (currentView === 'dashboard' && currentUser) {
     return (
