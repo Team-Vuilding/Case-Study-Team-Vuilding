@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import PublicPageLayout from './PublicPageLayout';
-import { apiRequest } from '../services/api';
+import { sendSupportRequest } from '../services/support';
 
 export default function ContactSupportPage(props) {
   const [sending, setSending] = useState(false);
@@ -23,12 +23,12 @@ export default function ContactSupportPage(props) {
     inFlight.current = true;
     setSending(true); setError(''); setNotice(''); setFieldErrors({});
     try {
-      const result = await apiRequest('support/contact', { method: 'POST', body: { ...values, consent: values.consent === 'on' } });
+      const result = await sendSupportRequest({ ...values, consent: values.consent === 'on' });
       if (!result.data?.reference || result.data.status !== 'sent') throw new Error('Support did not confirm your request. Your form has been kept. Please try again later.');
-      setNotice(`Request sent. Your reference is ${result.data.reference}. Keep it for follow-up. Support will reply using the email address you provided.`);
+      setNotice(`Request sent. Reference: ${result.data.reference}.`);
       form.reset();
     } catch (reason) {
-      setError(reason.status === 429 ? 'You have reached the request limit. Please wait one hour before trying again.' : reason.status ? reason.message : 'Could not reach support. Your form has been kept. Check your connection and try again later.');
+      setError(reason.message || 'Could not reach support. Please try again later.');
       setFieldErrors(reason.data?.errors || {});
     } finally {
       inFlight.current = false;
@@ -53,7 +53,7 @@ export default function ContactSupportPage(props) {
             <label htmlFor="contact-category">Category<select id="contact-category" name="category" required defaultValue="Technical" {...accessibility('category')}>{['Technical', 'Billing', 'Account', 'Feedback'].map(category => <option key={category}>{category}</option>)}</select>{fieldError('category')}</label>
             <label htmlFor="contact-subject">Subject<input id="contact-subject" name="subject" required maxLength={120} {...accessibility('subject')} />{fieldError('subject')}</label>
             <label htmlFor="contact-message">Message<textarea id="contact-message" name="message" rows={7} required minLength={10} maxLength={5000} {...accessibility('message')} />{fieldError('message')}</label>
-            <p id="contact-privacy" className="wba-public-form-note">Include the affected page, error message, and steps to reproduce the issue. Leave out passwords, tokens, and confidential customer data. Your contact details and message are shared with support to answer your request. See our <a href="#/privacy">Privacy Policy</a>.</p>
+            <p id="contact-privacy" className="wba-public-form-note">Leave out passwords and confidential data. Web3Forms processes your details to deliver this request to support. <a href="#/privacy">Privacy Policy</a>.</p>
             <label className="wba-public-consent" htmlFor="contact-consent"><input id="contact-consent" name="consent" type="checkbox" required {...accessibility('consent')} />I agree to share these details with support.</label>{fieldError('consent')}
             <button type="submit" className="wba-btn-primary" disabled={sending}>{sending ? 'Sending request...' : 'Send request'}</button>
           </fieldset>

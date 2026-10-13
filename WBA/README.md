@@ -19,8 +19,24 @@ and general support without requiring a working backend session.
 Inside a signed-in workspace, `#/help-center` shows only the assigned role's task
 guides: Admin management and oversight, Warehouse stock operations, Purchasing
 supplier orders, or Sales product enquiries. Users can open general help and
-return to their own guides. The support ticket form remains in the workspace;
-Gmail API sender configuration is described in the backend deployment guide.
+return to their own guides. Both help pages link to the public Contact Support
+form at `#/contact`.
+
+Contact Support sends directly from the browser through Web3Forms' free plan.
+Set `VITE_WEB3FORMS_ACCESS_KEY` to your form access key in `WBA/.env.local` and
+restart Vite. For production, add the same variable in Vercel's frontend build
+environment before deploying. The key identifies the recipient configured in
+Web3Forms and is intentionally available to the browser. Gmail OAuth settings
+are not needed for this form. Existing Laravel support endpoints retain their
+Gmail integration for API clients.
+
+The form shares only the supplied name, reply email, category, subject, message,
+and a reference with Web3Forms. Contact details are self-reported. It does not
+send a workspace token or account role. A success notice means Web3Forms accepted
+the submission; it does not confirm inbox delivery or a support reply. Failed or
+uncertain submissions keep the form values and are not retried automatically.
+The free plan allows 250 submissions per month; its spam controls and quotas
+apply. Manage submission retention in Web3Forms.
 
 ## ngrok
 
