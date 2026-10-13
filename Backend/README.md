@@ -90,6 +90,16 @@ deployments with other origins need an explicit entry in the comma-separated
 
 ## 4. Verify and operate the demo
 
+Warehouse product reports use `POST /api/warehouse/items/{id}/reports` with
+`kind` (`info` or `mismatch`) and a required `message` (3–1000 characters).
+Mismatch reports may include `countedQuantity` (0–100000000). Only warehouse
+accounts can create reports; admin and warehouse accounts can read them through
+`GET /api/items/{id}/reports?page=1` (20 records per page, newest first, with
+`meta.currentPage`, `meta.lastPage` and `meta.total`). A report records the author,
+time and current stock snapshot without adjusting quantities. Reports are retained
+when products are archived or authors are removed. Each accepted POST creates a
+new report, so clients must not automatically retry an uncertain submission.
+
 1. Open the backend's `/up` URL and confirm HTTP 200.
 2. Sign in through the frontend's **Admin** role with your new account.
 3. Create a product and a warehouse account, then verify receiving and dispatch.

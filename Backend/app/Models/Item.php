@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -70,6 +71,7 @@ class Item extends Model
         'archived_at' => 'datetime',
         'has_batch_stock' => 'boolean',
         'has_batch_history' => 'boolean',
+        'report_count' => 'integer',
         'lead_time_days' => 'integer',
     ];
 
@@ -82,6 +84,7 @@ class Item extends Model
     {
         $query->select('items.*')->selectRaw('EXISTS (SELECT 1 FROM batches WHERE batches.item_id = items.id AND batches.quantity > 0) as has_batch_stock')
             ->selectRaw('EXISTS (SELECT 1 FROM batches WHERE batches.item_id = items.id) as has_batch_history')
+            ->withCount(['inventoryReports as report_count'])
             ->withExists(['stockMovements as has_movements', 'purchaseOrderItems as has_order_history', 'countRecords as has_count_history',
                 'purchaseOrderItems as has_open_orders' => fn (Builder $lines) => $lines->whereHas('purchaseOrder', fn (Builder $orders) => $orders->whereIn('status', ['draft', 'pending_approval', 'approved']))]);
     }
@@ -115,6 +118,7 @@ class Item extends Model
             && ! ($this->has_movements ?? $this->stockMovements()->exists())
             && ! ($this->has_order_history ?? $this->purchaseOrderItems()->exists())
             && ! ($this->has_count_history ?? $this->countRecords()->exists())
+            && ($this->report_count ?? $this->inventoryReports()->count()) === 0
             && ! ($this->has_batch_history ?? DB::table('batches')->where('item_id', $this->id)->exists());
     }
 
@@ -152,5 +156,10 @@ class Item extends Model
     public function purchaseOrderItems()
     {
         return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    public function inventoryReports(): HasMany
+    {
+        return $this->hasMany(InventoryReport::class);
     }
 }

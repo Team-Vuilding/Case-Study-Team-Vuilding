@@ -37,10 +37,10 @@ class ApiController extends Controller
         ];
     }
 
-    protected function audit(Request $request, string $event, string $description, ?string $target = null): void
+    protected function audit(Request $request, string $event, string $description, ?string $target = null, string $severity = 'good'): void
     {
         DB::table('audit_events')->insert(['user_id' => $request->user()->id, 'actor' => $request->user()->name,
-            'event_type' => $event, 'description' => $description, 'target' => $target, 'severity' => 'good', 'created_at' => now()]);
+            'event_type' => $event, 'description' => $description, 'target' => $target, 'severity' => $severity, 'created_at' => now()]);
     }
 
     protected function itemData(Item $item): array
@@ -55,7 +55,7 @@ class ApiController extends Controller
             'isArchived' => (bool) $item->archived_at, 'archivedAt' => $item->archived_at?->toISOString(),
             'archivedBy' => $item->archived_by_name, 'archiveReason' => $item->archive_reason,
             'canArchive' => $archiveBlockReason === null, 'archiveBlockReason' => $archiveBlockReason,
-            'canDelete' => $item->canDeletePermanently()];
+            'canDelete' => $item->canDeletePermanently(), 'reportCount' => (int) ($item->report_count ?? $item->inventoryReports()->count())];
     }
 
     protected function movement(Request $request, Item $item, string $type, int $quantity, ?string $reference = null): void

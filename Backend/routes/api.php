@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuditController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\InventoryReportController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\ReferenceController;
@@ -45,11 +46,13 @@ Route::middleware('access:admin')->group(function () {
     Route::delete('categories/{id}', [ReferenceController::class, 'deleteReference'])->defaults('kind', 'categories')->whereNumber('id');
 });
 Route::middleware('access:admin,warehouse')->group(function () {
+    Route::get('items/{item}/reports', [InventoryReportController::class, 'index'])->whereNumber('item');
     Route::get('warehouse/movements', [StockMovementController::class, 'movements']);
     Route::get('warehouse/counts', [StockCountController::class, 'counts']);
     Route::post('warehouse/items/{item}/reconcile', [StockCountController::class, 'reconcile'])->whereNumber('item');
 });
 Route::middleware('access:warehouse')->group(function () {
+    Route::post('warehouse/items/{item}/reports', [InventoryReportController::class, 'store'])->whereNumber('item');
     Route::post('warehouse/movements', [StockMovementController::class, 'stock']);
     Route::post('warehouse/scan', [StockMovementController::class, 'scan']);
 });
