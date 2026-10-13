@@ -4,9 +4,6 @@ import CardsGraphic from './CardsGraphic';
 export default function Hero({ onGetStarted }) {
   return (
     <section id="home" className="wba-hero-section">
-      <div className="wba-bg-ambient-top" aria-hidden="true" />
-      <div className="wba-bg-ambient-right" aria-hidden="true" />
-      <div className="wba-bg-ambient-center" aria-hidden="true" />
       <div className="wba-hero-container">
         {/* Left Column: Headline & Subtitle */}
         <div className="wba-hero-content">
