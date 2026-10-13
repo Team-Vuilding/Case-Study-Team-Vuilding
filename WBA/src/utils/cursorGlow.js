@@ -37,7 +37,7 @@ export function trackCursorGlow(element, host = window) {
       thread.style.willChange = 'transform, opacity';
       const position = `translate3d(${x - 90}px, ${y - 50}px, 0) rotate(${angle}deg)`;
       const animation = thread.animate([
-        { transform: `${position} scale(0.75, 0.8)`, opacity: 0.7 },
+        { transform: `${position} scale(0.75, 0.8)`, opacity: 0.385 },
         { transform: `${position} scale(1.35, 1.4)`, opacity: 0 },
       ], { duration: 650, easing: 'ease-out', fill: 'forwards' });
       animations[slot] = animation;
