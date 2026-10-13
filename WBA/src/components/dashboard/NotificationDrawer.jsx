@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest } from '../../services/api';
+import { isDialogBackdrop } from '../../utils/dialogBackdrop';
 import ApiStatus from '../ApiStatus';
 import { SkeletonList } from '../WorkspaceSkeletons';
 import './form-and-alerts.css';
@@ -38,6 +39,7 @@ function AlertCard({ alert }) {
 
 function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed }) {
   const dialogRef = useRef(null);
+  const backdropPointer = useRef(false);
   const attempted = useRef('');
   const [shownThisVisit, setShownThisVisit] = useState(() => new Set(notifications.filter(alert => !alert.isRead).map(alertKey)));
   const [readError, setReadError] = useState('');
@@ -81,7 +83,14 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
 
   const current = notifications.filter(alert => !alert.isRead || shownThisVisit.has(alertKey(alert)));
   const viewed = notifications.filter(alert => alert.isRead && !shownThisVisit.has(alertKey(alert)));
-  return <dialog ref={dialogRef} className="wba-drawer-panel wba-alert-drawer" aria-labelledby="alerts-title" onCancel={event => { event.preventDefault(); onClose(); }}>
+  return <dialog ref={dialogRef} className="wba-drawer-panel wba-alert-drawer" aria-labelledby="alerts-title"
+    onPointerDown={event => { backdropPointer.current = isDialogBackdrop(event); }}
+    onClick={event => {
+      const dismiss = backdropPointer.current && isDialogBackdrop(event);
+      backdropPointer.current = false;
+      if (dismiss) onClose();
+    }}
+    onCancel={event => { event.preventDefault(); onClose(); }}>
     <header className="wba-alert-header">
       <div><h2 id="alerts-title">Notifications</h2><p>Stock levels and batch expiry updates.</p></div>
       <button type="button" className="wba-alert-close" aria-label="Close notifications" onClick={onClose}>×</button>
