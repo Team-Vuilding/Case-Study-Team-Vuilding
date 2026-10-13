@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Logo from '../Logo';
 import { isTabAllowed } from '../../data/rbac';
 import WorkspaceDialog from '../WorkspaceDialog';
@@ -12,10 +12,22 @@ export default function DashboardSidebar({
   currentUser,
 }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
-  const collapsed = isCollapsed && !isMobileOpen;
+  const [drawer, setDrawer] = useState({ requestedOpen: isMobileOpen, retained: isMobileOpen });
+  if (drawer.requestedOpen !== isMobileOpen) {
+    setDrawer({ requestedOpen: isMobileOpen, retained: true });
+  }
+  const drawerPresent = isMobileOpen || drawer.retained;
+  const collapsed = isCollapsed && !drawerPresent;
+
+  useEffect(() => {
+    if (isMobileOpen || !drawer.retained) return;
+    const immediate = window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(max-width: 900px)').matches;
+    const timeout = setTimeout(() => setDrawer(previous => ({ ...previous, retained: false })), immediate ? 0 : 180);
+    return () => clearTimeout(timeout);
+  }, [isMobileOpen, drawer.retained]);
 
   const sidebar = (
-    <aside className={`wba-dash-sidebar ${collapsed ? 'collapsed' : ''} ${isMobileOpen ? '' : 'mobile-closed'}`}>
+    <aside className={`wba-dash-sidebar ${collapsed ? 'collapsed' : ''} ${drawerPresent ? '' : 'mobile-closed'}`}>
       {/* Brand Logo matching reference */}
       <div className="wba-dash-sidebar-header">
         <Logo className="wba-dash-sidebar-logo" />
@@ -190,5 +202,5 @@ export default function DashboardSidebar({
       </div>
     </aside>
   );
-  return isMobileOpen ? <WorkspaceDialog onClose={onCloseMobile} label="Workspace navigation" closeLabel="Close sidebar" className="wba-sidebar-dialog">{sidebar}</WorkspaceDialog> : sidebar;
+  return drawerPresent ? <WorkspaceDialog onClose={onCloseMobile} label="Workspace navigation" closeLabel="Close sidebar" className={`wba-sidebar-dialog ${isMobileOpen ? '' : 'wba-sidebar-closing'}`}>{sidebar}</WorkspaceDialog> : sidebar;
 }

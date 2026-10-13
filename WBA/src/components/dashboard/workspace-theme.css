@@ -171,6 +171,16 @@ html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item { min-height: 48px
 html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item.active { color: var(--wba-inline-accent); background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); }
 html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item:not(:disabled):active { background: var(--wba-bg-card-hover); }
 .wba-sidebar-dialog .wba-dash-nav-label { display: inline; }
+@media (prefers-reduced-motion: no-preference) {
+  dialog.wba-sidebar-dialog { transform: translateX(0); transition: transform 180ms cubic-bezier(.22, 1, .36, 1); }
+  dialog.wba-sidebar-dialog.wba-sidebar-closing { transform: translateX(-100%); }
+  dialog.wba-sidebar-dialog::backdrop { opacity: 1; transition: opacity 180ms ease-out; }
+  dialog.wba-sidebar-dialog.wba-sidebar-closing::backdrop { opacity: 0; }
+  @starting-style {
+    dialog.wba-sidebar-dialog[open] { transform: translateX(-100%); }
+    dialog.wba-sidebar-dialog[open]::backdrop { opacity: 0; }
+  }
+}
 @supports not (backdrop-filter: blur(1px)) {
   html .wba-dashboard-app, .wba-workspace-dialog, html[data-theme] :is(.wba-dashboard-app, .wba-workspace-dialog) { --wba-glass: var(--wba-panel); --wba-panel-glass: var(--wba-panel); }
 }
