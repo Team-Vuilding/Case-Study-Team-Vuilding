@@ -120,12 +120,14 @@ test('notification dismissal detects backdrop taps without dismissing panel cont
   assert.equal(isDialogBackdrop(pointer(400, 400, {})), false);
 });
 
-test('stock details retain counts without showing legacy product classifications', () => {
-  for (const category of ['A', 'B', 'C', 'U']) {
-    const html = render(InventoryLedger, { items: [{ ...product, category }], currentUser: { accessLevel: 'admin' } });
-    assert.match(html, /<dt>Being picked<\/dt>/);
-    assert.match(html, /<dt>Ledger count<\/dt>/);
-    assert.doesNotMatch(html, /<dt>Category<\/dt>|High Value|Mid Value|Perishable|Unclassified/);
+test('inventory keeps stock balances and count status without extra stock details', () => {
+  for (const accessLevel of ['admin', 'warehouse', 'purchasing', 'sales']) {
+    const html = render(InventoryLedger, { items: [{ ...product, physicalOnHand: 10, paperSpreadsheetCount: 10, reserved: 2, allocated: 3 }], currentUser: { accessLevel } });
+    assert.match(html, /data-label="In stock"[^>]*>10<\/td>/);
+    assert.match(html, /data-label="Reserved"[^>]*>2<\/td>/);
+    assert.match(html, /wba-atp-positive[^>]*>5<span/);
+    assert.match(html, /Accurate/);
+    assert.doesNotMatch(html, /Stock details|wba-ledger-details|<dt>Category<\/dt>|Unclassified/);
   }
 });
 

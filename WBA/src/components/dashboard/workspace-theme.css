@@ -144,11 +144,6 @@ html .wba-workspace-dialog button:disabled { opacity: .5; cursor: not-allowed; }
 html .wba-dashboard-app .wba-purchase-table .wba-order-identity { display: block; overflow-wrap: anywhere; }
 html .wba-dashboard-app .wba-detail-table { min-width: 0; }
 html .wba-dashboard-app .wba-purchase-table .wba-order-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.wba-ledger-details { margin-top: 8px; }
-.wba-ledger-details summary { color: var(--wba-inline-accent); cursor: pointer; font-size: .75rem; }
-.wba-ledger-details dl { display: grid; gap: 6px; padding: 10px 0; font-size: .75rem; }
-.wba-ledger-details dl > div { display: flex; justify-content: space-between; gap: 12px; }
-.wba-ledger-details dt { color: var(--wba-inline-muted); }
 html .wba-dashboard-app .wba-inventory-ledger .wba-table { min-width: 0; }
 html .wba-dashboard-app .wba-inventory-ledger .wba-table th { padding-inline: 10px; }
 html .wba-dashboard-app .wba-kpi-icon-pill { padding: 0; border: 0; background: transparent; color: var(--wba-inline-accent); }
@@ -243,11 +238,6 @@ html .wba-workspace-dialog.wba-qr-scanner-modal :is(.wba-pill-btn, .wba-btn-prim
   html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-status-cell,
   html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-actions-cell,
   html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-empty { grid-column: 1 / -1; }
-  .wba-ledger-details { display: block; margin-top: 10px; }
-  .wba-ledger-details summary { cursor: pointer; color: var(--wba-inline-accent); font-size: .75rem; padding: 5px 0; }
-  .wba-ledger-details dl { display: grid; gap: 6px; padding: 10px 0; font-size: .75rem; }
-  .wba-ledger-details dl > div { display: flex; justify-content: space-between; gap: 12px; }
-  .wba-ledger-details dt { color: var(--wba-inline-muted); }
   html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) { min-width: 0; display: block; }
   html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) tbody { display: block; }
