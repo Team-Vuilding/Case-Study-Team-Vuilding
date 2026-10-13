@@ -7,18 +7,29 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends ApiController
 {
+    private const MAX_FAILURES = 6;
+
+    private const COOLDOWN_SECONDS = 180;
+
     public function login(Request $request): JsonResponse
     {
-        $data = $request->validate(['email' => 'required|email', 'password' => 'required|string', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))]]);
+        $data = $request->validate(['email' => 'required|email|max:254', 'password' => 'required|string|max:128', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))]]);
+        $attemptKey = $this->authAttemptKey($request, $data['email']);
+        $retryAfter = RateLimiter::availableIn($attemptKey.':cooldown');
+        if ($retryAfter > 0) {
+            return $this->cooldownResponse($retryAfter);
+        }
         $user = User::where('email', strtolower(trim($data['email'])))->first();
         if (! $user || ! Hash::check($data['password'], $user->password) || $user->access_level !== $data['accessLevel']) {
-            return response()->json(['message' => 'The credentials do not match an account for this role.'], 422);
+            return $this->failedCredentials($attemptKey, 'The credentials do not match an account for this role.');
         }
+        RateLimiter::clear($attemptKey.':failures');
 
         // Handle deactivated account state
         if ($user->isDeactivated()) {
@@ -62,16 +73,22 @@ class AuthController extends ApiController
     public function reactivate(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
+            'email' => 'required|email|max:254',
+            'password' => 'required|string|max:128',
             'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))],
         ]);
 
+        $attemptKey = $this->authAttemptKey($request, $data['email']);
+        $retryAfter = RateLimiter::availableIn($attemptKey.':cooldown');
+        if ($retryAfter > 0) {
+            return $this->cooldownResponse($retryAfter);
+        }
         $user = User::where('email', strtolower(trim($data['email'])))->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password) || $user->access_level !== $data['accessLevel']) {
-            return response()->json(['message' => 'Invalid recovery credentials provided.'], 422);
+            return $this->failedCredentials($attemptKey, 'Invalid recovery credentials provided.');
         }
+        RateLimiter::clear($attemptKey.':failures');
 
         if (! $user->isDeactivated()) {
             return response()->json(['message' => 'This account is already active.'], 422);
@@ -140,5 +157,30 @@ class AuthController extends ApiController
         DB::table('api_tokens')->where('id', $request->attributes->get('token_id'))->delete();
 
         return response()->json(['message' => 'Signed out.']);
+    }
+
+    private function authAttemptKey(Request $request, string $email): string
+    {
+        return 'auth-attempts:'.hash('sha256', strtolower(trim($email)).'|'.$request->ip());
+    }
+
+    private function failedCredentials(string $attemptKey, string $message): JsonResponse
+    {
+        $failures = RateLimiter::hit($attemptKey.':failures', self::COOLDOWN_SECONDS);
+        if ($failures >= self::MAX_FAILURES) {
+            RateLimiter::hit($attemptKey.':cooldown', self::COOLDOWN_SECONDS);
+
+            return $this->cooldownResponse(RateLimiter::availableIn($attemptKey.':cooldown'));
+        }
+
+        return response()->json(['message' => $message], 422);
+    }
+
+    private function cooldownResponse(int $seconds): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Too many sign-in attempts. Try again in '.$seconds.' seconds.',
+            'retryAfter' => $seconds,
+        ], 429)->header('Retry-After', (string) $seconds);
     }
 }
