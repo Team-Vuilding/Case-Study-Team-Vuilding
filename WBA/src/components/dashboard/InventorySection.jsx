@@ -122,7 +122,7 @@ export default function InventorySection({ currentUser }) {
           <div className="wba-qr-tools-actions">
             {isWarehouseStaff && (
               <button type="button" className="wba-btn-primary" disabled={loading || Boolean(error)} onClick={() => setIsQrScannerOpen(true)}>
-                Scan to receive
+                Scan Product
               </button>
             )}
             <button type="button" className="wba-qr-secondary-btn" disabled={loading || Boolean(error)} onClick={() => setIsQrGeneratorOpen(true)}>
