@@ -16,6 +16,7 @@ import GeneralHelpPage from './components/GeneralHelpPage';
 import ApiStatus from './components/ApiStatus';
 import { SkeletonCard } from './components/SkeletonLoader';
 import { authApi, getToken, setToken } from './services/api';
+import { animateNavigation } from './utils/navigationMotion';
 import './App.css';
 import './landing-modern.css';
 
@@ -47,6 +48,19 @@ function App() {
   const [selectedRole, setSelectedRole] = useState(() => getAccessRoute().role);
   const [isRolePickerOpen, setIsRolePickerOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const publicPage = ['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''));
+    const selector = currentView === 'landing' && !publicPage ? `#${activeSection}` : 'main';
+    const cancel = animateNavigation(document.querySelector(selector), motionPreference.matches);
+    const handleMotionChange = () => { if (motionPreference.matches) cancel?.(); };
+    motionPreference.addEventListener('change', handleMotionChange);
+    return () => {
+      cancel?.();
+      motionPreference.removeEventListener('change', handleMotionChange);
+    };
+  }, [location.pathname, currentView, selectedRole, activeSection]);
 
   useEffect(() => {
     const handleAccessRoute = () => {

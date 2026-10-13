@@ -7,7 +7,8 @@ export default function Navbar({ activeSection, setActiveSection, theme, onToggl
     setActiveSection(sectionId);
     const el = document.getElementById(sectionId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth' });
     }
   };
 
