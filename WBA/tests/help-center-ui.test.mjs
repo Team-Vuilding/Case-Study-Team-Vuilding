@@ -27,7 +27,9 @@ test('restoring a dashboard session shows the branded loader instead of a conten
     const html = render(App);
     assert.match(html, /wba-session-loader/);
     assert.match(html, /wba-logo-image/);
-    assert.match(html, /Checking your session/);
+    assert.match(html, /aria-label="Loading page"/);
+    assert.match(html, /wba-inventory-backdrop/);
+    assert.doesNotMatch(html, /Checking your session|Preparing your workspace/);
     assert.equal((html.match(/role="status"/g) || []).length, 1);
     assert.match(html, /aria-busy="true"/);
     assert.doesNotMatch(html, /wba-skeleton|wba-dash-sidebar/);
@@ -37,7 +39,7 @@ test('restoring a dashboard session shows the branded loader instead of a conten
   }
 });
 
-test('a visitor without a saved session reaches the landing page without a session loader', () => {
+test('a visitor gets the global refresh overlay while the landing page mounts underneath', () => {
   const previousWindow = globalThis.window;
   const previousStorage = globalThis.sessionStorage;
   globalThis.window = { location: { hash: '#/home' } };
@@ -45,7 +47,30 @@ test('a visitor without a saved session reaches the landing page without a sessi
   try {
     const html = render(App);
     assert.match(html, /wba-landing-page/);
-    assert.doesNotMatch(html, /wba-session-loader|Checking your session/);
+    assert.match(html, /wba-session-loader/);
+    assert.match(html, /inert=""/);
+    assert.doesNotMatch(html, /Checking your session|Preparing your workspace/);
+  } finally {
+    globalThis.window = previousWindow;
+    globalThis.sessionStorage = previousStorage;
+  }
+});
+
+test('the refresh overlay covers every public and sign-in route without removing page content', () => {
+  const previousWindow = globalThis.window;
+  const previousStorage = globalThis.sessionStorage;
+  globalThis.sessionStorage = { getItem: () => null };
+  try {
+    for (const route of ['help', 'privacy', 'terms', 'contact', 'login/admin', 'login/warehouse', 'login/purchasing', 'login/sales']) {
+      globalThis.window = { location: { hash: `#/${route}` } };
+      const html = render(App);
+      assert.match(html, /wba-session-loader/);
+      assert.match(html, /wba-refresh-page-content/);
+      assert.match(html, /<h1/);
+      assert.equal((html.match(/role="status" aria-label="Loading page"/g) || []).length, 1);
+      assert.match(html, /inert=""/);
+      assert.doesNotMatch(html, /Checking your session|Preparing your workspace/);
+    }
   } finally {
     globalThis.window = previousWindow;
     globalThis.sessionStorage = previousStorage;
