@@ -18,6 +18,40 @@ const { default: RoleHelp } = await server.ssrLoadModule('/src/components/dashbo
 const { default: GeneralHelp } = await server.ssrLoadModule('/src/components/GeneralHelpPage.jsx');
 const render = (Component, props) => renderToStaticMarkup(Component === App ? createElement(MemoryRouter, { initialEntries: [globalThis.window.location.hash.slice(1)] }, createElement(Component, props)) : createElement(Component, props));
 
+test('restoring a dashboard session shows the branded loader instead of a content skeleton', () => {
+  const previousWindow = globalThis.window;
+  const previousStorage = globalThis.sessionStorage;
+  globalThis.window = { location: { hash: '#/dashboard' } };
+  globalThis.sessionStorage = { getItem: () => 'session-test-fixture' };
+  try {
+    const html = render(App);
+    assert.match(html, /wba-session-loader/);
+    assert.match(html, /wba-logo-image/);
+    assert.match(html, /Checking your session/);
+    assert.equal((html.match(/role="status"/g) || []).length, 1);
+    assert.match(html, /aria-busy="true"/);
+    assert.doesNotMatch(html, /wba-skeleton|wba-dash-sidebar/);
+  } finally {
+    globalThis.window = previousWindow;
+    globalThis.sessionStorage = previousStorage;
+  }
+});
+
+test('a visitor without a saved session reaches the landing page without a session loader', () => {
+  const previousWindow = globalThis.window;
+  const previousStorage = globalThis.sessionStorage;
+  globalThis.window = { location: { hash: '#/home' } };
+  globalThis.sessionStorage = { getItem: () => null };
+  try {
+    const html = render(App);
+    assert.match(html, /wba-landing-page/);
+    assert.doesNotMatch(html, /wba-session-loader|Checking your session/);
+  } finally {
+    globalThis.window = previousWindow;
+    globalThis.sessionStorage = previousStorage;
+  }
+});
+
 test('general help opens directly outside the landing page without a session', () => {
   const previousWindow = globalThis.window;
   const previousStorage = globalThis.sessionStorage;
