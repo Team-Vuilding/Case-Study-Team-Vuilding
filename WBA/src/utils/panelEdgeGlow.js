@@ -3,41 +3,53 @@ const panels = '.wba-glow-card, .wba-qr-tools, .wba-public-panel, .wba-dashboard
 export function trackPanelEdgeGlow(host = window) {
   const reduced = host.matchMedia('(prefers-reduced-motion: reduce)');
   const mouse = host.matchMedia('(hover: hover) and (pointer: fine)');
-  let active = null;
-  let candidate = null;
+  let active = new Set();
   let frame = null;
   let x = 0;
   let y = 0;
-  const clearActive = () => {
-    if (!active) return;
-    active.classList.remove('wba-edge-flare');
-    for (const property of ['--wba-edge-x', '--wba-edge-y', '--wba-edge-strength']) active.style.removeProperty(property);
-    active = null;
+  const clearPanel = panel => {
+    panel.classList.remove('wba-edge-flare');
+    panel.style.setProperty('--wba-edge-strength', '0');
   };
   const hide = () => {
     if (frame !== null) host.cancelAnimationFrame(frame);
     frame = null;
-    candidate = null;
-    clearActive();
+    active.forEach(clearPanel);
+    active.clear();
   };
   const move = event => {
     if (reduced.matches || !mouse.matches || event.pointerType !== 'mouse' || host.document.hidden) { hide(); return; }
-    candidate = event.target?.closest?.(panels);
     x = event.clientX;
     y = event.clientY;
     if (frame !== null) return;
     frame = host.requestAnimationFrame(() => {
       frame = null;
-      if (!candidate?.isConnected) { clearActive(); return; }
-      const bounds = candidate.getBoundingClientRect();
-      const localX = x - bounds.left;
-      const localY = y - bounds.top;
-      const distance = Math.min(localX, localY, bounds.width - localX, bounds.height - localY);
-      if (distance < 0 || distance >= 32) { clearActive(); return; }
-      if (active !== candidate) { clearActive(); active = candidate; active.classList.add('wba-edge-flare'); }
-      active.style.setProperty('--wba-edge-x', `${localX}px`);
-      active.style.setProperty('--wba-edge-y', `${localY}px`);
-      active.style.setProperty('--wba-edge-strength', ((1 - distance / 32) * .7).toFixed(3));
+      const dialogs = [...host.document.querySelectorAll('dialog[open]')];
+      const scope = dialogs.at(-1) || host.document;
+      const candidates = [...scope.querySelectorAll(panels)];
+      if (scope.matches?.(panels)) candidates.unshift(scope);
+      const nearby = [];
+      for (const panel of candidates) {
+        if (!panel.isConnected || (panel.checkVisibility && !panel.checkVisibility())) continue;
+        const bounds = panel.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) continue;
+        const localX = x - bounds.left;
+        const localY = y - bounds.top;
+        const outsideX = Math.max(-localX, localX - bounds.width, 0);
+        const outsideY = Math.max(-localY, localY - bounds.height, 0);
+        const distance = outsideX || outsideY ? Math.hypot(outsideX, outsideY)
+          : Math.min(localX, localY, bounds.width - localX, bounds.height - localY);
+        if (distance < 48) nearby.push({ panel, localX, localY, distance });
+      }
+      const next = new Set(nearby.map(({ panel }) => panel));
+      for (const panel of active) if (!next.has(panel)) clearPanel(panel);
+      for (const { panel, localX, localY, distance } of nearby) {
+        panel.classList.add('wba-edge-flare');
+        panel.style.setProperty('--wba-edge-x', `${localX}px`);
+        panel.style.setProperty('--wba-edge-y', `${localY}px`);
+        panel.style.setProperty('--wba-edge-strength', ((1 - distance / 48) * .7).toFixed(3));
+      }
+      active = next;
     });
   };
   const leave = event => { if (!event.relatedTarget) hide(); };
@@ -52,7 +64,11 @@ export function trackPanelEdgeGlow(host = window) {
   reduced.addEventListener('change', hide);
   mouse.addEventListener('change', hide);
   return () => {
+    const touched = new Set([...host.document.querySelectorAll(panels), ...active]);
     hide();
+    for (const panel of touched) {
+      for (const property of ['--wba-edge-x', '--wba-edge-y', '--wba-edge-strength']) panel.style.removeProperty(property);
+    }
     host.removeEventListener('pointermove', move);
     host.removeEventListener('pointerout', leave);
     host.removeEventListener('pointercancel', hide);

@@ -117,23 +117,29 @@ html[data-theme='light'] .wba-cursor-glow {
 
 :where(.wba-dashboard-frame, .wba-qr-tools, .wba-public-panel, .wba-about-card, .wba-features-container, .wba-preview) { position: relative; }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none) and (prefers-contrast: no-preference) {
-  .wba-edge-flare::before,
-  .wba-edge-flare::after {
+  :is(.wba-glow-card, .wba-qr-tools, .wba-public-panel, .wba-dashboard-frame, .wba-dash-sidebar, .wba-about-card, .wba-features-container, .wba-preview, dialog.wba-workspace-dialog, dialog.wba-product-form, .wba-product-dialog) {
+    --wba-edge-strength: 0;
+    --wba-edge-x: 50%;
+    --wba-edge-y: 50%;
+  }
+  :is(.wba-glow-card, .wba-qr-tools, .wba-public-panel, .wba-dashboard-frame, .wba-dash-sidebar, .wba-about-card, .wba-features-container, .wba-preview, dialog.wba-workspace-dialog, dialog.wba-product-form, .wba-product-dialog)::before,
+  :is(.wba-glow-card, .wba-qr-tools, .wba-public-panel, .wba-dashboard-frame, .wba-dash-sidebar, .wba-about-card, .wba-features-container, .wba-preview, dialog.wba-workspace-dialog, dialog.wba-product-form, .wba-product-dialog)::after {
     content: '';
     position: absolute;
-    inset: -1px;
+    inset: 0;
     border-radius: inherit;
     padding: 1.5px;
     pointer-events: none;
     z-index: 2;
-    background: radial-gradient(160px circle at var(--wba-edge-x) var(--wba-edge-y), var(--wba-inline-accent, var(--accent-lavender)), transparent 75%);
+    background: radial-gradient(160px circle at var(--wba-edge-x, 50%) var(--wba-edge-y, 50%), var(--wba-inline-accent, var(--accent-lavender)), transparent 75%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: var(--wba-edge-strength, 0);
+    transition: opacity 150ms ease-out;
   }
-  .wba-edge-flare::before { inset: 0; padding: 8px; opacity: calc(var(--wba-edge-strength, 0) * .14); }
+  :is(.wba-glow-card, .wba-qr-tools, .wba-public-panel, .wba-dashboard-frame, .wba-dash-sidebar, .wba-about-card, .wba-features-container, .wba-preview, dialog.wba-workspace-dialog, dialog.wba-product-form, .wba-product-dialog)::before { inset: 0; padding: 8px; opacity: calc(var(--wba-edge-strength, 0) * .14); }
 }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {

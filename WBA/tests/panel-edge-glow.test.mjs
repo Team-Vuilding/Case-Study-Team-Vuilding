@@ -6,9 +6,10 @@ function setup() {
   const listeners = new Map();
   const media = new Map();
   const frames = new Map();
+  const panels = [];
   let nextFrame = 0;
   const host = {
-    document: { hidden: false, addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: name => listeners.delete(name) },
+    document: { hidden: false, querySelectorAll: selector => selector === 'dialog[open]' ? [] : panels, addEventListener: (name, fn) => listeners.set(name, fn), removeEventListener: name => listeners.delete(name) },
     matchMedia(query) {
       const value = { matches: query.includes('hover: hover'), addEventListener: (_, fn) => { value.change = fn; }, removeEventListener: () => { value.change = null; } };
       media.set(query, value);
@@ -19,12 +20,14 @@ function setup() {
     requestAnimationFrame(fn) { frames.set(++nextFrame, fn); return nextFrame; },
     cancelAnimationFrame: id => frames.delete(id),
   };
-  const panel = () => {
+  const panel = (bounds = { left: 100, top: 100, width: 400, height: 200 }) => {
     const classes = new Set();
     const styles = new Map();
-    return { isConnected: true, classes, styles, classList: { add: value => classes.add(value), remove: value => classes.delete(value) },
+    const element = { isConnected: true, classes, styles, classList: { add: value => classes.add(value), remove: value => classes.delete(value) },
       style: { setProperty: (key, value) => styles.set(key, value), removeProperty: key => styles.delete(key) },
-      getBoundingClientRect: () => ({ left: 100, top: 100, width: 400, height: 200 }) };
+      getBoundingClientRect: () => bounds };
+    panels.push(element);
+    return element;
   };
   const cleanup = trackPanelEdgeGlow(host);
   return { host, listeners, media, frames, panel, cleanup,
@@ -44,17 +47,33 @@ test('panel flare follows the nearest edge, batches movement, and stays off over
   assert.ok(Number(panel.styles.get('--wba-edge-strength')) > 0);
   fixture.move(panel, 300, 200); fixture.flush();
   assert.equal(panel.classes.size, 0);
+  assert.equal(Number(panel.styles.get('--wba-edge-strength')), 0);
+  fixture.cleanup();
   assert.equal(panel.styles.size, 0);
+});
+
+test('adjacent panel edges glow together across the gap with symmetric brightness', () => {
+  const fixture = setup();
+  const first = fixture.panel();
+  const second = fixture.panel({ left: 524, top: 100, width: 400, height: 200 });
+  fixture.move(null, 512, 200); fixture.flush();
+  assert.ok(first.classes.has('wba-edge-flare'));
+  assert.ok(second.classes.has('wba-edge-flare'));
+  assert.equal(first.styles.get('--wba-edge-strength'), second.styles.get('--wba-edge-strength'));
+  const middleStrength = Number(first.styles.get('--wba-edge-strength'));
+  fixture.move(first, 496, 200); fixture.flush();
+  assert.ok(first.classes.has('wba-edge-flare'));
+  assert.ok(second.classes.has('wba-edge-flare'));
+  assert.ok(Number(first.styles.get('--wba-edge-strength')) > middleStrength);
+  assert.ok(Number(second.styles.get('--wba-edge-strength')) < middleStrength);
   fixture.cleanup();
 });
 
-test('only one panel glows and route removal, scrolling, and cleanup clear the effect', () => {
+test('route removal, scrolling, and cleanup clear every nearby panel effect', () => {
   const fixture = setup(); const first = fixture.panel(); const second = fixture.panel();
   fixture.move(first, 104, 150); fixture.flush();
-  fixture.move(second, 104, 150); fixture.flush();
-  assert.equal(first.classes.size, 0);
-  assert.ok(second.classes.has('wba-edge-flare'));
   fixture.listeners.get('scroll')();
+  assert.equal(first.classes.size, 0);
   assert.equal(second.classes.size, 0);
   second.isConnected = false;
   fixture.move(second, 104, 150); fixture.flush();
