@@ -19,7 +19,9 @@ export default function AppSurface({ children }) {
       <div className="wba-bg-ambient-right" />
       <div className="wba-bg-ambient-center" />
     </div>
-    <div ref={cursorRef} className="wba-cursor-glow" aria-hidden="true" />
+    <div ref={cursorRef} className="wba-cursor-glow" aria-hidden="true">
+      {Array.from({ length: 8 }, (_, index) => <span key={index} className="wba-cursor-thread" />)}
+    </div>
     {children}
   </div>;
 }

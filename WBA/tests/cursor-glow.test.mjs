@@ -2,33 +2,42 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { trackCursorGlow } from '../src/utils/cursorGlow.js';
 
-test('mouse tracking batches updates and cleans up pending work', () => {
+test('weaving trail batches mouse updates, uses a fixed pool, and cancels on exit', () => {
   const listeners = new Map();
   const media = { matches: true, addEventListener() {}, removeEventListener() {} };
   let frame;
   let scheduled = 0;
   let cancelled = 0;
+  const stamps = [];
+  const threads = Array.from({ length: 8 }, () => ({ style: {}, animate(frames, options) {
+    stamps.push({ frames, options });
+    return { cancel() { cancelled++; } };
+  } }));
   const host = {
     matchMedia: query => query.includes('reduced-motion') ? { ...media, matches: false } : media,
     addEventListener: (name, fn) => listeners.set(name, fn),
     removeEventListener: name => listeners.delete(name),
     requestAnimationFrame: fn => { frame = fn; scheduled++; return 1; },
-    cancelAnimationFrame: () => { cancelled++; },
+    cancelAnimationFrame() {},
   };
-  const element = { style: {}, dataset: {} };
+  const element = { dataset: {}, querySelectorAll: () => threads };
   const cleanup = trackCursorGlow(element, host);
   listeners.get('pointermove')({ pointerType: 'touch', clientX: 20, clientY: 30 });
   assert.equal(scheduled, 0);
-  listeners.get('pointermove')({ pointerType: 'mouse', clientX: 200, clientY: 300 });
-  listeners.get('pointermove')({ pointerType: 'mouse', clientX: 250, clientY: 350 });
+  const move = (x, y) => listeners.get('pointermove')({ pointerType: 'mouse', clientX: x, clientY: y });
+  move(200, 300); move(250, 350);
   assert.equal(scheduled, 1);
   frame();
-  assert.equal(element.style.transform, 'translate3d(110px, 210px, 0)');
-  assert.equal(element.dataset.active, 'true');
+  assert.match(stamps[0].frames[0].transform, /translate3d\(160px, 300px, 0\)/);
+  assert.equal(stamps[0].frames.at(-1).opacity, 0);
+  assert.equal(stamps[0].options.duration, 650);
+  move(251, 350); frame();
+  assert.equal(stamps.length, 1, 'Tiny movements should not restamp the same area');
+  for (let i = 1; i <= 10; i++) { move(250 + i * 25, 350); frame(); }
+  assert.equal(threads.length, 8);
+  assert.ok(cancelled >= 3, 'Old stamps must be cancelled before pool reuse');
   listeners.get('blur')();
   assert.equal(element.dataset.active, 'false');
-  listeners.get('pointermove')({ pointerType: 'mouse', clientX: 300, clientY: 400 });
   cleanup();
-  assert.equal(cancelled, 1);
   assert.equal(listeners.size, 0);
 });
