@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Logo from './Logo';
+import PublicFooter from './PublicFooter';
+import './public-pages.css';
 import HelpGuideBrowser from './HelpGuideBrowser';
 import { GENERAL_HELP_ARTICLES, GENERAL_HELP_TOPICS, ROLE_NAMES } from '../data/helpCenter';
 
@@ -27,7 +29,9 @@ export default function GeneralHelpPage({ currentUser, theme, onToggleTheme, onS
           {currentUser ? <a className="wba-pill-btn" href="#/help-center">Open {ROLE_NAMES[currentUser.accessLevel]} task guides</a> : <button type="button" className="wba-btn-primary" onClick={onSignIn}>Sign in to your workspace</button>}
           <a href="mailto:vincentjamesguhiling@gmail.com">Email support</a>
         </div>
+        <a href="#/contact">Contact Support</a>
       </section>
     </main>
+    <PublicFooter />
   </div>;
 }

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
@@ -9,13 +10,13 @@ const server = await createServer({
   root: fileURLToPath(new URL('../', import.meta.url)),
   server: { middlewareMode: true, ws: false },
   appType: 'custom',
-  ssr: { external: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime'] },
+  ssr: { external: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-router-dom'] },
 });
 after(() => server.close());
 const { default: App } = await server.ssrLoadModule('/src/App.jsx');
 const { default: RoleHelp } = await server.ssrLoadModule('/src/components/dashboard/HelpCenterSection.jsx');
 const { default: GeneralHelp } = await server.ssrLoadModule('/src/components/GeneralHelpPage.jsx');
-const render = (Component, props) => renderToStaticMarkup(createElement(Component, props));
+const render = (Component, props) => renderToStaticMarkup(Component === App ? createElement(MemoryRouter, { initialEntries: [globalThis.window.location.hash.slice(1)] }, createElement(Component, props)) : createElement(Component, props));
 
 test('general help opens directly outside the landing page without a session', () => {
   const previousWindow = globalThis.window;
