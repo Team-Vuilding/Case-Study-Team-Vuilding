@@ -1,130 +1,142 @@
 export const ROLE_NAMES = { admin: 'Admin', warehouse: 'Warehouse Staff', purchasing: 'Purchasing Manager', sales: 'Sales Staff' };
-const ALL_ROLES = Object.keys(ROLE_NAMES);
 
-export const HELP_TOPICS = [
-  { id: 'getting-started', title: 'Getting Started', description: 'Sign in and find your way around WBA.' },
-  { id: 'accounts', title: 'Accounts & Permissions', description: 'Understand your role and account access.' },
-  { id: 'inventory', title: 'Inventory & Products', description: 'Read stock levels and manage the catalog.' },
-  { id: 'warehouse', title: 'Warehouse Operations', description: 'Receive, dispatch, and reconcile stock.' },
-  { id: 'purchasing', title: 'Purchasing', description: 'Work with suppliers and purchase orders.' },
-  { id: 'troubleshooting', title: 'Troubleshooting & Support', description: 'Resolve common problems or send a ticket.' },
+export const GENERAL_HELP_TOPICS = [
+  { id: 'overview', title: 'About WBA', description: 'What the system does and who uses it.' },
+  { id: 'access', title: 'Getting access', description: 'Sign-in, accounts, and recovery.' },
+  { id: 'concepts', title: 'Inventory terminology', description: 'Understand the terms used throughout WBA.' },
+  { id: 'support', title: 'General troubleshooting', description: 'Connection help and contacting support.' },
 ];
 
-export const HELP_ARTICLES = [
+export const GENERAL_HELP_ARTICLES = [
   {
-    id: 'sign-in', topic: 'getting-started', title: 'Sign in to your workspace', roles: ALL_ROLES,
-    summary: 'Use the account and role assigned by your administrator.',
-    steps: ['Open the sign-in form and select your assigned role.', 'Enter your account email and password, then sign in.', 'Use Dashboard for summaries and Inventory for product information. The sidebar shows the pages available to your role.'],
-    note: 'If your role or password is unknown, ask your administrator. WBA does not currently offer self-service password reset.',
+    id: 'overview', topic: 'overview', title: 'What is WBA?',
+    summary: 'A shared workspace for inventory, warehouse operations, and purchasing.',
+    steps: ['WBA brings product records, stock availability, receiving, dispatching, and purchase orders into one system.', 'Teams use the same recorded inventory while seeing the pages and actions assigned to their role.', 'This public Help Center explains the system. Detailed task guides are available inside your signed-in workspace.'],
+    note: 'You can read general help without signing in.',
   },
   {
-    id: 'dashboard', topic: 'getting-started', title: 'Read the dashboard', roles: ALL_ROLES,
-    summary: 'Understand current stock summaries and recorded monthly activity.',
-    steps: ['Review the summary cards. Sales sees available stock and reservations; other roles see storage cost, count mismatches, and expiry risk.', 'Read Monthly stock activity for recorded receipts and dispatches. Expand View monthly quantities to read the table.', 'Open the notification bell for inventory alerts.'],
-    note: 'Monthly stock activity shows recorded history, not a demand prediction. Empty charts mean no movements have been recorded.',
+    id: 'role-overview', topic: 'overview', title: 'Who uses the system?',
+    summary: 'Four roles work together with different responsibilities.',
+    steps: ['Admin oversees accounts, the catalog, purchasing approvals, and global records.', 'Warehouse Staff handles stock operations and count reconciliation.', 'Purchasing Manager coordinates suppliers and purchase orders.', 'Sales Staff checks product pricing and availability.'],
+    note: 'Your administrator assigns your role. Each workspace contains its own task guides.',
   },
   {
-    id: 'roles', topic: 'accounts', title: 'What each role can do', roles: ALL_ROLES,
-    summary: 'Permissions are enforced by the server as well as the interface.',
-    steps: ['Admin manages accounts and the catalog, oversees counts, and approves purchase orders.', 'Warehouse Staff receives and dispatches stock, uses QR scanning, and reconciles count mismatches.', 'Purchasing Manager manages supplier orders and can create or cancel purchase orders.', 'Sales Staff reads pricing, categories, and stock availability. Sales cannot change inventory or purchasing records.'],
-    note: 'All four roles can use the Help Center and send support tickets. A guide does not grant permission to perform its actions.',
+    id: 'sign-in', topic: 'access', title: 'How to sign in',
+    summary: 'Use the email, password, and role assigned to your account.',
+    steps: ['Return to the home page and select Log in.', 'Choose your assigned role, then enter your account email and password.', 'After signing in, open Help center at the bottom of the workspace sidebar for your role’s instructions. On mobile, open the sidebar menu first.'],
+    note: 'WBA does not offer public self-registration. Ask your administrator for an account.',
   },
   {
-    id: 'manage-users', topic: 'accounts', title: 'Create accounts and reset passwords', roles: ['admin'],
-    summary: 'Manage Accounts is available to Admin only.',
-    steps: ['Open Manage Accounts and the account creation form.', 'Enter the person’s name, email, assigned role, and a password with at least 12 characters.', 'To reset a password, edit the account and enter a replacement password. Leave it blank to keep the existing password.'],
-    note: 'An administrator cannot change their own role through this form. Share credentials through an approved private channel.',
+    id: 'account-access', topic: 'access', title: 'Passwords, expired sessions, and account recovery',
+    summary: 'Find the right next step when you cannot access your workspace.',
+    steps: ['If you forgot your password or do not know your role, ask your administrator. There is no self-service password reset page.', 'Sign in again when your session expires. Sessions last up to 12 hours.', 'For a deactivated account, try signing in with your existing credentials and use Reactivate My Account if recovery is offered. Contact your administrator if it is unavailable.'],
+    note: 'Deactivated accounts have a 30-day recovery window. Accounts past their recovery deadline cannot be restored.',
   },
   {
-    id: 'account-access', topic: 'accounts', title: 'Recover access to a deactivated account', roles: ALL_ROLES,
-    summary: 'Deactivated accounts have a limited recovery period.',
-    steps: ['Use the account reactivation option on the sign-in page with your existing credentials.', 'If recovery is unavailable or the account has expired, contact an administrator.', 'Ask the administrator to check your account status and role before creating a replacement account.'],
-    note: 'Accounts scheduled for deletion cannot be recovered after their recovery deadline.',
+    id: 'terminology', topic: 'concepts', title: 'Stock quantities and product terms',
+    summary: 'The key terms you will see in the inventory workspace.',
+    steps: ['SKU is the unique product identifier. A bin is its recorded storage location.', 'On-hand stock is the physical quantity. Reserved units and allocated units are already committed or assigned for picking.', 'Available to sell is on-hand stock minus reserved and allocated units, with a minimum of zero.', 'A count mismatch is a difference between physical and recorded stock. A purchase order records goods requested from a supplier.'],
+    note: 'Viewing a quantity does not change stock. Stock changes require an authorized workflow.',
   },
   {
-    id: 'availability', topic: 'inventory', title: 'Understand stock availability and pricing', roles: ALL_ROLES,
-    summary: 'On-hand stock and available-to-sell stock can differ.',
-    steps: ['Open Inventory and find the product name and SKU in the ledger.', 'Read the on-hand quantity, reserved units, and picking allocations.', 'Available to sell is on-hand stock minus reserved and allocated units, with a minimum of zero. Check the listed unit price before quoting a customer.'],
-    note: 'A count mismatch means the physical and recorded quantities differ. Ask Warehouse Staff or Admin to verify it.',
+    id: 'batch-terms', topic: 'concepts', title: 'Batches, expiry, and archived products',
+    summary: 'Understand how the system identifies and preserves product records.',
+    steps: ['A batch or lot groups stock received together, with a quantity and expiry date where applicable.', 'FIFO means first in, first out. FEFO means first expiry, first out. Follow your company’s handling policy.', 'An archived product is hidden from the active catalog while its recorded history and SKU are retained.'],
+    note: 'Archiving, restoration, receiving, and picking instructions are covered in the appropriate role’s workspace guides.',
   },
   {
-    id: 'add-product', topic: 'inventory', title: 'Add a product and classify it', roles: ['admin'],
-    summary: 'Create a catalog item with a unique SKU and accurate initial stock.',
-    steps: ['Open Inventory and select + Add Product.', 'Enter the name, SKU, bin location, unit price, initial stock, and storage cost.', 'Choose the A/B/C classification and stock-movement category. Enable batch tracking for products with a shelf life and enter the actual initial batch expiry when required.', 'Select Add to catalog and confirm the product appears in Active products.'],
-    note: 'Catalog and pricing changes are Admin responsibilities. Do not use initial stock as a substitute for later receiving or dispatch records.',
+    id: 'connection-help', topic: 'support', title: 'The website is slow or cannot connect',
+    summary: 'Check your connection and allow a sleeping hosted service time to wake.',
+    steps: ['Check your internet connection and reload the page if needed.', 'Wait briefly before selecting Retry. An idle hosted backend may need time to wake.', 'If the issue continues, note the page, time, browser, and error message before contacting support.'],
+    note: 'General help stays available without a backend connection. Workspace data and ticket sending need the backend.',
   },
   {
-    id: 'archive', topic: 'inventory', title: 'Archive, restore, or remove a product', roles: ['admin'],
-    summary: 'Archiving hides a product from the active catalog while preserving its history.',
-    steps: ['In Active products, select Archive beside an eligible product and enter a reason.', 'If Archive is disabled, read the blocking explanation. Stock, reserved or allocated units, count mismatches, batch stock, and open orders must be resolved first.', 'Open Archived products to restore an item, entering a reason for the change.', 'Permanent deletion is offered only for eligible unused products. Check the confirmation carefully; deleted products cannot be restored.'],
-    note: 'Archived SKUs stay reserved. Purchase, stock, count, and audit history is preserved when an item is archived.',
-  },
-  {
-    id: 'movement', topic: 'warehouse', title: 'Receive or dispatch stock using a SKU', roles: ['warehouse'],
-    summary: 'The scanner also supports manual SKU entry.',
-    steps: ['Open Inventory and select Scan to receive.', 'Scan the product QR label or type its SKU. Confirm the matched product.', 'Choose Receive stock or Dispatch stock and enter the actual quantity. For perishable receipts, enter the expiry date and lot when applicable.', 'Submit the operation and check the updated ledger.'],
-    note: 'Dispatch is limited by available stock. If a save fails, check the ledger before repeating the operation.',
-  },
-  {
-    id: 'qr-label', topic: 'warehouse', title: 'Generate a product QR label', roles: ['admin', 'warehouse'],
-    summary: 'QR labels identify an existing product by SKU.',
-    steps: ['Open Inventory and select Generate QR.', 'Choose the catalog product and check its name and SKU.', 'Use the available download or print action to create the label. Warehouse Staff can scan it when recording a movement.'],
-    note: 'Generating a label does not change stock. Only Warehouse Staff can use the stock scanner.',
-  },
-  {
-    id: 'reconcile', topic: 'warehouse', title: 'Resolve a stock count mismatch', roles: ['admin', 'warehouse'],
-    summary: 'Verify physical stock before reconciling the ledger.',
-    steps: ['Locate the product and its Count Mismatch in Inventory.', 'Verify the physical stock and investigate missing receipts, dispatches, or damaged goods.', 'Use Fix Count only after confirming the displayed physical quantity is correct. The action aligns the recorded count with that quantity.', 'Check that the mismatch is resolved. Report an unexplained discrepancy through a support ticket.'],
-    note: 'Fix Count records reconciliation history. It does not replace an unrecorded receiving or dispatch transaction.',
-  },
-  {
-    id: 'expiry', topic: 'warehouse', title: 'Read the FIFO / FEFO expiry queue', roles: ['admin', 'warehouse', 'purchasing'],
-    summary: 'Review remaining batch stock and expiry risk.',
-    steps: ['Open Inventory and review the batch expiry queue.', 'Check each batch’s location, quantity, and expiry date.', 'Follow warehouse policy for picking and handling expiring or expired stock.'],
-    note: 'Reviewing a batch does not change its quantity. Record stock operations through the authorized workflow.',
-  },
-  {
-    id: 'create-order', topic: 'purchasing', title: 'Add a supplier and create a purchase order', roles: ['admin', 'purchasing'],
-    summary: 'Purchase orders start pending approval.',
-    steps: ['Open Purchase history and select + New order.', 'Choose a supplier or enter a supplier name and select Save supplier.', 'Select the product, quantity, unit cost, expected delivery date, and any notes.', 'Select Submit for approval and check the order in the list.'],
-    note: 'Creating an order does not add stock. Admin approval and recorded delivery are separate steps.',
-  },
-  {
-    id: 'receive-order', topic: 'purchasing', title: 'Approve, receive, or cancel an order', roles: ['admin', 'warehouse', 'purchasing'],
-    summary: 'Available order actions depend on your role and the order status.',
-    steps: ['Admin can approve orders that are pending approval.', 'Admin or Warehouse Staff can select Receive delivery for approved orders. Verify all ordered units have arrived and supply actual expiry dates where required.', 'Admin or Purchasing Manager can cancel pending or approved orders.', 'Use the search and status filter to check the resulting order status.'],
-    note: 'Confirm receipt only when the full delivery has arrived. Do not also receive the same units through the scanner.',
-  },
-  {
-    id: 'forecast', topic: 'purchasing', title: 'Use stock activity when planning purchases', roles: ['admin', 'purchasing'],
-    summary: 'Compare recorded movements, availability, alerts, and open orders.',
-    steps: ['Review monthly receipts and dispatches on Dashboard.', 'Check current stock and low-stock alerts, then review pending and approved purchase orders.', 'Use this information with your company’s reorder policy before creating another order.'],
-    note: 'Dedicated demand-forecast reports and configurable reorder-point screens are not currently available in this interface.',
-  },
-  {
-    id: 'access-error', topic: 'troubleshooting', title: 'Sign-in failures or access denied', roles: ALL_ROLES,
-    summary: 'Check account access before repeating an action.',
-    steps: ['Confirm that you selected the assigned role and entered the correct account email.', 'If your session expired, sign in again. Sessions expire after 12 hours.', 'Ask an administrator to verify your account status or permissions. If the problem persists, send a ticket with the page and error message.'],
-    note: 'Never include your password, session token, or recovery credentials in a ticket.',
-  },
-  {
-    id: 'connection-error', topic: 'troubleshooting', title: 'Unavailable service or failed save', roles: ALL_ROLES,
-    summary: 'Keep your work and check whether the action completed.',
-    steps: ['Check your internet connection and wait briefly before using Retry. A sleeping hosted service may take time to wake.', 'For a failed save, check the relevant ledger or order list before submitting again to avoid recording the same action twice.', 'If the problem persists, note the error, time, page, and steps, then send a support ticket.'],
-    note: 'If the backend is unavailable, ticket sending may also be unavailable. Keep your description and use the support email shown in the form.',
-  },
-  {
-    id: 'camera-error', topic: 'troubleshooting', title: 'Camera or QR scanning problems', roles: ['warehouse'],
-    summary: 'Manual SKU entry is available when scanning does not work.',
-    steps: ['Allow camera access in your browser and use HTTPS or localhost.', 'Select Restart camera and make sure another application is not using it.', 'If your browser cannot decode QR codes, type the SKU manually and confirm the matched product before saving.'],
-    note: 'An unknown SKU must be added to the catalog by an administrator before stock can be recorded.',
+    id: 'contact-support', topic: 'support', title: 'Contact support or report a problem',
+    summary: 'Send useful details without sharing passwords or sensitive records.',
+    steps: ['Signed-in users can send a ticket from their workspace Help center. Include a short subject, the affected page, what happened, and steps to reproduce it.', 'If you cannot sign in, email vincentjamesguhiling@gmail.com directly.', 'For a failed save, check the relevant record before repeating the action so it is not recorded twice. Keep the ticket reference for email follow-up.'],
+    note: 'Do not send passwords, tokens, or confidential customer information. Support replies by email.',
   },
 ];
 
-export function findHelpArticles({ role, topic = 'all', query = '', relevantOnly = true }) {
+export const ROLE_HELP = {
+  admin: {
+    title: 'Admin task guides', description: 'Manage accounts and the catalog, oversee stock accuracy, and approve supplier orders.',
+    topics: [
+      { id: 'oversight', title: 'Dashboard & oversight', description: 'Review system summaries and global activity.' },
+      { id: 'accounts', title: 'Account management', description: 'Create users and maintain their access.' },
+      { id: 'catalog', title: 'Product catalog', description: 'Add, archive, restore, and remove products.' },
+      { id: 'purchasing', title: 'Purchasing approvals', description: 'Approve and oversee supplier orders.' },
+    ],
+    articles: [
+      { id: 'admin-dashboard', topic: 'oversight', title: 'Review inventory health as Admin', summary: 'Use system summaries to identify work that needs attention.', steps: ['Open Dashboard and review storage cost, stock count mismatches, and expiry risk.', 'Review recorded monthly receipts and dispatches, then open the notification bell for alerts.', 'Coordinate stock issues with Warehouse Staff and supplier-order issues with the Purchasing Manager.'], note: 'The monthly activity chart shows recorded history, not a demand prediction.' },
+      { id: 'admin-audit', topic: 'oversight', title: 'Review global audit logs', summary: 'Trace recorded account and inventory changes.', steps: ['Open Audit logs from the sidebar.', 'Use the available filters to locate the event and review its actor, time, action, and target.', 'Investigate unexplained changes and include the relevant reference when sending a support ticket.'], note: 'Global Audit logs are Admin-only. Do not distribute account or operational records outside approved channels.' },
+      { id: 'admin-count', topic: 'oversight', title: 'Verify and reconcile a count mismatch', summary: 'Oversee stock accuracy before aligning the ledger.', steps: ['Find the product’s Count Mismatch in Inventory.', 'Confirm the displayed physical quantity with Warehouse Staff and investigate missing movements.', 'Select Fix Count only after verifying that quantity, then check the mismatch is resolved.'], note: 'Fix Count records reconciliation history. It does not replace a missing receipt or dispatch.' },
+      { id: 'admin-users', topic: 'accounts', title: 'Create an account or reset a password', summary: 'Assign the appropriate role through Manage Accounts.', steps: ['Open Manage Accounts and the account creation form.', 'Enter the person’s name, email, assigned role, and a password of at least 12 characters.', 'To reset a password, edit the account and enter a replacement password. Leave it blank to retain the current one.'], note: 'You cannot change your own role here. Share credentials only through an approved private channel.' },
+      { id: 'admin-deactivate', topic: 'accounts', title: 'Deactivate or restore an account', summary: 'Manage access when someone leaves or needs recovery.', steps: ['Find the account in Manage Accounts and check that it is the correct person.', 'Use the deactivation action and review the confirmation and recovery deadline.', 'Use the available reactivation action before the recovery period expires when access should be restored.'], note: 'Deactivation removes access. Accounts have a limited recovery window; check the displayed deadline.' },
+      { id: 'admin-add', topic: 'catalog', title: 'Add and classify a catalog product', summary: 'Create an item with a unique SKU and accurate initial stock.', steps: ['Open Inventory and select + Add Product.', 'Enter its name, SKU, bin, unit price, initial stock, and storage cost.', 'Choose its classification and stock-movement category. Enter shelf life and actual batch expiry when required.', 'Select Add to catalog and check Active products.'], note: 'Later receipts and dispatches should use stock-operation workflows, not another initial-stock entry.' },
+      { id: 'admin-archive', topic: 'catalog', title: 'Archive, restore, or remove a product', summary: 'Preserve history when removing a product from the active catalog.', steps: ['Select Archive for an eligible product in Active products and enter a reason.', 'Resolve the displayed blockers first: stock, reserved or allocated units, count mismatches, batch stock, or open orders.', 'Use Archived products to restore an item with a reason.', 'Use permanent deletion only for an eligible unused product and review the confirmation carefully.'], note: 'Archived SKUs remain reserved and history is preserved. Permanent deletion cannot be reversed.' },
+      { id: 'admin-qr', topic: 'catalog', title: 'Create a product QR label', summary: 'Provide Warehouse Staff with a label for an existing SKU.', steps: ['Open Inventory and select Generate QR.', 'Select the product and verify the name and SKU.', 'Select Download QR (SVG) and use the label for the correct product.'], note: 'Generating a label does not change stock. The stock scanner is available to Warehouse Staff.' },
+      { id: 'admin-order', topic: 'purchasing', title: 'Approve an order and oversee delivery', summary: 'Review supplier orders before authorizing receipt.', steps: ['Open Purchase history and filter for pending approval.', 'Check the supplier, product, ordered quantity, and cost, then select Approve when appropriate.', 'For an approved order, confirm all units arrived before using Receive delivery. Enter actual expiry dates when required.', 'Cancel a pending or approved order when it should no longer proceed.'], note: 'Do not receive the same delivery through both its order and the stock scanner. Use the Purchasing Manager’s supplier process when delegating procurement.' },
+      { id: 'admin-create-order', topic: 'purchasing', title: 'Create a supplier order as Admin', summary: 'Enter a supplier purchase when handling procurement directly.', steps: ['Select + New order in Purchase history.', 'Choose an existing supplier or enter a name under Add a supplier and select Save supplier.', 'Choose the product, enter quantity, unit cost, expected delivery date, and notes, then select Submit for approval.', 'Review the resulting pending order before approving it.'], note: 'Order creation and approval do not increase stock. Record the actual delivery separately.' },
+    ],
+  },
+  warehouse: {
+    title: 'Warehouse Staff task guides', description: 'Receive and dispatch stock, verify quantities, and handle product batches.',
+    topics: [
+      { id: 'movements', title: 'Receiving & dispatch', description: 'Record stock operations and deliveries.' },
+      { id: 'counts', title: 'Counts & reconciliation', description: 'Verify stock and resolve ledger mismatches.' },
+      { id: 'batches', title: 'QR labels & batches', description: 'Identify products and review expiry risk.' },
+    ],
+    articles: [
+      { id: 'warehouse-start', topic: 'movements', title: 'Prepare for your warehouse shift', summary: 'Check the inventory and delivery information relevant to your work.', steps: ['Review Dashboard for count mismatches and expiry risk, then check inventory alerts.', 'Open Inventory to identify products and their storage bins.', 'Open Purchase history to review approved orders awaiting delivery.'], note: 'Catalog, pricing, account management, and global audit-log changes are outside the Warehouse Staff role.' },
+      { id: 'warehouse-receive', topic: 'movements', title: 'Receive stock using a SKU', summary: 'Record a physical receipt through the stock scanner.', steps: ['Open Inventory and select Scan to receive.', 'Scan the QR label or enter the SKU manually and confirm the matched product.', 'Choose Receive stock, enter the actual quantity, and supply lot and expiry details for perishable stock.', 'Submit the receipt and verify the ledger quantity.'], note: 'If these units belong to an approved purchase order, use Receive delivery for that order instead to avoid recording the same units twice.' },
+      { id: 'warehouse-dispatch', topic: 'movements', title: 'Dispatch stock using a SKU', summary: 'Record outgoing units against available stock.', steps: ['Open Inventory and select Scan to receive to open the stock-operation form.', 'Scan or enter the product SKU, then change Operation to Dispatch stock.', 'Confirm the product and actual outgoing quantity, submit Dispatch stock, and check the ledger.'], note: 'Dispatch is limited by available stock after reservations and allocations. Check the ledger before repeating a failed submission.' },
+      { id: 'warehouse-delivery', topic: 'movements', title: 'Receive an approved purchase-order delivery', summary: 'Record all ordered units when the supplier delivery is complete.', steps: ['Open Purchase history and locate the approved order.', 'Check the delivered products and quantities against the order.', 'Select Receive delivery, enter actual expiry dates where required, and confirm receipt only when all ordered units arrived.', 'Check that the order is marked received and its stock is reflected in Inventory.'], note: 'Warehouse Staff receives approved orders but does not create, approve, or cancel them.' },
+      { id: 'warehouse-count', topic: 'counts', title: 'Verify physical stock and fix a mismatch', summary: 'Reconcile only after confirming the displayed physical quantity.', steps: ['Locate the product’s Count Mismatch in Inventory.', 'Verify the actual stock and investigate missing receipts, dispatches, or damage.', 'If the displayed physical quantity is correct, select Fix Count to align the recorded count.', 'Check the resolved mismatch. Report an unexplained difference to Admin or through a ticket.'], note: 'Do not make unrestricted catalog or quantity edits. Stock movements and reconciliation must remain traceable.' },
+      { id: 'warehouse-qr', topic: 'batches', title: 'Generate or scan a product QR label', summary: 'Identify existing catalog products by SKU.', steps: ['Select Generate QR in Inventory, choose the product, and check its SKU.', 'Select Download QR (SVG) to create the label.', 'For stock operations, allow camera access and scan the label. If decoding fails, type the SKU manually or select Restart camera.'], note: 'Scanning needs HTTPS or localhost and a compatible browser. Ask Admin to add unknown SKUs before recording stock.' },
+      { id: 'warehouse-expiry', topic: 'batches', title: 'Review batch quantities and expiry risk', summary: 'Check batch location and expiry before handling goods.', steps: ['Review the FIFO / FEFO expiry queue in Inventory.', 'Check the product, batch quantity, bin, and expiry date.', 'Follow company policy for picking and for handling expired or expiring goods, and record any stock operation through its authorized workflow.'], note: 'Opening a batch does not change stock. Do not ship expired goods simply to clear an expiry alert.' },
+    ],
+  },
+  purchasing: {
+    title: 'Purchasing Manager task guides', description: 'Coordinate suppliers, create purchase orders, and plan replenishment.',
+    topics: [
+      { id: 'planning', title: 'Replenishment planning', description: 'Review stock activity and outstanding orders.' },
+      { id: 'orders', title: 'Suppliers & purchase orders', description: 'Create and maintain supplier orders.' },
+    ],
+    articles: [
+      { id: 'purchasing-start', topic: 'planning', title: 'Review purchasing needs', summary: 'Check recorded stock activity before arranging replenishment.', steps: ['Review Dashboard stock activity and inventory alerts.', 'Check current stock availability and relevant batch expiry information in Inventory.', 'Review pending and approved purchase orders before placing another order for the same product.'], note: 'Purchasing Manager cannot directly adjust stock, edit product pricing, or manage user accounts.' },
+      { id: 'purchasing-planning', topic: 'planning', title: 'Plan replenishment from recorded activity', summary: 'Combine WBA records with your company’s reorder policy.', steps: ['Compare monthly receipts and dispatches on Dashboard.', 'Review current stock, alerts, and expected deliveries.', 'Use these records and your company’s reorder policy to decide the next order quantity.'], note: 'The chart is historical activity. Dedicated demand forecasts and configurable reorder-point screens are not currently available.' },
+      { id: 'purchasing-supplier', topic: 'orders', title: 'Add a supplier for an order', summary: 'Save a supplier name within the order form.', steps: ['Open Purchase history and select + New order.', 'Choose an existing supplier, or enter a name under Add a supplier.', 'Select Save supplier and confirm the saved supplier is selected.'], note: 'The current form saves a supplier name; it does not provide a separate full supplier-profile editing screen.' },
+      { id: 'purchasing-create', topic: 'orders', title: 'Create a purchase order for approval', summary: 'Specify the supplier, product, quantity, and unit cost.', steps: ['Select + New order in Purchase history and choose the supplier.', 'Select the catalog product and enter the quantity, unit cost, expected delivery date, and notes.', 'Select Submit for approval and check the resulting pending order.'], note: 'Admin approves the order. Admin or Warehouse Staff records delivery; creating an order does not increase stock.' },
+      { id: 'purchasing-track', topic: 'orders', title: 'Track or cancel a supplier order', summary: 'Follow order status without changing warehouse quantities.', steps: ['Search Purchase history by order, supplier, or product.', 'Filter by pending approval, approved, received, or cancelled to check progress.', 'Use Cancel on a pending or approved order if it should not proceed, then verify its status.'], note: 'Ask Admin about approvals and Warehouse Staff about delivery confirmation. You cannot approve or receive an order as Purchasing Manager.' },
+    ],
+  },
+  sales: {
+    title: 'Sales Staff task guides', description: 'Check pricing, availability, and product information before making customer commitments.',
+    topics: [{ id: 'sales', title: 'Product enquiries & availability', description: 'Read product information and escalate stock questions.' }],
+    articles: [
+      { id: 'sales-start', topic: 'sales', title: 'Review availability before serving customers', summary: 'Start with the Sales dashboard’s stock summaries.', steps: ['Open Dashboard and check Available to sell, Customer reservations, and Catalog products.', 'Open Inventory to confirm the individual product’s current information.', 'Use recorded stock information when answering a customer enquiry.'], note: 'Sales Staff has read-only access. Sales cannot change stock, catalog records, purchasing, or accounts.' },
+      { id: 'sales-price', topic: 'sales', title: 'Check a product’s price and classification', summary: 'Use the inventory ledger to confirm product details.', steps: ['Locate the product name and SKU in Inventory.', 'Read its listed unit price and classification.', 'If the price or category appears incorrect, ask Admin to verify it before quoting the customer.'], note: 'Do not promise an unrecorded price change. Catalog and pricing changes belong to Admin.' },
+      { id: 'sales-atp', topic: 'sales', title: 'Understand available-to-sell stock', summary: 'Distinguish physical stock from units that can still be promised.', steps: ['Read the product’s on-hand, reserved, and picking-allocation quantities.', 'Available to sell is on-hand minus reserved and allocated units, with a minimum of zero.', 'If no stock is available, check with the relevant team before promising fulfillment.'], note: 'The Sales workspace displays reservations and allocations; it does not provide controls to create or release them.' },
+      { id: 'sales-discrepancy', topic: 'sales', title: 'Report a stock or product discrepancy', summary: 'Escalate inaccurate information while preserving the recorded inventory.', steps: ['Note the SKU, displayed quantity or price, time, and the information that appears wrong.', 'Ask Warehouse Staff about physical-stock differences or Admin about catalog and pricing issues.', 'If the issue persists, send a support ticket below with the affected page and expected result.'], note: 'Sales Staff cannot use Fix Count, receive stock, dispatch stock, or edit the catalog.' },
+    ],
+  },
+};
+
+function matchesHelpArticle(article, topic, query) {
   const search = query.trim().toLowerCase();
-  return HELP_ARTICLES.filter(article =>
-    (!relevantOnly || article.roles.includes(role)) &&
-    (topic === 'all' || article.topic === topic) &&
-    [article.title, article.summary, article.note, ...article.steps].join(' ').toLowerCase().includes(search));
+  return (topic === 'all' || article.topic === topic) &&
+    [article.title, article.summary, article.note, ...article.steps].join(' ').toLowerCase().includes(search);
+}
+
+export function findHelpArticles({ role, topic = 'all', query = '' }) {
+  return filterHelpArticles(ROLE_HELP[role]?.articles || [], { topic, query });
+}
+
+export function findGeneralHelpArticles({ topic = 'all', query = '' } = {}) {
+  return filterHelpArticles(GENERAL_HELP_ARTICLES, { topic, query });
+}
+
+export function filterHelpArticles(articles, { topic = 'all', query = '' } = {}) {
+  return articles.filter(article => matchesHelpArticle(article, topic, query));
 }

@@ -47,6 +47,7 @@ export default function Navbar({ activeSection, setActiveSection, theme, onToggl
                 Features
               </a>
             </li>
+            <li><a href="#/help" className="wba-nav-link">Help Center</a></li>
           </ul>
         </nav>
 

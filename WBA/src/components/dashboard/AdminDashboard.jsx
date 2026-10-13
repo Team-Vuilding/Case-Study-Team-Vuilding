@@ -50,6 +50,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
   useEffect(() => {
     const handleHashChange = () => {
       const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (rawHash === 'help') return;
       if (!rawHash) {
         return;
       }

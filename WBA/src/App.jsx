@@ -5,6 +5,7 @@ import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
 import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
+import GeneralHelpPage from './components/GeneralHelpPage';
 import ApiStatus from './components/ApiStatus';
 import { SkeletonCard } from './components/SkeletonLoader';
 import { authApi, getToken, setToken } from './services/api';
@@ -15,6 +16,7 @@ const ACCESS_LEVELS = ['admin', 'warehouse', 'purchasing', 'sales'];
 
 function getAccessRoute() {
   const route = window.location.hash.replace(/^#\/?/, '');
+  if (route === 'help') return { view: 'general-help', role: null };
   const role = route.startsWith('login/') ? route.slice(6) : null;
   if (ACCESS_LEVELS.includes(role)) return { view: 'role-login', role };
   return { view: 'landing', role: null };
@@ -39,11 +41,20 @@ function App() {
   const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
-    if (currentUser) return undefined;
     const handleAccessRoute = () => {
+      const route = getAccessRoute();
+      if (route.view === 'general-help') {
+        setIsRolePickerOpen(false);
+        setCurrentView('general-help');
+        setSelectedRole(null);
+        return;
+      }
+      if (currentUser) {
+        setCurrentView('dashboard');
+        return;
+      }
       // Login stores the token before React removes this public-route listener.
       if (getToken()) return;
-      const route = getAccessRoute();
       setCurrentView(route.view);
       setSelectedRole(route.role);
     };
@@ -55,12 +66,16 @@ function App() {
     let active = true;
     if (getToken()) {
       authApi.me().then(user => {
-        if (active) { setCurrentUser(user); setCurrentView('dashboard'); }
+        if (active) { setCurrentUser(user); setCurrentView(getAccessRoute().view === 'general-help' ? 'general-help' : 'dashboard'); }
       }).catch(error => {
         if (active && getToken()) setSessionError(error.message);
       }).finally(() => { if (active) setCheckingSession(false); });
     }
-    const expired = () => { setSessionError(''); setCurrentUser(null); setCurrentView('landing'); window.location.hash = '#/home'; };
+    const expired = () => {
+      setSessionError(''); setCurrentUser(null);
+      if (getAccessRoute().view === 'general-help') { setCurrentView('general-help'); return; }
+      setCurrentView('landing'); window.location.hash = '#/home';
+    };
     window.addEventListener('wba-auth-expired', expired);
     return () => { active = false; window.removeEventListener('wba-auth-expired', expired); };
   }, []);
@@ -129,6 +144,7 @@ function App() {
     window.location.hash = '#/home';
   };
 
+  if (currentView === 'general-help') return <GeneralHelpPage currentUser={currentUser} theme={theme} onToggleTheme={toggleTheme} onSignIn={showRolePickerFromLogin} />;
   if (checkingSession) return <main className="wba-access-page"><ApiStatus loading loadingLabel="Checking your session…"><div className="wba-skeleton-session"><SkeletonCard /></div></ApiStatus></main>;
   if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
   if (currentView === 'dashboard' && currentUser) {
@@ -185,6 +201,7 @@ function App() {
           <div className="wba-footer-links">
             <a href="#privacy">Privacy Policy</a>
             <a href="#terms">Terms of Service</a>
+            <a href="#/help">Help Center</a>
             <a href="#contact">Contact Support</a>
           </div>
         </div>

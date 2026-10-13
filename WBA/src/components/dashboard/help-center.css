@@ -2,7 +2,7 @@
 .wba-help-ticket-link { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; white-space: nowrap; }
 .wba-help-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 20px; }
 .wba-help-toolbar .wba-input-group { flex: 1; min-width: min(100%, 280px); margin: 0; }
-.wba-help-role-filter, .wba-help-consent { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: .875rem; color: var(--text-secondary); line-height: 1.5; }
+.wba-help-consent { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: .875rem; color: var(--text-secondary); line-height: 1.5; }
 .wba-help-center input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--text-primary); }
 .wba-help-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
 .wba-help-topics { display: grid; gap: 4px; }
@@ -22,7 +22,6 @@
 .wba-help-expand { flex-shrink: 0; font-size: 1.25rem; width: 24px; text-align: center; }
 .wba-help-article[open] .wba-help-expand { transform: rotate(45deg); }
 .wba-help-article-body { padding-bottom: 20px; color: var(--text-secondary); font-size: .875rem; line-height: 1.75; }
-.wba-help-article-roles { color: var(--text-primary); font-size: .75rem; margin-bottom: 16px; }
 .wba-help-article-body ol { padding-inline-start: 24px; margin: 0; }
 .wba-help-article-body li + li { margin-top: 10px; }
 .wba-help-note { margin-top: 20px; padding: 12px 16px; border-inline-start: 2px solid var(--border-subtle); background: var(--bg-surface); }
@@ -45,8 +44,24 @@
 .wba-help-error { color: var(--wba-inline-critical); font-size: .8rem; line-height: 1.6; }
 .wba-help-center :is(button, input, select, textarea, summary, a):focus-visible, .wba-help-notice:focus, #ticket-title:focus { outline: 2px solid var(--text-primary); outline-offset: 4px; }
 .wba-help-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.wba-help-page-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.wba-help-page-actions a { color: var(--text-primary); font-size: .875rem; min-height: 44px; display: inline-flex; align-items: center; overflow-wrap: anywhere; }
+.wba-help-page-actions .wba-pill-btn { text-decoration: none; }
+.wba-dashboard-app.wba-general-help { display: block; min-height: 100dvh; }
+.wba-general-help-nav, .wba-general-help-main { width: min(1200px, calc(100% - 48px)); margin-inline: auto; }
+.wba-general-help-nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 88px; border-bottom: 1px solid var(--border-subtle); }
+.wba-general-help-nav > a { display: inline-flex; }
+.wba-general-help-nav nav { display: flex; align-items: center; gap: 20px; }
+.wba-general-help-nav nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-primary); font-size: .875rem; text-underline-offset: 4px; }
+.wba-general-help-main { padding-block: 32px 48px; }
+.wba-help-general-support h2 { color: var(--text-primary); font-size: 1.125rem; margin-bottom: 12px; }
+.wba-help-general-support p { color: var(--text-secondary); font-size: .875rem; line-height: 1.7; margin-bottom: 20px; }
+.wba-general-help-nav :is(a, button):focus-visible { outline: 2px solid var(--text-primary); outline-offset: 4px; }
 @media (max-width: 1024px) { .wba-help-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } }
 @media (max-width: 768px) {
+  .wba-general-help-nav, .wba-general-help-main { width: calc(100% - 32px); }
+  .wba-general-help-nav { gap: 12px; }
+  .wba-general-help-nav nav { gap: 12px; }
   .wba-help-layout { grid-template-columns: minmax(0, 1fr); }
   .wba-help-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .wba-help-topics button { padding: 12px; }

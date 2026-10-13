@@ -7,7 +7,7 @@ import { createServer } from 'vite';
 
 const server = await createServer({
   root: fileURLToPath(new URL('../', import.meta.url)),
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, ws: false },
   appType: 'custom',
   ssr: { external: ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime'] },
 });

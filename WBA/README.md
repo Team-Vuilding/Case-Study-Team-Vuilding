@@ -10,6 +10,18 @@ The workspace uses the Laravel API in ../Backend and its SQLite database. Run ph
 
 For separate production hosts, set VITE_API_BASE_URL=https://your-api-domain/api in the frontend build environment and FRONTEND_URL=https://your-frontend-domain in Laravel. The free deployment uses Supabase PostgreSQL with Laravel on Render; follow the [deployment guide](../Backend/README.md). SQLite remains available locally and requires persistent storage if hosted. API sessions expire after 12 hours, and credentials are verified by the server. Operational data is never seeded with sample inventory.
 
+## Help Center
+
+General help is a standalone public page at `#/help`, linked from the home page's
+navigation and footer. It covers WBA's purpose, account access, inventory terms,
+and general support without requiring a working backend session.
+
+Inside a signed-in workspace, `#/help-center` shows only the assigned role's task
+guides: Admin management and oversight, Warehouse stock operations, Purchasing
+supplier orders, or Sales product enquiries. Users can open general help and
+return to their own guides. The support ticket form remains in the workspace;
+Gmail API sender configuration is described in the backend deployment guide.
+
 ## ngrok
 
 Set `NGROK_HOST=your-tunnel.ngrok-free.dev` in `WBA/.env.local` using your exact tunnel hostname, then restart `npm run dev`. Keep `VITE_API_BASE_URL=/api` and run `ngrok http http://localhost:5173`. The tunnel serves the frontend and proxies API requests to Laravel on port 8000. If your tunnel hostname changes, update `NGROK_HOST` and restart Vite.
