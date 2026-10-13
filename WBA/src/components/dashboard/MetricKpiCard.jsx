@@ -21,7 +21,7 @@ export default function MetricKpiCard({
   };
 
   return (
-    <div className="wba-glow-card">
+    <div className={'wba-glow-card wba-metric-' + status}>
       <div className="wba-kpi-header">
         <div className="wba-kpi-tag-wrap">
           <span className="wba-kpi-label">{title}</span>

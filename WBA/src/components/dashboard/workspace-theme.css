@@ -1,0 +1,235 @@
+/* Shared surfaces for the approved WBA glass reference. Data surfaces stay opaque. */
+html .wba-dashboard-app, .wba-workspace-dialog {
+  --wba-glass: rgba(19, 24, 43, .82);
+  --wba-panel: #1b2033;
+  --wba-input: #20263a;
+  --wba-edge: rgba(183, 191, 226, .2);
+  --wba-field-edge: #747f9b;
+  --wba-dialog: rgba(27, 32, 51, .98);
+  --wba-inline-strong: #f5f6ff;
+  --wba-inline-muted: #b4bcd1;
+  --wba-inline-accent: #bba1ff;
+  --wba-inline-good: #6fdbc0;
+  --wba-inline-warning: #ffd186;
+  --wba-inline-critical: #ffadb6;
+  --wba-inline-info: #71caff;
+  --wba-text-main: var(--wba-inline-strong);
+  --wba-text-secondary: var(--wba-inline-muted);
+  --wba-text-muted: var(--wba-inline-muted);
+  --text-primary: var(--wba-inline-strong);
+  --text-secondary: var(--wba-inline-muted);
+  --bg-surface: var(--wba-panel);
+  --border-subtle: var(--wba-edge);
+  --border-accent: var(--wba-inline-accent);
+  --wba-border-subtle: var(--wba-edge);
+  --wba-bg-card-hover: #272e46;
+  --wba-chart-grid: var(--wba-edge);
+  color: var(--wba-inline-strong);
+}
+html[data-theme='light'] :is(.wba-dashboard-app, .wba-workspace-dialog) {
+  --wba-glass: rgba(255, 255, 255, .76);
+  --wba-panel: #ffffff;
+  --wba-input: #f9faff;
+  --wba-edge: rgba(81, 94, 142, .22);
+  --wba-field-edge: #7b859f;
+  --wba-dialog: rgba(255, 255, 255, .98);
+  --wba-inline-strong: #252b43;
+  --wba-inline-muted: #536079;
+  --wba-inline-accent: #6141b1;
+  --wba-inline-good: #096d57;
+  --wba-inline-warning: #895200;
+  --wba-inline-critical: #b22842;
+  --wba-inline-info: #12689a;
+  --wba-bg-card-hover: #f0ebfa;
+}
+.wba-app-shell.wba-app-shell .wba-dashboard-frame,
+html .wba-dashboard-app .wba-dash-sidebar {
+  background: var(--wba-glass);
+  border: 1px solid var(--wba-edge);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 55px rgba(8, 12, 26, .16);
+}
+html .wba-dashboard-app { height: 100dvh; max-height: 100dvh; font-family: var(--font-body); }
+html .wba-dashboard-app .wba-main-wrapper { height: 100dvh; max-height: 100dvh; padding: 20px; }
+html .wba-dashboard-app .wba-dashboard-frame { border-radius: 24px; padding: 26px; min-height: calc(100dvh - 40px); }
+html .wba-dashboard-app .wba-dash-sidebar { width: 220px; min-width: 220px; height: calc(100dvh - 40px); max-height: calc(100dvh - 40px); border-radius: 22px; margin: 20px 0 20px 20px; padding: 22px 14px; transition-property: width, min-width; }
+html .wba-dashboard-app .wba-dash-sidebar.collapsed { width: 78px; min-width: 78px; padding-inline: 12px; }
+html .wba-dashboard-app .wba-dash-sidebar-logo { max-width: 120px; }
+html .wba-dashboard-app .wba-dash-nav-item { min-height: 44px; border-radius: 10px; color: var(--wba-inline-muted); }
+html .wba-dashboard-app .wba-dash-nav-item.active { background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); color: var(--wba-inline-accent); border-color: var(--wba-edge); box-shadow: none; }
+html .wba-dashboard-app .wba-header { min-height: 64px; margin-bottom: 26px; padding-bottom: 22px; border-color: var(--wba-edge); }
+html .wba-dashboard-app .wba-header-title { font-size: 1.65rem; font-weight: 700; letter-spacing: -.025em; color: var(--wba-inline-strong); text-wrap: balance; }
+html .wba-dashboard-app .wba-glow-card,
+html .wba-dashboard-app .wba-qr-tools,
+html .wba-dashboard-app .wba-accounts-summary > div { background: var(--wba-panel); border: 1px solid var(--wba-edge); border-radius: 16px; padding: 22px; box-shadow: none; }
+html .wba-dashboard-app .wba-glow-card { transition: border-color 150ms ease; }
+html .wba-dashboard-app .wba-glow-card:hover { border-color: var(--wba-edge); box-shadow: none; transform: none; }
+html .wba-dashboard-app .wba-card-heading,
+html .wba-dashboard-app .wba-accounts-section-head h3,
+html .wba-dashboard-app .wba-sku-name,
+html .wba-dashboard-app .wba-account-identity strong { color: var(--wba-inline-strong); }
+html .wba-dashboard-app .wba-card-heading { font-size: 1.05rem; font-weight: 600; }
+html .wba-dashboard-app .wba-grid-container { gap: 22px; }
+html .wba-dashboard-app .wba-kpi-label { font-size: .8125rem; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--wba-inline-muted); }
+html .wba-dashboard-app .wba-kpi-metric { font-size: 2.15rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 16px; color: var(--wba-inline-strong); }
+html .wba-dashboard-app .wba-sku-code { display: block; margin-top: 4px; color: var(--wba-inline-muted); font-family: inherit; font-size: .75rem; overflow-wrap: anywhere; }
+html .wba-dashboard-app .wba-accounts-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html .wba-dashboard-app .wba-accounts-summary > div { display: grid; gap: 14px; }
+html .wba-dashboard-app .wba-accounts-summary span { color: var(--wba-inline-muted); }
+html .wba-dashboard-app .wba-accounts-summary strong { font-size: 1.85rem; font-weight: 700; color: var(--wba-inline-strong); font-variant-numeric: tabular-nums; }
+html .wba-dashboard-app .wba-status-good { color: var(--wba-inline-good); }
+html .wba-dashboard-app .wba-status-warning { color: var(--wba-inline-warning); }
+html .wba-dashboard-app .wba-account-identity span,
+html .wba-dashboard-app .wba-account-activity span,
+html .wba-dashboard-app .wba-account-activity time { color: var(--wba-inline-muted); }
+html .wba-dashboard-app .wba-account-activity strong { color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-account-role { color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-account-status.active { color: var(--wba-inline-good); }
+html .wba-dashboard-app .wba-account-status.inactive { color: var(--wba-inline-warning); }
+html .wba-dashboard-app .wba-table-container { border-color: var(--wba-edge); border-radius: 11px; }
+html .wba-dashboard-app .wba-table th { background: var(--wba-input); color: var(--wba-inline-muted); font-size: .75rem; text-transform: none; letter-spacing: 0; font-weight: 600; }
+html .wba-dashboard-app .wba-table td { color: var(--wba-inline-strong); border-color: var(--wba-edge); font-size: .8125rem; line-height: 1.5; }
+html .wba-dashboard-app .wba-table tr:hover td { background: transparent; color: var(--wba-inline-strong); }
+html .wba-dashboard-app .wba-input-field,
+html .wba-workspace-dialog .wba-input-field { background: var(--wba-input); color: var(--wba-inline-strong); border: 1px solid var(--wba-field-edge); border-radius: 9px; min-height: 40px; font-size: .875rem; box-shadow: none; }
+html .wba-dashboard-app .wba-input-field::placeholder,
+html .wba-workspace-dialog .wba-input-field::placeholder { color: var(--wba-inline-muted); opacity: 1; }
+html .wba-dashboard-app .wba-input-label,
+html .wba-workspace-dialog .wba-input-label { color: var(--wba-inline-muted); font-weight: 500; font-size: .8125rem; }
+html .wba-dashboard-app .wba-btn-primary,
+html .wba-workspace-dialog .wba-btn-primary { background: #7048cf; border: 1px solid transparent; color: #fff; min-height: 40px; padding: 9px 15px; border-radius: 9px; font-size: .8125rem; font-weight: 600; box-shadow: none; transition: background-color 150ms ease; }
+html .wba-dashboard-app .wba-btn-primary:hover,
+html .wba-workspace-dialog .wba-btn-primary:hover { background: #633ac1; box-shadow: none; transform: none; }
+html .wba-dashboard-app .wba-pill-btn,
+html .wba-dashboard-app .wba-qr-secondary-btn,
+html .wba-dashboard-app .wba-account-actions button,
+html .wba-workspace-dialog .wba-pill-btn { min-height: 36px; padding: 7px 11px; border: 1px solid var(--wba-edge); border-radius: 8px; background: transparent; color: var(--wba-inline-accent); box-shadow: none; }
+html .wba-dashboard-app .wba-pill-btn.active { background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-ledger-action.reconcile { color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-account-actions button:hover { background: var(--wba-bg-card-hover); }
+html .wba-dashboard-app .wba-action-danger { color: var(--wba-inline-critical); }
+html .wba-dashboard-app .wba-qr-tools-icon { background: transparent; color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-section-page-header:has(.wba-toolbar-title) { padding: 0; margin: 0; border: 0; justify-content: flex-end; }
+.wba-toolbar-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wba-workspace-dialog,
+html .wba-dashboard-app dialog.wba-product-form,
+html .wba-dashboard-app .wba-product-dialog,
+html .wba-dashboard-app dialog.wba-alert-drawer {
+  background: var(--wba-dialog); border: 1px solid var(--wba-edge); color: var(--wba-inline-strong); box-shadow: 0 24px 60px rgba(8, 12, 26, .24); backdrop-filter: blur(12px); border-radius: 20px;
+}
+dialog.wba-workspace-dialog { position: fixed; inset: 0; width: min(520px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 28px; overflow-y: auto; overscroll-behavior: contain; }
+dialog.wba-workspace-dialog.wba-order-form { width: min(620px, calc(100% - 32px)); }
+dialog.wba-workspace-dialog::backdrop,
+html .wba-dashboard-app dialog::backdrop { background: rgba(9, 12, 24, .62); backdrop-filter: blur(4px); }
+html[data-theme] .wba-workspace-dialog h2 { padding-right: 28px; font-size: 1.4rem; font-weight: 700; line-height: 1.3; color: var(--wba-inline-strong); text-wrap: balance; }
+html .wba-workspace-dialog > p { color: var(--wba-inline-muted); margin: 14px 0; line-height: 1.6; }
+html .wba-workspace-dialog .wba-input-group { margin-top: 16px; }
+html .wba-workspace-dialog .wba-form-grid .wba-input-group { margin-top: 0; }
+html .wba-workspace-dialog .wba-modal-close-btn { width: 36px; height: 36px; top: 16px; right: 16px; color: var(--wba-inline-muted); }
+html .wba-workspace-dialog .wba-accounts-form-actions { margin-top: 24px; }
+.wba-dialog-identity { display: grid; gap: 4px; margin-top: 20px; overflow-wrap: anywhere; }
+.wba-dialog-identity span { color: var(--wba-inline-muted); font-size: .8125rem; }
+.wba-recovery-notice { margin: 22px 0; padding: 16px; border: 1px solid var(--wba-edge); background: color-mix(in srgb, var(--wba-inline-accent) 8%, var(--wba-panel)); border-radius: 12px; font-size: .8125rem; line-height: 1.6; }
+.wba-recovery-notice p { margin-top: 4px; color: var(--wba-inline-muted); }
+html .wba-workspace-dialog .wba-danger-button { background: #b22842; color: #fff; }
+html .wba-workspace-dialog .wba-danger-button:hover { background: #981b34; }
+html .wba-workspace-dialog .wba-modal-error { color: var(--wba-inline-critical); margin-top: 14px; }
+.wba-order-reference { overflow-wrap: anywhere; }
+html .wba-workspace-dialog :is(button, input, select, textarea):focus-visible { outline: 2px solid var(--wba-inline-accent); outline-offset: 3px; }
+html .wba-workspace-dialog button:disabled { opacity: .5; cursor: not-allowed; }
+html .wba-dashboard-app .wba-purchase-table .wba-order-identity { display: block; overflow-wrap: anywhere; }
+html .wba-dashboard-app .wba-detail-table { min-width: 0; }
+html .wba-dashboard-app .wba-purchase-table .wba-order-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.wba-ledger-details { margin-top: 8px; }
+.wba-ledger-details summary { color: var(--wba-inline-accent); cursor: pointer; font-size: .75rem; }
+.wba-ledger-details dl { display: grid; gap: 6px; padding: 10px 0; font-size: .75rem; }
+.wba-ledger-details dl > div { display: flex; justify-content: space-between; gap: 12px; }
+.wba-ledger-details dt { color: var(--wba-inline-muted); }
+html .wba-dashboard-app .wba-inventory-ledger .wba-table { min-width: 0; }
+html .wba-dashboard-app .wba-inventory-ledger .wba-table th { padding-inline: 10px; }
+html .wba-dashboard-app .wba-kpi-icon-pill { padding: 0; border: 0; background: transparent; color: var(--wba-inline-accent); }
+html .wba-dashboard-app .wba-metric-warning .wba-kpi-metric { color: var(--wba-inline-warning); }
+html .wba-dashboard-app .wba-accounts-summary strong.wba-status-good { color: var(--wba-inline-good); }
+html .wba-dashboard-app .wba-accounts-summary strong.wba-status-warning { color: var(--wba-inline-warning); }
+.wba-chart-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.wba-chart-heading .wba-stock-legend { margin: 0; }
+.wba-mobile-activity { display: none; }
+html .wba-dashboard-app .wba-ledger-result-count { margin: 16px 0 0; }
+dialog.wba-sidebar-dialog { inset: 0 auto 0 0; margin: 0; width: min(280px, calc(100% - 32px)); height: 100dvh; max-height: 100dvh; padding: 18px; border-radius: 0 20px 20px 0; }
+.wba-sidebar-dialog .wba-dash-sidebar { position: static; inset: auto; width: 100%; min-width: 0; height: 100%; max-height: 100%; padding: 10px 0 max(16px, env(safe-area-inset-bottom)); background: transparent; border: 0; transform: none; }
+.wba-sidebar-dialog .wba-dash-mobile-toggle { display: none; }
+.wba-sidebar-dialog .wba-dash-nav-item { min-height: 44px; color: var(--wba-inline-muted); }
+.wba-sidebar-dialog .wba-dash-nav-item.active { color: var(--wba-inline-accent); background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); }
+.wba-sidebar-dialog .wba-dash-nav-label { display: inline; }
+@supports not (backdrop-filter: blur(1px)) {
+  .wba-app-shell.wba-app-shell .wba-dashboard-frame, .wba-dashboard-app .wba-dash-sidebar, dialog.wba-workspace-dialog { background: var(--wba-panel); }
+}
+@media (max-width: 900px) {
+  html .wba-dashboard-app .wba-main-wrapper { padding: 12px; }
+  html .wba-dashboard-app .wba-dashboard-frame { min-height: calc(100dvh - 24px); padding: 20px; }
+  html .wba-dashboard-app .wba-dash-sidebar { position: fixed; margin: 0; inset: 0 auto 0 0; width: 240px; min-width: 240px; height: 100dvh; max-height: 100dvh; border-radius: 0 20px 20px 0; background: var(--wba-dialog); padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+  html .wba-dashboard-app .wba-dash-sidebar.collapsed { width: 240px; min-width: 240px; }
+  html .wba-dashboard-app .wba-dash-sidebar.mobile-closed { visibility: hidden; }
+  html .wba-dashboard-app .wba-dash-nav-label { display: inline; }
+  html .wba-dashboard-app .wba-header { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  html .wba-dashboard-app .wba-header-title { font-size: 1.35rem; white-space: normal; overflow: visible; }
+}
+@media (max-width: 740px) {
+  .wba-desktop-activity { display: none; }
+  .wba-mobile-activity { display: grid; gap: 16px; list-style: none; padding: 0; }
+  .wba-mobile-activity li { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 12px; font-size: .75rem; }
+  .wba-activity-month { color: var(--wba-inline-muted); }
+  .wba-activity-value { display: grid; grid-template-columns: minmax(0, 1fr) 22px; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+  .wba-activity-value.received { color: var(--wba-stock-received); }
+  .wba-activity-value.dispatched { color: var(--wba-stock-dispatched); }
+  .wba-activity-track { display: block; height: 5px; border-radius: 4px; background: color-mix(in srgb, currentColor 10%, transparent); }
+  .wba-activity-track > span { display: block; height: 100%; border-radius: inherit; background: currentColor; }
+  html .wba-dashboard-app .wba-dashboard-frame { padding: 16px; border-radius: 18px; }
+  html .wba-dashboard-app .wba-glow-card { padding: 16px; }
+  html .wba-dashboard-app .wba-input-field, .wba-workspace-dialog .wba-input-field { font-size: 16px; }
+  html .wba-dashboard-app .wba-accounts-summary { grid-template-columns: minmax(0, 1fr); }
+  html .wba-dashboard-app .wba-accounts-summary > div { display: flex; align-items: center; justify-content: space-between; }
+  html .wba-dashboard-app .wba-top-metrics-row .wba-glow-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  html .wba-dashboard-app .wba-kpi-header { margin: 0; }
+  html .wba-dashboard-app .wba-kpi-metric { font-size: 1.6rem; margin: 0; }
+  html .wba-dashboard-app .wba-inventory-ledger .wba-table { min-width: 0; display: block; }
+  html .wba-dashboard-app .wba-inventory-ledger .wba-table-container { border: 0; overflow: visible; }
+  html .wba-dashboard-app .wba-inventory-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  html .wba-dashboard-app .wba-inventory-ledger tbody { display: block; }
+  html .wba-dashboard-app .wba-inventory-ledger tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 18px 0; border-top: 1px solid var(--wba-edge); }
+  html .wba-dashboard-app .wba-inventory-ledger td { display: block; padding: 0; border: 0; min-width: 0; text-align: left; }
+  html .wba-dashboard-app .wba-inventory-ledger td:first-child { grid-column: 1 / -1; min-width: 0; }
+  html .wba-dashboard-app .wba-inventory-ledger .wba-atp-pill { padding: 0; border: 0; background: transparent; font-size: 1.125rem; }
+  .wba-unit-suffix { display: none; }
+  html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-number::before { content: attr(data-label); display: block; font-weight: 400; font-size: .75rem; color: var(--wba-inline-muted); margin-bottom: 5px; }
+  html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-status-cell,
+  html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-actions-cell,
+  html .wba-dashboard-app .wba-inventory-ledger .wba-ledger-empty { grid-column: 1 / -1; }
+  .wba-ledger-details { display: block; margin-top: 10px; }
+  .wba-ledger-details summary { cursor: pointer; color: var(--wba-inline-accent); font-size: .75rem; padding: 5px 0; }
+  .wba-ledger-details dl { display: grid; gap: 6px; padding: 10px 0; font-size: .75rem; }
+  .wba-ledger-details dl > div { display: flex; justify-content: space-between; gap: 12px; }
+  .wba-ledger-details dt { color: var(--wba-inline-muted); }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) { min-width: 0; display: block; }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) tbody { display: block; }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) tbody tr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 18px 14px; border-top: 1px solid var(--wba-edge); }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) td { padding: 0; border: 0; min-width: 0; overflow-wrap: anywhere; }
+  html .wba-dashboard-app :is(.wba-purchase-table, .wba-detail-table) td[data-label]::before { content: attr(data-label); display: block; font-size: .75rem; color: var(--wba-inline-muted); margin-bottom: 4px; }
+  html .wba-dashboard-app .wba-account-row { grid-template-columns: 36px minmax(0, 1fr); }
+  html .wba-dashboard-app .wba-account-actions { grid-column: 2; grid-row: auto; flex-direction: row; justify-content: flex-start; flex-wrap: wrap; }
+  html .wba-workspace-dialog { padding: 24px; }
+  html .wba-workspace-dialog .wba-form-grid { grid-template-columns: minmax(0, 1fr); }
+  html .wba-workspace-dialog .wba-accounts-form-actions { flex-wrap: wrap; }
+  html .wba-dashboard-app .wba-product-row-actions { gap: 8px; flex-wrap: wrap; }
+  html .wba-dashboard-app .wba-ledger-action { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html .wba-dashboard-app *, .wba-workspace-dialog * { transition: none; }
+}
+@media (max-width: 380px) {
+  html .wba-dashboard-app .wba-top-metrics-row .wba-glow-card { display: grid; grid-template-columns: minmax(0, 1fr); }
+  html .wba-dashboard-app .wba-kpi-header { width: 100%; }
+  html .wba-dashboard-app .wba-kpi-metric { margin-top: 8px; }
+}

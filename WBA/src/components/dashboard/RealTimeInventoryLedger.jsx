@@ -36,36 +36,33 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
               <line x1="12" y1="22.08" x2="12" y2="12" />
             </svg>
-            <span>{accessLevel === 'sales' ? 'Product Availability & Pricing Ledger' : 'Inventory Stock Ledger'}</span>
+            <span>{accessLevel === 'sales' ? 'Product availability' : 'Stock ledger'}</span>
           </div>
         </div>
         <div className="wba-ledger-controls">
-          <input type="search" className="wba-input-field" aria-label="Search inventory" placeholder="Search product, SKU, or bin" value={search} onChange={event => setSearch(event.target.value)} />
+          <input type="search" className="wba-input-field" aria-label="Search inventory" placeholder="Search product or SKU" value={search} onChange={event => setSearch(event.target.value)} />
           <select className="wba-input-field" aria-label="Filter by count status" value={countFilter} onChange={event => setCountFilter(event.target.value)}>
             <option value="all">All count statuses</option><option value="mismatch">Count mismatches</option>
           </select>
         </div>
       </div>
 
-      <p className="wba-ledger-result-count" role="status">Showing {visibleItems.length} of {items.length} products</p>
       <div className="wba-table-container" tabIndex={0} role="region" aria-label="Inventory stock ledger">
         <table className="wba-table">
           <caption className="wba-ledger-caption">Product stock balances</caption>
           <thead>
             <tr>
               <th>Product</th>
-              <th>Category</th>
               {accessLevel === 'sales' && <th>Unit Price</th>}
               <th className="wba-ledger-number">In stock</th>
               <th className="wba-ledger-number">Reserved</th>
-              <th className="wba-ledger-number">Being picked</th>
-              <th className="wba-ledger-number">Available to sell</th>
+              <th className="wba-ledger-number">Available</th>
               <th>Count status</th>
               {hasActions && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
-            {visibleItems.length === 0 && <tr><td colSpan={7 + (accessLevel === 'sales' ? 1 : 0) + (hasActions ? 1 : 0)} className="wba-ledger-empty">
+            {visibleItems.length === 0 && <tr><td colSpan={5 + (accessLevel === 'sales' ? 1 : 0) + (hasActions ? 1 : 0)} className="wba-ledger-empty">
               {items.length === 0 ? 'No products yet.' : <>
                 No products match these filters. <button type="button" className="wba-pill-btn" onClick={() => { setSearch(''); setCountFilter('all'); }}>Clear filters</button>
               </>}
@@ -82,34 +79,25 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
                     <span className="wba-sku-code">
                       {item.sku} {accessLevel !== 'sales' && `· ${item.warehouseBin}`}
                     </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`wba-category-tag ${
-                        item.category === 'A'
-                          ? 'wba-cat-a'
-                          : item.category === 'B'
-                          ? 'wba-cat-b'
-                          : item.category === 'C' ? 'wba-cat-c' : ''
-                      }`}
-                    >
-                      {item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : item.category === 'C' ? 'Perishable' : 'Unclassified'}
-                    </span>
+                    <details className="wba-ledger-details"><summary>Stock details</summary><dl>
+                      <div><dt>Category</dt><dd>{item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : item.category === 'C' ? 'Perishable' : 'Unclassified'}</dd></div>
+                      <div><dt>Being picked</dt><dd>{item.allocated}</dd></div>
+                      <div><dt>Ledger count</dt><dd>{item.paperSpreadsheetCount}</dd></div>
+                    </dl></details>
                   </td>
                   {accessLevel === 'sales' && (
-                    <td style={{ fontWeight: 700, color: 'var(--wba-inline-good)' }}>
+                    <td className="wba-ledger-number" data-label="Unit price" style={{ fontWeight: 700, color: 'var(--wba-inline-good)' }}>
                       ₱{item.unitPrice.toLocaleString()}
                     </td>
                   )}
-                  <td className="wba-ledger-number" style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{item.physicalOnHand}</td>
-                  <td className="wba-ledger-number" style={{ color: 'var(--wba-inline-warning)' }}>{item.reserved}</td>
-                  <td className="wba-ledger-number" style={{ color: 'var(--wba-inline-info)' }}>{item.allocated}</td>
-                  <td className="wba-ledger-number">
+                  <td className="wba-ledger-number" data-label="In stock" style={{ fontWeight: 700, color: 'var(--wba-inline-strong)' }}>{item.physicalOnHand}</td>
+                  <td className="wba-ledger-number" data-label="Reserved" style={{ color: 'var(--wba-inline-muted)' }}>{item.reserved}</td>
+                  <td className="wba-ledger-number" data-label="Available">
                     <span className={`wba-atp-pill ${available === 0 ? 'wba-atp-zero' : 'wba-atp-positive'}`}>
-                      {available} units
+                      {available}<span className="wba-unit-suffix"> units</span>
                     </span>
                   </td>
-                  <td>
+                  <td className="wba-ledger-status-cell">
                     {hasDiscrepancy ? (
                       <span className="wba-ledger-count-status mismatch">
                         ⚠️ {Math.abs(variance)} {variance < 0 ? 'missing' : 'extra'}
@@ -142,6 +130,7 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
           </tbody>
         </table>
       </div>
+      <p className="wba-ledger-result-count" role="status">{visibleItems.length} {visibleItems.length === 1 ? 'product' : 'products'}</p>
     </div>
   );
 }

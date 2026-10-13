@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import WorkspaceDialog from '../WorkspaceDialog';
 
 export default function QrInventoryScanner({ isOpen, onClose, onScan, products }) {
   const video = useRef(null);
@@ -63,8 +64,7 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan, products }
       stop(); setCode(''); setQuantity(1); setExpiresAt(''); setLot(''); onClose();
     } catch (reason) { setError(reason.message); } finally { setSaving(false); }
   };
-  return <div className="wba-dash-modal-overlay" onClick={close}><section className="wba-dash-modal-card wba-qr-scanner-modal" role="dialog" aria-modal="true" aria-labelledby="scan-title" onClick={event => event.stopPropagation()}>
-    <button type="button" className="wba-modal-close-btn" onClick={close} disabled={saving} aria-label="Close scanner">×</button>
+  return <WorkspaceDialog onClose={close} labelledBy="scan-title" closeLabel="Close scanner" busy={saving} className="wba-qr-scanner-modal">
     <h2 id="scan-title">Scan product stock</h2><p>Scan a SKU label, choose an operation, and confirm the quantity.</p>
     <div className="wba-qr-camera-frame"><video ref={video} muted playsInline /><span>{camera === 'opening' ? 'Opening camera…' : ''}</span></div>
     <button type="button" className="wba-pill-btn" onClick={start} disabled={camera === 'opening'}>Restart camera</button>
@@ -80,5 +80,5 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan, products }
       {error && <p role="alert" className="wba-modal-error">{error}</p>}
       <div className="wba-qr-scanner-actions"><button type="button" className="wba-pill-btn" disabled={saving} onClick={close}>Cancel</button><button className="wba-btn-primary" disabled={saving || !products.length}>{saving ? 'Saving…' : type === 'stock_in' ? 'Receive stock' : 'Dispatch stock'}</button></div>
     </form>
-  </section></div>;
+  </WorkspaceDialog>;
 }

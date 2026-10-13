@@ -8,13 +8,13 @@ export default function ArchivedProducts({ onRestore, onDelete, onReports }) {
 
   return <section className="wba-glow-card">
     <div className="wba-card-title-group"><h3>Archived products</h3></div>
-    {!data.length ? <p className="wba-product-empty">No archived products.</p> : <div className="wba-table-container"><table className="wba-table">
+    {!data.length ? <p className="wba-product-empty">No archived products.</p> : <div className="wba-table-container" tabIndex={0} role="region" aria-label="Archived products"><table className="wba-table wba-detail-table">
       <thead><tr><th>Product</th><th>Archived on</th><th>Archived by</th><th>Reason</th><th>Actions</th></tr></thead>
       <tbody>{data.map(item => <tr key={item.id}>
         <td><strong className="wba-sku-name">{item.name}</strong><span className="wba-sku-code">{item.sku}</span></td>
-        <td><time dateTime={item.archivedAt}>{new Date(item.archivedAt).toLocaleDateString()}</time></td>
-        <td>{item.archivedBy}</td>
-        <td className="wba-product-archive-reason">{item.archiveReason}</td>
+        <td data-label="Archived on"><time dateTime={item.archivedAt}>{new Date(item.archivedAt).toLocaleDateString()}</time></td>
+        <td data-label="Archived by">{item.archivedBy}</td>
+        <td data-label="Reason" className="wba-product-archive-reason">{item.archiveReason}</td>
         <td><div className="wba-product-row-actions">
           {item.reportCount > 0 && <button type="button" className="wba-pill-btn" onClick={() => onReports(item)} aria-label={'View reports for ' + item.name}>Reports ({item.reportCount})</button>}
           <button type="button" className="wba-pill-btn" onClick={() => onRestore(item)} aria-label={'Restore ' + item.name}>Restore</button>

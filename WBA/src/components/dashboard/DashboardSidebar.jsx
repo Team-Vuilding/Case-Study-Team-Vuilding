@@ -1,20 +1,19 @@
 import React from 'react';
 import Logo from '../Logo';
-import { isTabAllowed, hasPermission, PERMISSIONS } from '../../data/rbac';
+import { isTabAllowed } from '../../data/rbac';
+import WorkspaceDialog from '../WorkspaceDialog';
 
 export default function DashboardSidebar({
   isCollapsed = false,
-  isMobileOpen = true,
+  isMobileOpen = false,
   onCloseMobile,
   activeTab = 'dashboard',
   onSelectTab,
-  onOpenAddProduct,
   currentUser,
 }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
-  const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
 
-  return (
+  const sidebar = (
     <aside className={`wba-dash-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? '' : 'mobile-closed'}`}>
       {/* Brand Logo matching reference */}
       <div className="wba-dash-sidebar-header">
@@ -29,32 +28,6 @@ export default function DashboardSidebar({
           ‹
         </button>
       </div>
-
-      {/* + Add product button (Admin only) */}
-      {canAddProduct && (
-        <div className="wba-dash-add-product-wrapper">
-          <button
-            type="button"
-            className="wba-dash-add-product-btn"
-            onClick={onOpenAddProduct}
-            title="Add product"
-          >
-            <svg
-              className="wba-dash-add-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            {!isCollapsed && <span className="wba-dash-add-text">Add product</span>}
-          </button>
-        </div>
-      )}
 
       {/* Section Title */}
       {!isCollapsed && <div className="wba-dash-section-title">Overview</div>}
@@ -216,4 +189,5 @@ export default function DashboardSidebar({
       </div>
     </aside>
   );
+  return isMobileOpen ? <WorkspaceDialog onClose={onCloseMobile} label="Workspace navigation" closeLabel="Close sidebar" className="wba-sidebar-dialog">{sidebar}</WorkspaceDialog> : sidebar;
 }

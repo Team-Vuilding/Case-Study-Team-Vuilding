@@ -91,6 +91,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
       return;
     }
     setActiveTab(tab);
+    setIsMobileSidebarOpen(false);
     try {
       localStorage.setItem('wba_active_tab', tab);
     } catch {
@@ -158,24 +159,14 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
-        onOpenAddProduct={() => handleSelectTab('inventory')}
         currentUser={currentUser}
       />
-      {isMobileSidebarOpen && (
-        <button
-          type="button"
-          className="wba-dash-sidebar-backdrop"
-          onClick={() => setIsMobileSidebarOpen(false)}
-          aria-label="Close sidebar"
-        />
-      )}
 
       {/* Main Content Area */}
       <div className="wba-main-wrapper">
         <div className="wba-dashboard-frame">
           {/* Header Bar */}
           <DashboardHeader
-            isSidebarCollapsed={isSidebarCollapsed}
             onToggleSidebar={handleToggleSidebar}
             currentRole={currentUser?.role || 'Admin'}
             currentUser={currentUser}

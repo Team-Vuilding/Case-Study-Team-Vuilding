@@ -100,7 +100,7 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
         {readError && <div role="alert" className="wba-alert-read-error">{readError} <button type="button" className="wba-pill-btn" disabled={marking} onClick={() => markViewed(notifications.filter(alert => !alert.isRead && alert.version))}>Retry</button></div>}
         {current.length > 0 ? <section aria-label="New notifications" className="wba-alert-list">{current.map(alert => <AlertCard key={alertKey(alert)} alert={alert} />)}</section> : <div className="wba-alert-empty"><h3>You're all caught up</h3><p>No new notifications.</p></div>}
         {viewed.length > 0 && <details className="wba-viewed-alerts"><summary>Viewed alerts <span>{viewed.length}</span></summary><div className="wba-alert-list">{viewed.map(alert => <AlertCard key={alertKey(alert)} alert={alert} />)}</div></details>}
-        <p className="wba-alert-footer" role="status">{marking ? 'Marking notifications as viewed…' : readError ? 'Unread notifications are still highlighted.' : 'New notifications are marked as viewed when opened.'}</p>
+        {(marking || readError) && <p className="wba-alert-footer" role="status">{marking ? 'Marking notifications as viewed…' : 'Unread notifications are still highlighted.'}</p>}
       </>}
     </div>
   </dialog>;

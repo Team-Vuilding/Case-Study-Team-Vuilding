@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
+import WorkspaceDialog from '../WorkspaceDialog';
 import { SkeletonHeading, SkeletonList, SkeletonSummary } from '../WorkspaceSkeletons';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 import './form-and-alerts.css';
@@ -30,6 +31,7 @@ export default function ManageAccountsSection({ currentUser }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Confirmation modal state for 30-day deactivation
   const [accountToDeactivate, setAccountToDeactivate] = useState(null);
@@ -57,6 +59,7 @@ export default function ManageAccountsSection({ currentUser }) {
 
   const handleSave = async (event) => {
     event.preventDefault();
+    if (isSaving) return;
     if (!hasPermission(currentUser?.accessLevel, PERMISSIONS.MANAGE_ACCOUNTS)) return;
     const name = form.name.trim();
     const email = form.email.trim().toLowerCase();
@@ -71,6 +74,7 @@ export default function ManageAccountsSection({ currentUser }) {
       return setError('You cannot change your own role.');
     }
 
+    setIsSaving(true);
     try {
       await apiRequest(editingId ? 'users/' + editingId : 'users', {
         method: editingId ? 'PUT' : 'POST',
@@ -86,6 +90,8 @@ export default function ManageAccountsSection({ currentUser }) {
       setNotice(`${name} ${editingId ? 'updated' : 'added'}.`);
     } catch (reason) {
       setError(reason.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -159,7 +165,7 @@ export default function ManageAccountsSection({ currentUser }) {
     <div className="wba-grid-container wba-accounts-page">
       <div className="wba-section-page-header">
         <div>
-          <h2 className="wba-section-page-title">Manage Accounts</h2>
+          <h2 className="wba-section-page-title wba-toolbar-title">Manage Accounts</h2>
         </div>
         <button type="button" className="wba-btn-primary" onClick={openCreate}>
           + Add user
@@ -175,11 +181,11 @@ export default function ManageAccountsSection({ currentUser }) {
         </div>
         <div>
           <span>Active users</span>
-          <strong style={{ color: '#34d399' }}>{activeAccountsCount}</strong>
+          <strong className="wba-status-good">{activeAccountsCount}</strong>
         </div>
         <div>
           <span>In 30-Day Recovery</span>
-          <strong style={{ color: '#fbbf24' }}>{deactivatedAccountsCount}</strong>
+          <strong className="wba-status-warning">{deactivatedAccountsCount}</strong>
         </div>
       </section>
 
@@ -249,7 +255,7 @@ export default function ManageAccountsSection({ currentUser }) {
                   {isDeactivated ? (
                     <button
                       type="button"
-                      style={{ color: '#34d399', borderColor: 'rgba(52, 211, 153, 0.4)' }}
+                      className="wba-status-good"
                       onClick={() => handleReactivate(account)}
                     >
                       Reactivate
@@ -293,22 +299,7 @@ export default function ManageAccountsSection({ currentUser }) {
 
       {/* Add / Edit User Modal */}
       {isFormOpen && (
-        <div className="wba-dash-modal-overlay" onClick={() => setIsFormOpen(false)}>
-          <div
-            className="wba-dash-modal-card wba-account-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="wba-account-form-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="wba-modal-close-btn"
-              aria-label="Close account form"
-              onClick={() => setIsFormOpen(false)}
-            >
-              &times;
-            </button>
+        <WorkspaceDialog onClose={() => setIsFormOpen(false)} labelledBy="wba-account-form-title" className="wba-account-modal" busy={isSaving}>
             <h2 id="wba-account-form-title">{editingId ? 'Edit account' : 'Add user'}</h2>
             <form onSubmit={handleSave} className="wba-account-form" autoComplete="off">
               <label className="wba-input-group">
@@ -370,68 +361,24 @@ export default function ManageAccountsSection({ currentUser }) {
               </div>
               {error && <p className="wba-modal-error" role="alert">{error}</p>}
               <div className="wba-accounts-form-actions">
-                <button type="button" className="wba-pill-btn" onClick={() => setIsFormOpen(false)}>
+                <button type="button" className="wba-pill-btn" disabled={isSaving} onClick={() => setIsFormOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="wba-btn-primary">
-                  {editingId ? 'Save changes' : 'Create account'}
+                <button type="submit" className="wba-btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving…' : editingId ? 'Save changes' : 'Create account'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </WorkspaceDialog>
       )}
 
       {/* Admin Deactivation Confirmation Modal */}
       {accountToDeactivate && (
-        <div className="wba-dash-modal-overlay" onClick={() => setAccountToDeactivate(null)}>
-          <div
-            className="wba-dash-modal-card"
-            style={{ maxWidth: '480px', border: '1.5px solid rgba(245, 158, 11, 0.45)' }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="admin-deactivate-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="wba-modal-close-btn"
-              onClick={() => setAccountToDeactivate(null)}
-              aria-label="Close modal"
-            >
-              &times;
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '1.4rem' }}>⚠️</span>
-              <h2 id="admin-deactivate-title" style={{ color: '#fff', fontSize: '1.2rem', margin: 0 }}>
-                Confirm Account Deactivation
-              </h2>
-            </div>
-
-            <p style={{ color: '#d1d5db', fontSize: '0.88rem', margin: '12px 0 6px 0', lineHeight: 1.5 }}>
-              Are you sure you want to deactivate <strong>{accountToDeactivate.name}</strong> ({accountToDeactivate.email})?
-            </p>
-
-            <div
-              style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
-                borderRadius: '8px',
-                padding: '12px',
-                fontSize: '0.82rem',
-                color: '#fef3c7',
-                lineHeight: 1.5,
-                margin: '12px 0 16px 0',
-              }}
-            >
-              <strong>30-Day Recovery Policy:</strong>
-              <div style={{ marginTop: '4px' }}>
-                The account will immediately lose access. They will have <strong>30 days</strong> to recover their account. If not reactivated by <strong>{accountToDeactivate.recoveryDeadline}</strong>, it becomes eligible for permanent deletion.
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <WorkspaceDialog onClose={() => setAccountToDeactivate(null)} labelledBy="admin-deactivate-title" busy={isDeactivatingAccount} className="wba-confirm-dialog">
+            <h2 id="admin-deactivate-title">Deactivate account?</h2>
+            <div className="wba-dialog-identity"><strong>{accountToDeactivate.name}</strong><span>{accountToDeactivate.email}</span></div>
+            <div className="wba-recovery-notice"><strong>30-day recovery</strong><p>Access stops immediately. Recover this account before {accountToDeactivate.recoveryDeadline}. After that date, it becomes eligible for permanent deletion.</p></div>
+            <div className="wba-accounts-form-actions">
               <button
                 type="button"
                 className="wba-pill-btn"
@@ -442,16 +389,14 @@ export default function ManageAccountsSection({ currentUser }) {
               </button>
               <button
                 type="button"
-                className="wba-btn-primary"
-                style={{ background: '#dc2626', borderColor: '#ef4444' }}
+                className="wba-btn-primary wba-danger-button"
                 onClick={executeDeactivation}
                 disabled={isDeactivatingAccount}
               >
-                {isDeactivatingAccount ? 'Deactivating…' : 'Confirm Deactivation'}
+                {isDeactivatingAccount ? 'Deactivating…' : 'Deactivate account'}
               </button>
             </div>
-          </div>
-        </div>
+        </WorkspaceDialog>
       )}
     </div>
   );

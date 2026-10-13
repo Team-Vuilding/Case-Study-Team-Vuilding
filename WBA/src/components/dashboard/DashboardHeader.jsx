@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { authApi } from '../../services/api';
+import WorkspaceDialog from '../WorkspaceDialog';
 
 export default function DashboardHeader({
-  isSidebarCollapsed,
   onToggleSidebar,
   currentRole = 'Admin',
   currentUser,
@@ -69,8 +69,8 @@ export default function DashboardHeader({
           type="button"
           className="wba-toggle-btn"
           onClick={onToggleSidebar}
-          aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label="Toggle navigation"
+          title="Toggle navigation"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -237,61 +237,13 @@ export default function DashboardHeader({
 
       {/* Account Deactivation Modal */}
       {isDeactivateModalOpen && (
-        <div className="wba-dash-modal-overlay" onClick={() => setIsDeactivateModalOpen(false)}>
-          <div
-            className="wba-dash-modal-card"
-            style={{ maxWidth: '500px', border: '1.5px solid rgba(245, 158, 11, 0.5)' }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="deactivate-dialog-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="wba-modal-close-btn"
-              onClick={() => setIsDeactivateModalOpen(false)}
-              aria-label="Close deactivation modal"
-            >
-              &times;
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '1.5rem' }}>⚠️</span>
-              <h2 id="deactivate-dialog-title" style={{ color: '#fff', fontSize: '1.25rem', margin: 0 }}>
-                Deactivate Your Account
-              </h2>
-            </div>
-
-            <div
-              style={{
-                background: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.35)',
-                borderRadius: '10px',
-                padding: '14px',
-                margin: '14px 0',
-                fontSize: '0.85rem',
-                lineHeight: 1.55,
-                color: '#fef3c7',
-              }}
-            >
-              <p style={{ margin: '0 0 8px 0', fontWeight: 600 }}>
-                30-Day Recovery Period Policy:
-              </p>
-              <ul style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <li>Your access will be suspended immediately upon confirmation.</li>
-                <li>You will have <strong>30 days</strong> to recover your account simply by signing back in.</li>
-                <li>
-                  Permanent deletion deadline: <strong>{scheduledDeletionDate}</strong>.
-                </li>
-                <li>
-                  After this deadline, the server will <strong>permanently and irreversibly delete</strong> your account.
-                </li>
-              </ul>
-            </div>
+        <WorkspaceDialog onClose={() => setIsDeactivateModalOpen(false)} labelledBy="deactivate-dialog-title" busy={isDeactivating} className="wba-confirm-dialog">
+            <h2 id="deactivate-dialog-title">Deactivate your account?</h2>
+            <div className="wba-recovery-notice"><strong>30-day recovery</strong><p>Access stops immediately. Sign in again before {scheduledDeletionDate} to recover your account. After that date, it becomes eligible for permanent deletion.</p></div>
 
             <form onSubmit={handleConfirmDeactivation} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <label className="wba-input-group">
-                <span className="wba-input-label" style={{ color: '#e9d5ff' }}>
+                <span className="wba-input-label">
                   Confirm your password to proceed
                 </span>
                 <input
@@ -309,7 +261,7 @@ export default function DashboardHeader({
               </label>
 
               {deactivateError && (
-                <p className="wba-modal-error" role="alert" style={{ color: '#f87171', margin: 0, fontSize: '0.84rem' }}>
+                <p className="wba-modal-error" role="alert">
                   {deactivateError}
                 </p>
               )}
@@ -325,20 +277,14 @@ export default function DashboardHeader({
                 </button>
                 <button
                   type="submit"
-                  className="wba-btn-primary"
-                  style={{
-                    background: '#dc2626',
-                    borderColor: '#ef4444',
-                    color: '#fff',
-                  }}
+                  className="wba-btn-primary wba-danger-button"
                   disabled={isDeactivating}
                 >
-                  {isDeactivating ? 'Deactivating…' : 'Confirm Deactivation'}
+                  {isDeactivating ? 'Deactivating…' : 'Deactivate account'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </WorkspaceDialog>
       )}
     </header>
   );

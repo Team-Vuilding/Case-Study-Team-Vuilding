@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import WorkspaceDialog from '../WorkspaceDialog';
 
 
 export default function ProductQrGenerator({ isOpen, onClose, products }) {
@@ -44,9 +45,7 @@ export default function ProductQrGenerator({ isOpen, onClose, products }) {
   if (!isOpen) return null;
 
   return (
-    <div className="wba-dash-modal-overlay" onClick={onClose}>
-      <div className="wba-dash-modal-card wba-qr-generator-modal" role="dialog" aria-modal="true" aria-labelledby="qr-generator-title" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="wba-modal-close-btn" onClick={onClose} aria-label="Close QR generator">&times;</button>
+    <WorkspaceDialog onClose={onClose} labelledBy="qr-generator-title" closeLabel="Close QR generator" className="wba-qr-generator-modal">
         <div className="wba-qr-scanner-heading">
           <span className="wba-qr-scanner-icon">▦</span>
           <div>
@@ -77,7 +76,6 @@ export default function ProductQrGenerator({ isOpen, onClose, products }) {
           <button type="button" className="wba-pill-btn" onClick={onClose}>Close</button>
           <button type="button" className="wba-btn-primary" onClick={downloadLabel} disabled={!svg || !product}>Download QR (SVG)</button>
         </div>
-      </div>
-    </div>
+    </WorkspaceDialog>
   );
 }

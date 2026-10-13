@@ -79,7 +79,7 @@ export default function InventorySection({ currentUser }) {
       {/* Section Header */}
       <div className="wba-section-page-header">
         <div>
-          <h2 ref={headingRef} tabIndex={-1} className="wba-section-page-title">
+          <h2 ref={headingRef} tabIndex={-1} className="wba-section-page-title wba-toolbar-title">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
@@ -105,6 +105,12 @@ export default function InventorySection({ currentUser }) {
         <button type="button" className={'wba-pill-btn' + (catalogView === 'archived' ? ' active' : '')} aria-pressed={catalogView === 'archived'} onClick={() => setCatalogView('archived')}>Archived products</button>
       </div>}
 
+      {/* Real-Time Multi-State Ledger (Full Width) */}
+      <section style={{ width: '100%' }}>
+        {canManageProducts && catalogView === 'archived' ? <ArchivedProducts onRestore={item => openProductAction('restore', item)} onDelete={item => openProductAction('delete', item)} onReports={openReports} />
+          : loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} onArchive={item => openProductAction('archive', item)} onReports={openReports} />}
+      </section>
+
       {canGenerateQr && catalogView === 'active' && (
         <section className="wba-qr-tools" aria-label="Product QR tools">
           <div className="wba-qr-tools-copy">
@@ -119,18 +125,12 @@ export default function InventorySection({ currentUser }) {
                 Scan to receive
               </button>
             )}
-            <button type="button" className={isWarehouseStaff ? 'wba-qr-secondary-btn' : 'wba-btn-primary'} disabled={loading || Boolean(error)} onClick={() => setIsQrGeneratorOpen(true)}>
+            <button type="button" className="wba-qr-secondary-btn" disabled={loading || Boolean(error)} onClick={() => setIsQrGeneratorOpen(true)}>
               Generate QR
             </button>
           </div>
         </section>
       )}
-
-      {/* Real-Time Multi-State Ledger (Full Width) */}
-      <section style={{ width: '100%' }}>
-        {canManageProducts && catalogView === 'archived' ? <ArchivedProducts onRestore={item => openProductAction('restore', item)} onDelete={item => openProductAction('delete', item)} onReports={openReports} />
-          : loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} onArchive={item => openProductAction('archive', item)} onReports={openReports} />}
-      </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
       {catalogView === 'active' && <section style={{ width: '100%' }}>
