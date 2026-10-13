@@ -1,7 +1,8 @@
-/* Shared surfaces for the approved WBA glass reference. Data surfaces stay opaque. */
+/* Translucent panels share a solid fallback; text and form fields remain opaque. */
 html .wba-dashboard-app, .wba-workspace-dialog {
-  --wba-glass: rgba(19, 24, 43, .82);
+  --wba-glass: rgba(19, 24, 43, .64);
   --wba-panel: #1b2033;
+  --wba-panel-glass: rgba(27, 32, 51, .68);
   --wba-input: #20263a;
   --wba-edge: rgba(183, 191, 226, .2);
   --wba-field-edge: #747f9b;
@@ -27,8 +28,9 @@ html .wba-dashboard-app, .wba-workspace-dialog {
   color: var(--wba-inline-strong);
 }
 html[data-theme='light'] :is(.wba-dashboard-app, .wba-workspace-dialog) {
-  --wba-glass: rgba(255, 255, 255, .76);
+  --wba-glass: rgba(255, 255, 255, .62);
   --wba-panel: #ffffff;
+  --wba-panel-glass: rgba(255, 255, 255, .66);
   --wba-input: #f9faff;
   --wba-edge: rgba(81, 94, 142, .22);
   --wba-field-edge: #7b859f;
@@ -62,7 +64,7 @@ html .wba-dashboard-app .wba-header { min-height: 64px; margin-bottom: 26px; pad
 html .wba-dashboard-app .wba-header-title { font-size: 1.65rem; font-weight: 700; letter-spacing: -.025em; color: var(--wba-inline-strong); text-wrap: balance; }
 html .wba-dashboard-app .wba-glow-card,
 html .wba-dashboard-app .wba-qr-tools,
-html .wba-dashboard-app .wba-accounts-summary > div { background: var(--wba-panel); border: 1px solid var(--wba-edge); border-radius: 16px; padding: 22px; box-shadow: none; }
+html .wba-dashboard-app .wba-accounts-summary > div { background: var(--wba-panel-glass); border: 1px solid var(--wba-edge); border-radius: 16px; padding: 22px; box-shadow: none; }
 html .wba-dashboard-app .wba-glow-card { transition: border-color 150ms ease; }
 html .wba-dashboard-app .wba-glow-card:hover { border-color: var(--wba-edge); box-shadow: none; transform: none; }
 html .wba-dashboard-app .wba-card-heading,
@@ -79,6 +81,7 @@ html .wba-dashboard-app .wba-accounts-summary > div { display: grid; gap: 14px; 
 html .wba-dashboard-app .wba-accounts-summary span { color: var(--wba-inline-muted); }
 html .wba-dashboard-app .wba-accounts-summary strong { font-size: 1.85rem; font-weight: 700; color: var(--wba-inline-strong); font-variant-numeric: tabular-nums; }
 html .wba-dashboard-app .wba-status-good { color: var(--wba-inline-good); }
+html .wba-dashboard-app .wba-atp-positive { color: var(--wba-inline-good); }
 html .wba-dashboard-app .wba-status-warning { color: var(--wba-inline-warning); }
 html .wba-dashboard-app .wba-account-identity span,
 html .wba-dashboard-app .wba-account-activity span,
@@ -163,7 +166,10 @@ dialog.wba-sidebar-dialog { inset: 0 auto 0 0; margin: 0; width: min(280px, calc
 .wba-sidebar-dialog .wba-dash-nav-item.active { color: var(--wba-inline-accent); background: color-mix(in srgb, var(--wba-inline-accent) 13%, transparent); }
 .wba-sidebar-dialog .wba-dash-nav-label { display: inline; }
 @supports not (backdrop-filter: blur(1px)) {
-  .wba-app-shell.wba-app-shell .wba-dashboard-frame, .wba-dashboard-app .wba-dash-sidebar, dialog.wba-workspace-dialog { background: var(--wba-panel); }
+  html .wba-dashboard-app, .wba-workspace-dialog, html[data-theme] :is(.wba-dashboard-app, .wba-workspace-dialog) { --wba-glass: var(--wba-panel); --wba-panel-glass: var(--wba-panel); }
+}
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html .wba-dashboard-app, .wba-workspace-dialog, html[data-theme] :is(.wba-dashboard-app, .wba-workspace-dialog) { --wba-glass: var(--wba-panel); --wba-panel-glass: var(--wba-panel); --wba-dialog: var(--wba-panel); }
 }
 @media (max-width: 900px) {
   html .wba-dashboard-app .wba-main-wrapper { padding: 12px; }
