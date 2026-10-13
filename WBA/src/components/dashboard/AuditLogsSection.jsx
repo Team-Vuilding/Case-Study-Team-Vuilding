@@ -76,9 +76,6 @@ function AuditLogContent() {
             </svg>
             Audit Logs
           </h2>
-          <p className="wba-section-page-desc">
-            A record of all stock changes, corrections, orders, and system actions.
-          </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <input
@@ -130,16 +127,16 @@ function AuditLogContent() {
           )}
           {filtered.map((log) => (
             <div key={log.id} className="wba-audit-item">
-              <div className="wba-audit-top">
-                <span className="wba-audit-time">{log.timestamp}</span>
-                <span className="wba-audit-event" style={getSeverityStyle(log.severity)}>
-                  {FRIENDLY_EVENT[log.eventType] || log.eventType}
-                </span>
-              </div>
               <div className="wba-audit-desc">
                 <strong style={{ color: 'var(--wba-inline-strong)' }}>{log.actor}</strong>
                 <br />
                 {log.description}
+              </div>
+              <div className="wba-audit-top">
+                <span className="wba-audit-event" style={getSeverityStyle(log.severity)}>
+                  {FRIENDLY_EVENT[log.eventType] || log.eventType}
+                </span>
+                <span className="wba-audit-time">{log.timestamp}</span>
               </div>
             </div>
           ))}

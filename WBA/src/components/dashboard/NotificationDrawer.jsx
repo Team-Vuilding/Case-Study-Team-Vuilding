@@ -92,7 +92,7 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
     }}
     onCancel={event => { event.preventDefault(); onClose(); }}>
     <header className="wba-alert-header">
-      <div><h2 id="alerts-title">Notifications</h2><p>Stock levels and batch expiry updates.</p></div>
+      <div><h2 id="alerts-title">Notifications</h2></div>
       <button type="button" className="wba-alert-close" aria-label="Close notifications" onClick={onClose}>×</button>
     </header>
     <div className="wba-alert-scroll">

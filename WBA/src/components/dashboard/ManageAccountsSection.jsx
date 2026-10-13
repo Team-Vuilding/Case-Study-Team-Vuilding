@@ -83,7 +83,7 @@ export default function ManageAccountsSection({ currentUser }) {
       });
       refresh();
       setIsFormOpen(false);
-      setNotice(`${name} ${editingId ? 'updated' : 'added'} successfully.`);
+      setNotice(`${name} ${editingId ? 'updated' : 'added'}.`);
     } catch (reason) {
       setError(reason.message);
     }
@@ -119,7 +119,7 @@ export default function ManageAccountsSection({ currentUser }) {
     try {
       await apiRequest('users/' + account.id + '/reactivate', { method: 'POST' });
       refresh();
-      setNotice(`${account.name}'s account has been successfully reactivated.`);
+      setNotice(`${account.name}'s account reactivated.`);
     } catch (reason) {
       setNotice(reason.message);
     }
@@ -160,7 +160,6 @@ export default function ManageAccountsSection({ currentUser }) {
       <div className="wba-section-page-header">
         <div>
           <h2 className="wba-section-page-title">Manage Accounts</h2>
-          <p className="wba-section-page-desc">Create accounts, assign fixed roles, review deactivation recovery periods, and audit account activity.</p>
         </div>
         <button type="button" className="wba-btn-primary" onClick={openCreate}>
           + Add user
@@ -188,7 +187,6 @@ export default function ManageAccountsSection({ currentUser }) {
         <div className="wba-accounts-section-head">
           <div>
             <h3>User directory</h3>
-            <p>Search or filter system accounts and monitor deactivation recovery states.</p>
           </div>
           <div className="wba-accounts-filters">
             <input
@@ -277,17 +275,16 @@ export default function ManageAccountsSection({ currentUser }) {
         <div className="wba-accounts-section-head">
           <div>
             <h3>Account activity</h3>
-            <p>Recent sign-ins, deactivations, reactivations, and account purges recorded by the server.</p>
           </div>
         </div>
         <div className="wba-account-activity">
           {activity.length === 0 && <p className="wba-accounts-empty">No account activity yet.</p>}
           {activity.slice(0, 10).map((entry) => (
             <div key={entry.id}>
-              <strong>{entry.action}</strong>
-              <span>
+              <span className="wba-account-activity-identity">
                 {entry.target} · {entry.actor}
               </span>
+              <strong>{entry.action}</strong>
               <time dateTime={entry.at}>{new Date(entry.at).toLocaleString()}</time>
             </div>
           ))}
@@ -313,7 +310,6 @@ export default function ManageAccountsSection({ currentUser }) {
               &times;
             </button>
             <h2 id="wba-account-form-title">{editingId ? 'Edit account' : 'Add user'}</h2>
-            <p className="wba-accounts-form-intro">Choose a role to apply its approved page and action permissions.</p>
             <form onSubmit={handleSave} className="wba-account-form" autoComplete="off">
               <label className="wba-input-group">
                 <span className="wba-input-label">Full name</span>

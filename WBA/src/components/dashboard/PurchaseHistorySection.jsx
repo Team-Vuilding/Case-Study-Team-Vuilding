@@ -69,7 +69,7 @@ export default function PurchaseHistorySection({ currentUser }) {
   </ApiStatus>;
   const filtered = orders.data.filter(order => (filter === 'all' || order.status === filter) && (order.number + order.supplier + order.lines.map(line => line.product).join(' ')).toLowerCase().includes(search.toLowerCase()));
   return <div className="wba-grid-container">
-    <div className="wba-section-page-header"><div><h2 className="wba-section-page-title">Purchase orders</h2><p className="wba-section-page-desc">Supplier orders, approvals, and recorded deliveries.</p></div>{canCreate && <button type="button" className="wba-btn-primary" onClick={() => setOpen(true)}>+ New order</button>}</div>
+    <div className="wba-section-page-header"><div><h2 className="wba-section-page-title">Purchase orders</h2></div>{canCreate && <button type="button" className="wba-btn-primary" onClick={() => setOpen(true)}>+ New order</button>}</div>
     <div className="wba-accounts-filters"><input className="wba-input-field" type="search" aria-label="Search purchase orders" placeholder="Search order, product, supplier" value={search} onChange={event => setSearch(event.target.value)} /><select className="wba-input-field" aria-label="Order status" value={filter} onChange={event => setFilter(event.target.value)}>{['all', 'pending_approval', 'approved', 'received', 'cancelled'].map(status => <option key={status} value={status}>{status.replaceAll('_', ' ')}</option>)}</select></div>
     {error && <p role="alert">{error}</p>}
     <div className="wba-glow-card"><p>{filtered.length} orders{costs ? ' · ₱' + filtered.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString() + ' total' : ''}</p>

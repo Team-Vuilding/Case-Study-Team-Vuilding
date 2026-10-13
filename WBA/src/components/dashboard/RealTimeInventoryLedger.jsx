@@ -38,11 +38,6 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
             </svg>
             <span>{accessLevel === 'sales' ? 'Product Availability & Pricing Ledger' : 'Inventory Stock Ledger'}</span>
           </div>
-          <span className="wba-card-desc">
-            {accessLevel === 'sales'
-              ? 'Real-time sellable inventory (Available-to-Promise), customer reservations, and unit pricing'
-              : 'Live stock counts across all products — highlights mismatches between physical and system records'}
-          </span>
         </div>
         <div className="wba-ledger-controls">
           <input type="search" className="wba-input-field" aria-label="Search inventory" placeholder="Search product, SKU, or bin" value={search} onChange={event => setSearch(event.target.value)} />
@@ -55,7 +50,7 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
       <p className="wba-ledger-result-count" role="status">Showing {visibleItems.length} of {items.length} products</p>
       <div className="wba-table-container" tabIndex={0} role="region" aria-label="Inventory stock ledger">
         <table className="wba-table">
-          <caption className="wba-ledger-caption">Current product balances. Count status compares recorded physical stock with ledger counts.</caption>
+          <caption className="wba-ledger-caption">Product stock balances</caption>
           <thead>
             <tr>
               <th>Product</th>
@@ -71,7 +66,7 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
           </thead>
           <tbody>
             {visibleItems.length === 0 && <tr><td colSpan={7 + (accessLevel === 'sales' ? 1 : 0) + (hasActions ? 1 : 0)} className="wba-ledger-empty">
-              {items.length === 0 ? 'No products yet. An administrator can add the first product.' : <>
+              {items.length === 0 ? 'No products yet.' : <>
                 No products match these filters. <button type="button" className="wba-pill-btn" onClick={() => { setSearch(''); setCountFilter('all'); }}>Clear filters</button>
               </>}
             </td></tr>}

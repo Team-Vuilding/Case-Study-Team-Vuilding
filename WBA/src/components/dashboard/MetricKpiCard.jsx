@@ -36,9 +36,9 @@ export default function MetricKpiCard({
 
       <div className="wba-kpi-metric">{value}</div>
 
-      <div className="wba-kpi-subtext">
+      {subtext && <div className="wba-kpi-subtext">
         <span>{subtext}</span>
-      </div>
+      </div>}
 
       {typeof meterPercent === 'number' && (
         <span className={`wba-kpi-utilization wba-kpi-utilization-${status}`}>

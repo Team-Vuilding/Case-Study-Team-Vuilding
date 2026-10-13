@@ -7,7 +7,7 @@ export default function ArchivedProducts({ onRestore, onDelete, onReports }) {
   if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading archived products…"><SkeletonTable columns={5} /></ApiStatus>;
 
   return <section className="wba-glow-card">
-    <div className="wba-card-title-group"><h3>Archived products</h3><p className="wba-card-desc">Inactive catalog records. Product history stays available in purchase records and audit logs.</p></div>
+    <div className="wba-card-title-group"><h3>Archived products</h3></div>
     {!data.length ? <p className="wba-product-empty">No archived products.</p> : <div className="wba-table-container"><table className="wba-table">
       <thead><tr><th>Product</th><th>Archived on</th><th>Archived by</th><th>Reason</th><th>Actions</th></tr></thead>
       <tbody>{data.map(item => <tr key={item.id}>

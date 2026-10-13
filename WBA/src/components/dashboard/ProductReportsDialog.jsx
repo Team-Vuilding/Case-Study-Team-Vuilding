@@ -70,7 +70,7 @@ export default function ProductReportsDialog({ item, currentUser, onClose }) {
         <h3>Report history</h3>
         {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading product reports…"><SkeletonText lines={4} /></ApiStatus>
           : <>
-            {data.length === 0 ? <p>No reports yet. Warehouse staff can add the first observation.</p> : <ol className="wba-report-list">
+            {data.length === 0 ? <p>No reports yet.</p> : <ol className="wba-report-list">
               {data.map(report => <li key={report.id}>
                 <div className="wba-report-entry-header"><span className={'wba-report-type ' + report.kind}>{report.kind === 'mismatch' ? 'Mismatch' : 'Info'}</span><time dateTime={report.createdAt}>{new Date(report.createdAt).toLocaleString()}</time></div>
                 <p className="wba-report-message">{report.message}</p>

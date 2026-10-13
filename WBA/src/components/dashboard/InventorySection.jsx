@@ -87,11 +87,6 @@ export default function InventorySection({ currentUser }) {
             </svg>
             Inventory
           </h2>
-          <p className="wba-section-page-desc">
-            {accessLevel === 'sales'
-              ? 'Real-time product availability, pricing, and Available-to-Promise (ATP) inventory levels.'
-              : 'View and manage product stock — track quantities, resolve mismatches, and monitor expiring batches.'}
-          </p>
         </div>
         {canAddProduct && (
           <button
@@ -116,7 +111,6 @@ export default function InventorySection({ currentUser }) {
             <span className="wba-qr-tools-icon" aria-hidden="true">▦</span>
             <div>
               <h3>Product QR tools</h3>
-              <p>{isWarehouseStaff ? 'Create SKU labels or scan one to receive stock.' : 'Create a scannable SKU code for any catalog product.'}</p>
             </div>
           </div>
           <div className="wba-qr-tools-actions">
@@ -153,28 +147,22 @@ export default function InventorySection({ currentUser }) {
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
-                  <span>Sales Order & ATP Reservation Monitor</span>
+                  <span>Stock availability</span>
                 </div>
-                <span className="wba-card-desc">
-                  Active customer checkout locks and Available-to-Promise stock status across online channels
-                </span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '12px' }}>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '10px', padding: '14px' }}>
                 <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-info)', textTransform: 'uppercase', marginBottom: '4px' }}>Total Active Reservations</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.reduce((sum, item) => sum + item.reserved, 0)} Units</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Customer cart holds protected for checkout</div>
               </div>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', padding: '14px' }}>
                 <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-good)', textTransform: 'uppercase', marginBottom: '4px' }}>Available to sell</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.reduce((sum, item) => sum + Math.max(0, item.physicalOnHand - item.reserved - item.allocated), 0)} Units</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>On-hand stock minus reserved and allocated units</div>
               </div>
               <div style={{ flex: '1', minWidth: '180px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', padding: '14px' }}>
-                <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-critical)', textTransform: 'uppercase', marginBottom: '4px' }}>Stockout ATP Lock</div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--wba-inline-critical)', textTransform: 'uppercase', marginBottom: '4px' }}>Out of stock</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--wba-inline-strong)' }}>{items.filter(item => item.physicalOnHand - item.reserved - item.allocated <= 0).length} Products</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--wba-inline-muted)', marginTop: '4px' }}>Products with no available stock</div>
               </div>
             </div>
           </div>
