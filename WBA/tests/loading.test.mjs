@@ -15,6 +15,7 @@ after(() => server.close());
 const { default: ApiStatus } = await server.ssrLoadModule('/src/components/ApiStatus.jsx');
 const { Skeleton, SkeletonText } = await server.ssrLoadModule('/src/components/SkeletonLoader.jsx');
 const { default: InventoryLedger } = await server.ssrLoadModule('/src/components/dashboard/RealTimeInventoryLedger.jsx');
+const { default: ProductLifecycleDialog } = await server.ssrLoadModule('/src/components/dashboard/ProductLifecycleDialog.jsx');
 const { default: DashboardSidebar } = await server.ssrLoadModule('/src/components/dashboard/DashboardSidebar.jsx');
 const { default: AuditLogsSection } = await server.ssrLoadModule('/src/components/dashboard/AuditLogsSection.jsx');
 const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
@@ -60,8 +61,27 @@ test('administrators see archive controls and an explanation for ineligible prod
   const html = render(InventoryLedger, { items: [product, { ...product, id: 2, name: 'Stocked appliance', physicalOnHand: 1,
     canArchive: false, archiveBlockReason: 'Resolve stock first.' }], currentUser: { accessLevel: 'admin' }, onArchive: () => {} });
   assert.match(html, /aria-label="Archive Test appliance"/);
-  assert.match(html, /disabled="" aria-label="Archive Stocked appliance"/);
+  assert.doesNotMatch(html, /disabled="" aria-label="Archive Stocked appliance"/);
   assert.match(html, /id="archive-blocked-2">Resolve stock first\./);
+});
+
+test('blocked archive dialogs explain the stock balance without offering a submit action', () => {
+  const html = render(ProductLifecycleDialog, { action: 'archive', item: { ...product, physicalOnHand: 5, paperSpreadsheetCount: 5,
+    canArchive: false, archiveBlockReason: 'Stock and commitments must be zero.' }, onClose: () => {} });
+  assert.match(html, /Stock and commitments must be zero\./);
+  assert.match(html, /Physical stock<\/dt><dd>5<\/dd>/);
+  assert.match(html, /Ledger count<\/dt><dd>5<\/dd>/);
+  assert.match(html, /Back to inventory/);
+  assert.doesNotMatch(html, /<textarea|type="submit"/);
+});
+
+test('eligible archive and restore dialogs still offer their required reason and submit action', () => {
+  for (const action of ['archive', 'restore']) {
+    const html = render(ProductLifecycleDialog, { action, item: product, onClose: () => {} });
+    assert.match(html, /<textarea/);
+    assert.match(html, /Reason \(required\)/);
+    assert.match(html, /type="submit"/);
+  }
 });
 
 test('warehouse, purchasing, and sales users do not see archive controls', () => {

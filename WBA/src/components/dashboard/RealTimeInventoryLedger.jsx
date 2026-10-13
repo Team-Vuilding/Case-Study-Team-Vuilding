@@ -126,7 +126,7 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive 
                     ) : (
                       <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-accent)' }}>✓ OK</span>
                     )}
-                    {canManageProducts && <button type="button" className="wba-pill-btn" disabled={!item.canArchive || reconcilingId !== null} aria-label={'Archive ' + item.name} aria-describedby={item.archiveBlockReason ? 'archive-blocked-' + item.id : undefined} onClick={() => onArchive(item)}>Archive</button>}
+                    {canManageProducts && <button type="button" className="wba-pill-btn" disabled={reconcilingId !== null} aria-haspopup="dialog" aria-label={'Archive ' + item.name} aria-describedby={item.archiveBlockReason ? 'archive-blocked-' + item.id : undefined} onClick={() => onArchive(item)}>Archive</button>}
                     </div>
                     {canManageProducts && item.archiveBlockReason && <span className="wba-product-action-hint" id={'archive-blocked-' + item.id}>{item.archiveBlockReason}</span>}
                   </td>

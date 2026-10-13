@@ -57,6 +57,12 @@
 .wba-product-dialog-identity span { color: var(--text-secondary); font-size: 0.8rem; }
 .wba-product-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
 .wba-product-dialog .wba-product-action-error { color: var(--wba-inline-critical); }
+.wba-product-archive-block { display: grid; gap: 16px; }
+.wba-product-archive-block strong { color: var(--wba-inline-warning); }
+.wba-product-stock-balances { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.wba-product-stock-balances > div { padding: 12px; border: 1px solid var(--border-subtle); border-radius: 8px; }
+.wba-product-stock-balances dt { color: var(--text-secondary); font-size: 0.8rem; }
+.wba-product-stock-balances dd { margin-top: 4px; font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .wba-product-delete-link { color: var(--wba-inline-critical); }
 .wba-product-delete-btn { background: #b42338; }
 

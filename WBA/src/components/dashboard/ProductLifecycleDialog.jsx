@@ -14,6 +14,7 @@ export default function ProductLifecycleDialog({ action, item, onClose, onComple
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const copy = ACTIONS[action];
+  const archiveBlocked = action === 'archive' && item.canArchive === false;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -28,7 +29,7 @@ export default function ProductLifecycleDialog({ action, item, onClose, onComple
 
   const submit = async event => {
     event.preventDefault();
-    if (pending || reason.trim().length < 3) return;
+    if (archiveBlocked || pending || reason.trim().length < 3) return;
     setPending(true);
     setError('');
     try {
@@ -52,15 +53,24 @@ export default function ProductLifecycleDialog({ action, item, onClose, onComple
     <form onSubmit={submit} aria-busy={pending}>
       <h2 id="product-action-title">{copy.title}</h2>
       <div className="wba-product-dialog-identity"><strong>{item.name}</strong><span>{item.sku}</span></div>
-      <p id="product-action-description">{copy.description}</p>
-      <label className="wba-input-group" htmlFor="product-action-reason">
+      <p id="product-action-description">{archiveBlocked ? 'This product cannot be archived yet. Review the reason below before trying again.' : copy.description}</p>
+      {archiveBlocked ? <div className="wba-product-archive-block">
+        <p role="alert"><strong>{item.archiveBlockReason}</strong></p>
+        <dl className="wba-product-stock-balances">
+          {[
+            ['Physical stock', item.physicalOnHand], ['Ledger count', item.paperSpreadsheetCount],
+            ['Reserved', item.reserved], ['Being picked', item.allocated],
+          ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+        </dl>
+        <p>Resolve remaining stock and reservations through the warehouse workflow, and finish or cancel open purchase orders. Then try archiving again.</p>
+      </div> : <label className="wba-input-group" htmlFor="product-action-reason">
         <span className="wba-input-label">Reason (required)</span>
         <textarea ref={reasonRef} id="product-action-reason" className="wba-input-field" rows={3} required minLength={3} maxLength={500} value={reason} disabled={pending} onChange={event => setReason(event.target.value)} />
-      </label>
+      </label>}
       {error && <p className="wba-product-action-error" role="alert">{error}</p>}
       <div className="wba-product-dialog-actions">
-        <button type="button" className="wba-pill-btn" disabled={pending} onClick={onClose}>Cancel</button>
-        <button type="submit" className={'wba-btn-primary' + (action === 'delete' ? ' wba-product-delete-btn' : '')} disabled={pending || reason.trim().length < 3}>{pending ? copy.pending : copy.title}</button>
+        <button type="button" className={archiveBlocked ? 'wba-btn-primary' : 'wba-pill-btn'} disabled={pending} onClick={onClose}>{archiveBlocked ? 'Back to inventory' : 'Cancel'}</button>
+        {!archiveBlocked && <button type="submit" className={'wba-btn-primary' + (action === 'delete' ? ' wba-product-delete-btn' : '')} disabled={pending || reason.trim().length < 3}>{pending ? copy.pending : copy.title}</button>}
       </div>
     </form>
   </dialog>;
