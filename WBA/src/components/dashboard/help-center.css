@@ -47,7 +47,7 @@
 .wba-help-page-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .wba-help-page-actions a { color: var(--text-primary); font-size: .875rem; min-height: 44px; display: inline-flex; align-items: center; overflow-wrap: anywhere; }
 .wba-help-page-actions .wba-pill-btn { text-decoration: none; }
-.wba-dashboard-app.wba-general-help { display: block; min-height: 100dvh; }
+.wba-dashboard-app.wba-general-help { display: block; height: auto; max-height: none; min-height: 100dvh; overflow: visible; }
 .wba-general-help-nav, .wba-general-help-main { width: min(1200px, calc(100% - 48px)); margin-inline: auto; }
 .wba-general-help-nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 88px; border-bottom: 1px solid var(--border-subtle); }
 .wba-general-help-nav > a { display: inline-flex; }
