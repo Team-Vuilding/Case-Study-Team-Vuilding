@@ -66,13 +66,14 @@ test('placeholder primitives stay decorative and respect zero dimensions', () =>
 const product = { id: 1, name: 'Test appliance', sku: 'TEST-001', category: 'A', warehouseBin: 'BIN-01', unitPrice: 100,
   physicalOnHand: 0, paperSpreadsheetCount: 0, reserved: 0, allocated: 0, canArchive: true };
 
-test('product entry provides a read-only SKU preview and explains movement rate without classification', () => {
+test('product entry keeps the SKU preview read-only and labels concise', () => {
   const html = render(AddProductModal, { isOpen: true, onClose: () => {}, onAddProduct: () => {} });
-  assert.match(html, /SKU · generated automatically/);
-  assert.match(html, /readOnly=""[^>]*aria-describedby="product-sku-help"/);
+  assert.match(html, /for="product-sku-preview">SKU<\/label>/);
+  assert.match(html, /id="product-sku-preview"[^>]*readOnly=""/);
+  assert.match(html, /wba-input-label">Cost<\/span>/);
   assert.match(html, /Track batches and expiry/);
-  assert.match(html, /How quickly stock usually sells or is used/);
-  assert.doesNotMatch(html, /name="sku"|name="category"|Classification/);
+  assert.match(html, /Movement rate/);
+  assert.doesNotMatch(html, /generated automatically|Based on expiry tracking|How quickly stock|Enter the product details|Storage cost per unit|movement-rate-help|name="sku"|name="category"|Classification/);
 });
 
 test('notification cards separate severity and expiry details and retain viewed alerts', () => {
