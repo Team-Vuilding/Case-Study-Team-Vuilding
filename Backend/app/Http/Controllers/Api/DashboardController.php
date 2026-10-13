@@ -6,6 +6,7 @@ use App\Models\Item;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends ApiController
@@ -49,18 +50,45 @@ class DashboardController extends ApiController
 
     public function alerts(Request $request): JsonResponse
     {
+        $views = DB::table('alert_views')->where('user_id', $request->user()->id)->pluck('version', 'alert_id');
+        $alerts = $this->activeAlerts($request)->map(fn ($alert) => [...$alert, 'isRead' => $views->get($alert['id']) === $alert['version']]);
+
+        return response()->json(['data' => $alerts]);
+    }
+
+    public function markAlertsViewed(Request $request): JsonResponse
+    {
+        $data = $request->validate(['alerts' => 'required|array|min:1|max:500',
+            'alerts.*.id' => 'required|string|max:80|distinct',
+            'alerts.*.version' => 'required|string|size:64|regex:/^[a-f0-9]+$/']);
+        $active = $this->activeAlerts($request)->keyBy('id');
+        $rows = collect($data['alerts'])->filter(fn ($alert) => isset($active[$alert['id']]) && $active[$alert['id']]['version'] === $alert['version'])
+            ->map(fn ($alert) => ['user_id' => $request->user()->id, 'alert_id' => $alert['id'], 'version' => $alert['version'], 'viewed_at' => now()])->values()->all();
+        if ($rows !== []) {
+            DB::table('alert_views')->upsert($rows, ['user_id', 'alert_id'], ['version', 'viewed_at']);
+        }
+
+        return response()->json(['message' => 'Notifications marked as viewed.']);
+    }
+
+    private function activeAlerts(Request $request): Collection
+    {
         $alerts = Item::active()->get()->filter(fn ($item) => $item->physical_on_hand <= $item->safety_stock_off_peak)->map(fn ($item) => [
             'id' => 'stock-'.$item->id, 'title' => 'Low stock: '.$item->name, 'severity' => 'warning',
             'description' => $item->physical_on_hand.' units on hand; safety stock '.$item->safety_stock_off_peak.'.',
+            'type' => 'stock', 'product' => $item->name, 'sku' => $item->sku,
+            'quantity' => (int) $item->physical_on_hand, 'safetyStock' => (int) $item->safety_stock_off_peak,
         ])->values();
         if ($request->user()->access_level !== 'sales') {
             foreach ($this->batches($request)->getData(true)['data'] as $batch) {
                 if ($batch['daysLeft'] <= 30) {
-                    $alerts->push(['id' => 'expiry-'.$batch['id'], 'title' => 'Batch expiry: '.$batch['product'], 'severity' => 'critical', 'description' => $batch['lot'].' expires '.$batch['expiresAt'].'.']);
+                    $alerts->push(['id' => 'expiry-'.$batch['id'], 'title' => 'Batch expiry: '.$batch['product'], 'severity' => 'critical', 'description' => $batch['lot'].' expires '.$batch['expiresAt'].'.',
+                        'type' => 'expiry', 'product' => $batch['product'], 'sku' => $batch['sku'], 'lot' => $batch['lot'],
+                        'quantity' => (int) $batch['quantity'], 'expiresAt' => $batch['expiresAt'], 'daysLeft' => $batch['daysLeft']]);
                 }
             }
         }
 
-        return response()->json(['data' => $alerts]);
+        return $alerts->map(fn ($alert) => [...$alert, 'version' => hash('sha256', json_encode($alert))]);
     }
 }

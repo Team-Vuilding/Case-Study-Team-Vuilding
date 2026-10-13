@@ -24,10 +24,12 @@ Route::middleware('access')->group(function () {
     Route::get('items/{item}', [ItemController::class, 'item'])->whereNumber('item');
     Route::get('dashboard/metrics', [DashboardController::class, 'metrics']);
     Route::get('dashboard/alerts', [DashboardController::class, 'alerts']);
+    Route::post('dashboard/alerts/viewed', [DashboardController::class, 'markAlertsViewed']);
     Route::get('dashboard/activity', [DashboardController::class, 'activity']);
     Route::get('categories', [ReferenceController::class, 'references'])->defaults('kind', 'categories');
 });
 Route::middleware('access:admin')->group(function () {
+    Route::get('items/sku-preview', [ItemController::class, 'skuPreview']);
     Route::get('audit-logs', [AuditController::class, 'audits']);
     Route::get('items/archived', [ItemController::class, 'archived']);
     Route::post('items/{item}/archive', [ItemController::class, 'archive'])->whereNumber('item');

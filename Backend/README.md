@@ -166,6 +166,29 @@ Apply your company's retention policy to the support mailbox.
 
 ## Compatibility checks
 
+### Product codes and notification views
+
+New product forms omit `sku` and `category`. The server assigns a SKU from
+independent `WBA-EXP-001` / `WBA-NEX-001` sequences according to `hasShelfLife`;
+unspecified classification is `U` (unclassified). Existing classifications and
+codes remain unchanged. Legacy clients can still submit custom SKUs, but the
+`WBA-EXP-` and `WBA-NEX-` prefixes are reserved for server generation.
+Generated codes cannot be renamed. Sequence counters are locked inside the
+creation transaction and are retained after product deletion.
+
+Admins can request `GET /api/items/sku-preview?hasShelfLife=0` (or `1`).
+The returned `data.sku` is a preview, not a reservation; another save may consume
+it before submission.
+
+`GET /api/dashboard/alerts` adds structured stock/expiry details, `version`, and
+per-user `isRead`. Opening the drawer posts `{alerts: [{id, version}]}` to
+`POST /api/dashboard/alerts/viewed` (up to 500 per request). This idempotently
+acknowledges only currently visible alert versions for that authenticated user.
+Changed alerts become unread again. Viewing does not resolve stock/expiry
+conditions; previously viewed active alerts remain available in the drawer.
+
+Deploy the backend migrations before deploying the updated frontend.
+
 Run `php artisan test --compact` and the frontend's `npm run lint` and
 `npm run build` before deploying. PostgreSQL tests must point to a **dedicated test
 database**, never the Supabase deployment database: `RefreshDatabase` rebuilds its

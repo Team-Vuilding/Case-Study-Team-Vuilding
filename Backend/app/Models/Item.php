@@ -32,7 +32,7 @@ class Item extends Model
         'sku',
         'name',
         'category_id',
-        'category_classification', // 'A', 'B', 'C'
+        'category_classification', // 'A', 'B', 'C', or 'U' (unclassified)
         'fsn',                     // 'Fast', 'Slow', 'Non-moving'
         'unit_price',
         'storage_cost_per_month',

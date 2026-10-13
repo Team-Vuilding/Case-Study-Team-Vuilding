@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Item;
+use App\Services\ProductSku;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,13 @@ use Illuminate\Validation\Rule;
 
 class ItemController extends ApiController
 {
+    public function skuPreview(Request $request, ProductSku $skus): JsonResponse
+    {
+        $data = $request->validate(['hasShelfLife' => 'required|boolean']);
+
+        return response()->json(['data' => ['sku' => $skus->preview((bool) $data['hasShelfLife'])]]);
+    }
+
     public function items(Request $request): JsonResponse
     {
         return response()->json(['data' => Item::active()->withArchiveEligibility()->orderBy('name')->get()->map(fn ($item) => $this->itemData($item))]);
@@ -25,19 +33,28 @@ class ItemController extends ApiController
     public function saveItem(Request $request, ?Item $item = null): JsonResponse
     {
         abort_if($item?->archived_at, 422, 'Restore this product before editing it.');
+        if (is_string($request->input('sku'))) {
+            $request->merge(['sku' => trim($request->input('sku'))]);
+        }
         $data = $request->validate(['name' => 'required|string|max:200',
-            'sku' => ['required', 'string', 'max:80', Rule::unique('items')->ignore($item?->id)],
-            'category' => ['required', Rule::in(['A', 'B', 'C'])], 'fsn' => ['required', Rule::in(['Fast', 'Normal', 'Slow', 'Non-moving'])],
+            'sku' => ['sometimes', 'required', 'string', 'max:80', Rule::unique('items')->ignore($item?->id)],
+            'category' => ['sometimes', Rule::in(['A', 'B', 'C', 'U'])], 'fsn' => ['required', Rule::in(['Fast', 'Normal', 'Slow', 'Non-moving'])],
             'unitPrice' => 'required|numeric|min:0|max:9999999999', 'warehouseBin' => 'required|string|max:120',
             'physicalOnHand' => $item ? 'prohibited' : 'required|integer|min:0|max:100000000',
             'hasShelfLife' => 'required|boolean', 'shelfLifeMonths' => 'nullable|required_if:hasShelfLife,true|integer|min:1|max:120',
             'isSeasonal' => 'sometimes|boolean', 'storageCostPerMonth' => 'sometimes|numeric|min:0|max:99999999.99',
             'expiresAt' => 'nullable|date|after_or_equal:today']);
+        if (isset($data['sku'])) {
+            $data['sku'] = trim($data['sku']);
+            abort_if(! $item && preg_match('/^WBA-(EXP|NEX)-/i', $data['sku']), 422, 'Leave SKU empty to generate the product code automatically.');
+            abort_if($item && preg_match('/^WBA-(EXP|NEX)-/i', $item->sku) && $data['sku'] !== $item->sku, 422, 'Generated product codes cannot be changed.');
+        }
         abort_if(! $item && $data['hasShelfLife'] && $data['physicalOnHand'] > 0 && empty($data['expiresAt']), 422, 'Enter the actual initial batch expiry date.');
         $saved = DB::transaction(function () use ($request, $data, $item) {
             $saved = $item ? Item::whereKey($item->id)->lockForUpdate()->firstOrFail() : new Item;
             abort_if($saved->archived_at, 422, 'Restore this product before editing it.');
-            $saved->fill(['name' => trim($data['name']), 'sku' => trim($data['sku']), 'category_classification' => $data['category'],
+            $sku = $item ? ($data['sku'] ?? $saved->sku) : ($data['sku'] ?? app(ProductSku::class)->allocate($data['hasShelfLife']));
+            $saved->fill(['name' => trim($data['name']), 'sku' => $sku, 'category_classification' => $data['category'] ?? $saved->category_classification ?? 'U',
                 'fsn' => $data['fsn'], 'unit_price' => $data['unitPrice'], 'warehouse_bin' => trim($data['warehouseBin']),
                 'shelf_life_months' => $data['hasShelfLife'] ? $data['shelfLifeMonths'] : null,
                 'is_seasonal' => $data['isSeasonal'] ?? false, 'storage_cost_per_month' => $data['storageCostPerMonth'] ?? 0]);
@@ -52,7 +69,7 @@ class ItemController extends ApiController
             $this->audit($request, $item ? 'Product updated' : 'PRODUCT_CATALOG_ADDED', $saved->name.' saved in the catalog.', $saved->sku);
 
             return $saved;
-        });
+        }, 3);
 
         return response()->json(['data' => $this->itemData($saved->fresh())], $item ? 200 : 201);
     }
