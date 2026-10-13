@@ -44,12 +44,12 @@ export default function ProductReportsDialog({ item, currentUser, onClose }) {
     }
   };
 
-  return <dialog ref={dialogRef} className="wba-product-dialog wba-product-reports-dialog" aria-labelledby="product-reports-title" aria-describedby="product-reports-description" onCancel={event => { event.preventDefault(); if (!pending) onClose(); }}>
+  return <dialog ref={dialogRef} className="wba-product-dialog wba-product-reports-dialog" aria-labelledby="product-reports-title" aria-describedby={canAddReport ? 'product-reports-description' : undefined} onCancel={event => { event.preventDefault(); if (!pending) onClose(); }}>
     <button type="button" className="wba-modal-close-btn" aria-label="Close product reports" disabled={pending} onClick={onClose}>×</button>
     <div className="wba-product-reports-body">
       <h2 id="product-reports-title">Product reports</h2>
       <div className="wba-product-dialog-identity"><strong>{item.name}</strong><span>{item.sku} · {item.warehouseBin}</span></div>
-      <p id="product-reports-description">Warehouse observations and reported mismatches. Saving a report does not change stock quantities.</p>
+      {canAddReport && <p id="product-reports-description">Reports do not change stock quantities.</p>}
       {canAddReport && <form className="wba-report-form" onSubmit={submit} aria-busy={pending}>
         <label className="wba-input-group"><span className="wba-input-label">Report type</span>
           <select className="wba-input-field" value={kind} disabled={pending} onChange={event => { setKind(event.target.value); setCounted(''); }}>

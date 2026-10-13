@@ -149,10 +149,11 @@ test('warehouse report forms require a description while admins can only review 
   assert.match(warehouse, /Description \(required\)/);
   assert.match(warehouse, /Info \/ note/);
   assert.match(warehouse, /Mismatch/);
-  assert.match(warehouse, /does not change stock quantities/);
+  assert.match(warehouse, /Reports do not change stock quantities/);
   const admin = render(ProductReportsDialog, { item: product, currentUser: { accessLevel: 'admin' }, onClose: () => {} });
   assert.match(admin, /Report history/);
   assert.doesNotMatch(admin, /Save report|<textarea/);
+  assert.doesNotMatch(admin, /product-reports-description|Reports do not change|Warehouse observations/);
 });
 
 test('blocked archive dialogs explain the stock balance without offering a submit action', () => {

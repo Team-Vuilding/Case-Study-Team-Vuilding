@@ -181,6 +181,18 @@ html .wba-sidebar-dialog .wba-dash-sidebar .wba-dash-nav-item:not(:disabled):act
     dialog.wba-sidebar-dialog[open]::backdrop { opacity: 0; }
   }
 }
+.wba-workspace-dialog .wba-qr-camera-frame:has(.wba-qr-scan-result:not(:empty)) {
+  background: var(--wba-input);
+  border: 1px solid var(--wba-edge);
+}
+.wba-qr-scan-result { display: grid; justify-items: center; gap: 8px; padding: 24px; text-align: center; color: var(--wba-inline-strong); overflow-wrap: anywhere; min-width: 0; max-width: 100%; }
+.wba-qr-scan-result:empty { display: none; }
+.wba-qr-scan-result strong { font-size: 1rem; }
+.wba-qr-result-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: color-mix(in srgb, var(--wba-inline-warning) 12%, transparent); color: var(--wba-inline-warning); font-size: 1.5rem; }
+.wba-qr-scan-result.is-success .wba-qr-result-icon { color: var(--wba-inline-good); background: color-mix(in srgb, var(--wba-inline-good) 12%, transparent); }
+.wba-qr-result-sku { color: var(--wba-inline-muted); font-size: .8125rem; }
+html .wba-workspace-dialog.wba-qr-scanner-modal h2 { margin-bottom: 16px; }
+html .wba-workspace-dialog.wba-qr-scanner-modal :is(.wba-pill-btn, .wba-btn-primary) { min-height: 48px; }
 @supports not (backdrop-filter: blur(1px)) {
   html .wba-dashboard-app, .wba-workspace-dialog, html[data-theme] :is(.wba-dashboard-app, .wba-workspace-dialog) { --wba-glass: var(--wba-panel); --wba-panel-glass: var(--wba-panel); }
 }
