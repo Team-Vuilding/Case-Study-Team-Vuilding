@@ -168,14 +168,20 @@ function App() {
     window.location.hash = '#/home';
   };
 
+  const rolePicker = isRolePickerOpen && <WorkspaceAccess
+    role={null}
+    onSelectRole={showRoleLogin}
+    onClose={() => setIsRolePickerOpen(false)}
+  />;
+
   if (['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''))) {
     const pageProps = { currentUser, theme, onToggleTheme: toggleTheme };
-    return <Routes>
+    return <><Routes>
       <Route path="/privacy" element={<PrivacyPolicyPage {...pageProps} />} />
       <Route path="/terms" element={<TermsOfServicePage {...pageProps} />} />
-      <Route path="/help" element={<GeneralHelpPage {...pageProps} onSignIn={showRolePickerFromLogin} />} />
+      <Route path="/help" element={<GeneralHelpPage {...pageProps} onSignIn={showRoleSelection} />} />
       <Route path="/contact" element={<ContactSupportPage {...pageProps} />} />
-    </Routes>;
+    </Routes>{rolePicker}</>;
   }
   if (checkingSession) return <main className="wba-access-page"><ApiStatus loading loadingLabel="Checking your session…"><div className="wba-skeleton-session"><SkeletonCard /></div></ApiStatus></main>;
   if (sessionError) return <main className="wba-access-page"><p role="alert">{sessionError}</p><button type="button" onClick={() => window.location.reload()}>Retry connection</button></main>;
@@ -231,13 +237,7 @@ function App() {
 
       <BackToTop onBackToTop={() => setActiveSection('home')} />
 
-      {isRolePickerOpen && (
-        <WorkspaceAccess
-          role={null}
-          onSelectRole={showRoleLogin}
-          onClose={() => setIsRolePickerOpen(false)}
-        />
-      )}
+      {rolePicker}
 
     </div>
   );
