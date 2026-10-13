@@ -26,6 +26,7 @@
 .wba-public-contact-details h2:not(:first-child) { margin-top: 32px; }
 .wba-public-contact-details a { display: inline-block; padding-block: 12px; font-size: .875rem; }
 .wba-public-page :is(a, button, input, select, textarea):focus-visible, .wba-public-page [tabindex='-1']:focus { outline: 2px solid var(--text-primary); outline-offset: 4px; }
+.wba-public-page .wba-public-heading h1:focus { outline: none; }
 .wba-footer-links { flex-wrap: wrap; }
 .wba-footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
 .wba-footer-links a:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 4px; }
