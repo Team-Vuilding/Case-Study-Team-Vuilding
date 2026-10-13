@@ -142,10 +142,10 @@ class SystemApiTest extends TestCase
             ->assertJsonPath('data.0.target', $admin->email);
 
         $this->signIn('purchasing');
-        $this->getJson('/api/audit-logs')->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.eventType', 'PRODUCT_CATALOG_ADDED');
+        $this->getJson('/api/audit-logs')->assertForbidden();
         $this->getJson('/api/users/activity-logs')->assertForbidden();
+        $this->getJson('/api/purchasing/purchase-orders')->assertOk();
+        $this->getJson('/api/purchasing/suppliers')->assertOk();
         $this->assertDatabaseCount('audit_events', 3);
     }
 

@@ -23,7 +23,7 @@ export const PERMISSIONS = {
 export const ROLE_TABS = {
   admin: ['dashboard', 'inventory', 'purchase-history', 'audit-logs', 'manage-accounts', 'help-center'],
   warehouse: ['dashboard', 'inventory', 'purchase-history', 'help-center'],
-  purchasing: ['dashboard', 'inventory', 'purchase-history', 'audit-logs', 'help-center'],
+  purchasing: ['dashboard', 'inventory', 'purchase-history', 'help-center'],
   sales: ['dashboard', 'inventory', 'help-center'],
 };
 
@@ -47,7 +47,6 @@ const ROLE_PERMISSIONS = {
   ],
   purchasing: [
     PERMISSIONS.VIEW_PURCHASE_HISTORY,
-    PERMISSIONS.VIEW_AUDIT_LOGS,
     PERMISSIONS.VIEW_FORECAST_ROP,
     PERMISSIONS.VIEW_SUPPLIER_COSTS,
     PERMISSIONS.VIEW_FIFO_QUEUE,

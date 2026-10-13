@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
 import { SkeletonHeading, SkeletonList, SkeletonSummary } from '../WorkspaceSkeletons';
-
-const SEVERITY_LABELS = ['All', 'critical', 'warning', 'good', 'info'];
+import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
 // Map technical event codes to human-readable labels
 const FRIENDLY_EVENT = {
@@ -26,27 +25,30 @@ const getSeverityStyle = (sev) => {
 };
 
 export default function AuditLogsSection({ currentUser }) {
-  const { data, loading, error, reload } = useApiData('audit-logs');
-  const [search, setSearch] = useState('');
-  const [severity, setSeverity] = useState('All');
-  const accessLevel = currentUser?.accessLevel || 'admin';
-
-  if (accessLevel === 'sales') {
+  if (!hasPermission(currentUser?.accessLevel, PERMISSIONS.VIEW_AUDIT_LOGS)) {
     return (
       <div className="wba-grid-container">
         <div className="wba-glow-card" style={{ textAlign: 'center', padding: '60px 40px', border: '1px solid rgba(239, 68, 68, 0.45)' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚫</div>
           <h2 style={{ color: 'var(--wba-inline-critical)', fontSize: '1.4rem', marginBottom: '8px' }}>Access Denied</h2>
           <p style={{ color: 'var(--wba-inline-accent)', fontSize: '0.92rem' }}>
-            Sales Staff accounts do not have permission to view administrative audit trails.
+            Only administrators can view audit logs.
           </p>
         </div>
       </div>
     );
   }
 
+  return <AuditLogContent />;
+}
+
+function AuditLogContent() {
+  const { data, loading, error, reload } = useApiData('audit-logs');
+  const [search, setSearch] = useState('');
+  const [severity, setSeverity] = useState('All');
+
   if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading audit logs…">
-    <div className="wba-grid-container"><SkeletonHeading /><SkeletonSummary count={4} /><SkeletonList rows={4} /></div>
+    <div className="wba-grid-container"><SkeletonHeading /><SkeletonSummary count={5} /><SkeletonList rows={4} /></div>
   </ApiStatus>;
   const allLogs = data || [];
 
@@ -82,34 +84,23 @@ export default function AuditLogsSection({ currentUser }) {
           <input
             className="wba-input-field"
             type="text"
+            aria-label="Search audit logs"
             placeholder="Search by product, action, or user..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: '230px', fontSize: '0.84rem' }}
           />
-          <div className="wba-pill-toggle">
-            {SEVERITY_LABELS.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={`wba-pill-btn ${severity === s ? 'active' : ''}`}
-                onClick={() => setSeverity(s)}
-                style={{ textTransform: 'capitalize' }}
-              >
-                {s === 'All' ? 'All' : s === 'critical' ? 'Critical' : s === 'warning' ? 'Warning' : s === 'good' ? 'Resolved' : 'Info'}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="wba-audit-summary" aria-label="Filter audit logs by severity">
+      <div className="wba-audit-summary" role="group" aria-label="Filter audit logs by severity">
         {[
           { label: 'Total Entries', filter: 'All', val: allLogs.length, color: 'var(--wba-inline-accent)' },
           { label: 'Critical Alerts', filter: 'critical', val: allLogs.filter(l => l.severity === 'critical').length, color: 'var(--wba-inline-critical)' },
           { label: 'Warnings', filter: 'warning', val: allLogs.filter(l => l.severity === 'warning').length, color: 'var(--wba-inline-warning)' },
           { label: 'Resolved', filter: 'good', val: allLogs.filter(l => l.severity === 'good').length, color: 'var(--wba-inline-good)' },
+          { label: 'Info', filter: 'info', val: allLogs.filter(l => l.severity === 'info').length, color: 'var(--wba-inline-info)' },
         ].map((s) => (
           <button
             key={s.label}
@@ -127,7 +118,7 @@ export default function AuditLogsSection({ currentUser }) {
 
       {/* Log Stream */}
       <div className="wba-glow-card">
-        <div style={{ marginBottom: '14px', fontSize: '0.84rem', color: 'var(--wba-inline-accent)' }}>
+        <div role="status" aria-live="polite" style={{ marginBottom: '14px', fontSize: '0.84rem', color: 'var(--wba-inline-accent)' }}>
           Showing <strong style={{ color: 'var(--wba-inline-strong)' }}>{filtered.length}</strong> entries
         </div>
 

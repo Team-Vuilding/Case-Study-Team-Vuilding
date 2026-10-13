@@ -15,6 +15,9 @@ after(() => server.close());
 const { default: ApiStatus } = await server.ssrLoadModule('/src/components/ApiStatus.jsx');
 const { Skeleton, SkeletonText } = await server.ssrLoadModule('/src/components/SkeletonLoader.jsx');
 const { default: InventoryLedger } = await server.ssrLoadModule('/src/components/dashboard/RealTimeInventoryLedger.jsx');
+const { default: DashboardSidebar } = await server.ssrLoadModule('/src/components/dashboard/DashboardSidebar.jsx');
+const { default: AuditLogsSection } = await server.ssrLoadModule('/src/components/dashboard/AuditLogsSection.jsx');
+const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
 const render = (Component, props, children) => renderToStaticMarkup(createElement(Component, props, children));
 
 test('pending API data shows a skeleton and one contextual loading announcement', () => {
@@ -66,4 +69,20 @@ test('warehouse, purchasing, and sales users do not see archive controls', () =>
     const html = render(InventoryLedger, { items: [product], currentUser: { accessLevel } });
     assert.doesNotMatch(html, /aria-label="Archive/);
   }
+});
+
+test('only administrators can navigate to audit logs or mount their data view', () => {
+  for (const accessLevel of ['admin', 'purchasing', 'warehouse', 'sales']) {
+    const allowed = accessLevel === 'admin';
+    assert.equal(isTabAllowed(accessLevel, 'audit-logs'), allowed);
+    assert.equal(hasPermission(accessLevel, PERMISSIONS.VIEW_AUDIT_LOGS), allowed);
+    const sidebar = render(DashboardSidebar, { currentUser: { accessLevel }, activeTab: 'dashboard' });
+    assert.equal(sidebar.includes('Audit logs'), allowed);
+    if (!allowed) {
+      const audit = render(AuditLogsSection, { currentUser: { accessLevel } });
+      assert.match(audit, /Only administrators can view audit logs\./);
+      assert.doesNotMatch(audit, /Loading audit logs/);
+    }
+  }
+  assert.match(render(AuditLogsSection, {}), /Only administrators can view audit logs\./);
 });

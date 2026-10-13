@@ -25,6 +25,7 @@ Route::middleware('access')->group(function () {
     Route::get('categories', [ReferenceController::class, 'references'])->defaults('kind', 'categories');
 });
 Route::middleware('access:admin')->group(function () {
+    Route::get('audit-logs', [AuditController::class, 'audits']);
     Route::get('items/archived', [ItemController::class, 'archived']);
     Route::post('items/{item}/archive', [ItemController::class, 'archive'])->whereNumber('item');
     Route::post('items/{item}/restore', [ItemController::class, 'restore'])->whereNumber('item');
@@ -56,7 +57,6 @@ Route::middleware('access:admin,warehouse,purchasing')->group(function () {
     Route::put('purchasing/purchase-orders/{id}/status', [PurchaseOrderController::class, 'orderStatus'])->whereNumber('id');
 });
 Route::middleware('access:admin,purchasing')->group(function () {
-    Route::get('audit-logs', [AuditController::class, 'audits']);
     Route::get('purchasing/suppliers', [ReferenceController::class, 'references'])->defaults('kind', 'suppliers');
     Route::post('purchasing/suppliers', [ReferenceController::class, 'saveReference'])->defaults('kind', 'suppliers');
     Route::put('purchasing/suppliers/{id}', [ReferenceController::class, 'saveReference'])->defaults('kind', 'suppliers')->whereNumber('id');
