@@ -215,11 +215,6 @@ function App() {
 
   return renderPage(
     <div className="wba-landing-page">
-      {/* Background Ambient Glows */}
-      <div className="wba-bg-ambient-top" />
-      <div className="wba-bg-ambient-right" />
-      <div className="wba-bg-ambient-center" aria-hidden="true" />
-
       {/* Header / Navbar */}
       <Navbar
         activeSection={activeSection}
