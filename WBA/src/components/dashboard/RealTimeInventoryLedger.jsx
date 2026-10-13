@@ -80,7 +80,6 @@ export default function RealTimeInventoryLedger({ items, currentUser, onArchive,
                       {item.sku} {accessLevel !== 'sales' && `· ${item.warehouseBin}`}
                     </span>
                     <details className="wba-ledger-details"><summary>Stock details</summary><dl>
-                      <div><dt>Category</dt><dd>{item.category === 'A' ? 'High Value' : item.category === 'B' ? 'Mid Value' : item.category === 'C' ? 'Perishable' : 'Unclassified'}</dd></div>
                       <div><dt>Being picked</dt><dd>{item.allocated}</dd></div>
                       <div><dt>Ledger count</dt><dd>{item.paperSpreadsheetCount}</dd></div>
                     </dl></details>

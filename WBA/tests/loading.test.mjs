@@ -120,10 +120,13 @@ test('notification dismissal detects backdrop taps without dismissing panel cont
   assert.equal(isDialogBackdrop(pointer(400, 400, {})), false);
 });
 
-test('unclassified products are not mislabeled as perishable', () => {
-  const html = render(InventoryLedger, { items: [{ ...product, category: 'U' }], currentUser: { accessLevel: 'admin' } });
-  assert.match(html, /Unclassified/);
-  assert.doesNotMatch(html, /Perishable/);
+test('stock details retain counts without showing legacy product classifications', () => {
+  for (const category of ['A', 'B', 'C', 'U']) {
+    const html = render(InventoryLedger, { items: [{ ...product, category }], currentUser: { accessLevel: 'admin' } });
+    assert.match(html, /<dt>Being picked<\/dt>/);
+    assert.match(html, /<dt>Ledger count<\/dt>/);
+    assert.doesNotMatch(html, /<dt>Category<\/dt>|High Value|Mid Value|Perishable|Unclassified/);
+  }
 });
 
 test('ledger keeps count status separate from actions and archive descriptions inside the dialog', () => {
