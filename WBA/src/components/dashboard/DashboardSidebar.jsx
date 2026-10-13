@@ -101,10 +101,8 @@ export default function DashboardSidebar({
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" />
+            <path d="m12 3 9 5v8l-9 5-9-5V8z" />
+            <path d="m3 8 9 5 9-5M12 13v8M7.5 5.5l9 5" />
           </svg>
           {!isCollapsed && <span className="wba-dash-nav-label">Inventory</span>}
         </button>
