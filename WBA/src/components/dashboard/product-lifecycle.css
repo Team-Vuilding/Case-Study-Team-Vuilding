@@ -16,15 +16,6 @@
   cursor: not-allowed;
 }
 
-.wba-product-action-hint {
-  display: block;
-  max-width: 240px;
-  margin-top: 6px;
-  color: var(--wba-inline-muted);
-  font-size: 0.72rem;
-  line-height: 1.45;
-}
-
 .wba-product-notice,
 .wba-product-empty {
   color: var(--wba-inline-accent);

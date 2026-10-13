@@ -10,6 +10,7 @@ import QrInventoryScanner from './QrInventoryScanner';
 import ProductQrGenerator from './ProductQrGenerator';
 import ArchivedProducts from './ArchivedProducts';
 import ProductLifecycleDialog from './ProductLifecycleDialog';
+import ProductReportsDialog from './ProductReportsDialog';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 import './product-lifecycle.css';
 
@@ -19,6 +20,7 @@ export default function InventorySection({ currentUser }) {
   const [isQrGeneratorOpen, setIsQrGeneratorOpen] = useState(false);
   const [catalogView, setCatalogView] = useState('active');
   const [productAction, setProductAction] = useState(null);
+  const [reportItem, setReportItem] = useState(null);
   const [notice, setNotice] = useState('');
   const headingRef = useRef(null);
   const { data, loading, error, reload } = useApiData('items');
@@ -26,6 +28,7 @@ export default function InventorySection({ currentUser }) {
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
   const canManageProducts = hasPermission(accessLevel, PERMISSIONS.MANAGE_PRODUCTS);
+  const canViewReports = hasPermission(accessLevel, PERMISSIONS.VIEW_PRODUCT_REPORTS);
   const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
   const isWarehouseStaff = accessLevel === 'warehouse';
   const canGenerateQr = isWarehouseStaff || accessLevel === 'admin';
@@ -57,6 +60,12 @@ export default function InventorySection({ currentUser }) {
     if (!canManageProducts) return;
     setNotice('');
     setProductAction({ action, item });
+  };
+
+  const openReports = item => {
+    if (!canViewReports) return;
+    setNotice('');
+    setReportItem(item);
   };
 
   const completeProductAction = message => {
@@ -125,8 +134,8 @@ export default function InventorySection({ currentUser }) {
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        {canManageProducts && catalogView === 'archived' ? <ArchivedProducts onRestore={item => openProductAction('restore', item)} onDelete={item => openProductAction('delete', item)} />
-          : loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} onArchive={item => openProductAction('archive', item)} />}
+        {canManageProducts && catalogView === 'archived' ? <ArchivedProducts onRestore={item => openProductAction('restore', item)} onDelete={item => openProductAction('delete', item)} onReports={openReports} />
+          : loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} onArchive={item => openProductAction('archive', item)} onReports={openReports} />}
       </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
@@ -173,6 +182,7 @@ export default function InventorySection({ currentUser }) {
       </section>}
 
       {canManageProducts && productAction && <ProductLifecycleDialog key={productAction.action + '-' + productAction.item.id} {...productAction} onClose={() => setProductAction(null)} onComplete={completeProductAction} />}
+      {canViewReports && reportItem && <ProductReportsDialog key={reportItem.id} item={reportItem} currentUser={currentUser} onClose={() => setReportItem(null)} />}
 
       {/* Add Product Modal (Only rendered when permitted) */}
       {canAddProduct && (

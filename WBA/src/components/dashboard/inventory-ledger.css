@@ -1,0 +1,49 @@
+.wba-ledger-toolbar { align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+.wba-ledger-toolbar .wba-card-title-group { flex: 1 1 300px; }
+.wba-ledger-controls { display: flex; flex: 1 1 320px; flex-wrap: wrap; gap: 10px; }
+.wba-ledger-controls input { flex: 1 1 200px; min-width: 0; }
+.wba-ledger-controls select { flex: 1 1 160px; width: auto; }
+.wba-ledger-result-count { margin: 0 0 12px; color: var(--wba-inline-muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.wba-inventory-ledger .wba-table { min-width: 960px; }
+.wba-inventory-ledger .wba-table th { white-space: nowrap; }
+.wba-inventory-ledger .wba-table td { padding: 16px 12px; }
+.wba-inventory-ledger .wba-table td:first-child { min-width: 185px; }
+.wba-inventory-ledger .wba-sku-name, .wba-inventory-ledger .wba-sku-code { overflow-wrap: anywhere; }
+.wba-inventory-ledger .wba-ledger-number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wba-ledger-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.wba-ledger-count-status { display: inline-flex; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+.wba-ledger-count-status.accurate { color: var(--wba-inline-good); background: color-mix(in srgb, var(--wba-inline-good) 10%, transparent); }
+.wba-ledger-count-status.mismatch { color: var(--wba-inline-critical); background: color-mix(in srgb, var(--wba-inline-critical) 10%, transparent); }
+.wba-ledger-actions-cell { min-width: 155px; }
+.wba-ledger-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 10px; border: 1px solid var(--border-subtle); border-radius: 8px; background: transparent; color: var(--wba-inline-accent); font: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.wba-ledger-action:hover { background: color-mix(in srgb, var(--wba-inline-accent) 8%, transparent); }
+.wba-ledger-action.reconcile { color: var(--wba-inline-critical); }
+.wba-ledger-action:focus-visible, .wba-inventory-ledger .wba-table-container:focus-visible { outline: 2px solid var(--border-accent); outline-offset: 3px; }
+.wba-ledger-report-count { padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--wba-inline-accent) 12%, transparent); font-variant-numeric: tabular-nums; }
+.wba-inventory-ledger .wba-ledger-empty { padding: 28px; text-align: center; color: var(--wba-inline-muted); }
+
+.wba-product-reports-dialog { width: min(640px, calc(100% - 32px)); }
+.wba-product-reports-body { display: grid; gap: 20px; }
+.wba-product-reports-dialog .wba-report-form { padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; gap: 14px; }
+.wba-product-reports-dialog textarea { resize: vertical; min-height: 100px; }
+.wba-report-form .wba-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.wba-report-history { display: grid; gap: 14px; }
+.wba-report-history h3 { font-size: 1rem; }
+.wba-report-list { display: grid; gap: 12px; list-style: none; }
+.wba-report-list li { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; }
+.wba-report-entry-header, .wba-report-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.wba-report-entry-header time { color: var(--text-secondary); font-size: 0.75rem; }
+.wba-report-type { padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; color: var(--wba-inline-info); background: color-mix(in srgb, var(--wba-inline-info) 10%, transparent); }
+.wba-report-type.mismatch { color: var(--wba-inline-warning); background: color-mix(in srgb, var(--wba-inline-warning) 10%, transparent); }
+.wba-product-reports-dialog .wba-report-message { color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.wba-report-actor { font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.wba-report-pagination { font-size: 0.8rem; color: var(--text-secondary); }
+.wba-report-pagination > div { display: flex; gap: 8px; }
+.wba-report-pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+.wba-product-reports-dialog .wba-report-success { color: var(--wba-inline-good); }
+
+@media (max-width: 600px) {
+  .wba-ledger-controls { flex-basis: 100%; }
+  .wba-ledger-controls input, .wba-ledger-controls select { flex-basis: 100%; }
+  .wba-product-reports-dialog .wba-product-dialog-actions > button { flex: 1 1 100%; width: 100%; white-space: nowrap; }
+}

@@ -2,7 +2,7 @@ import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
 import { SkeletonTable } from '../WorkspaceSkeletons';
 
-export default function ArchivedProducts({ onRestore, onDelete }) {
+export default function ArchivedProducts({ onRestore, onDelete, onReports }) {
   const { data, loading, error, reload } = useApiData('items/archived');
   if (loading || error) return <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading archived products…"><SkeletonTable columns={5} /></ApiStatus>;
 
@@ -16,6 +16,7 @@ export default function ArchivedProducts({ onRestore, onDelete }) {
         <td>{item.archivedBy}</td>
         <td className="wba-product-archive-reason">{item.archiveReason}</td>
         <td><div className="wba-product-row-actions">
+          {item.reportCount > 0 && <button type="button" className="wba-pill-btn" onClick={() => onReports(item)} aria-label={'View reports for ' + item.name}>Reports ({item.reportCount})</button>}
           <button type="button" className="wba-pill-btn" onClick={() => onRestore(item)} aria-label={'Restore ' + item.name}>Restore</button>
           {item.canDelete && <button type="button" className="wba-pill-btn wba-product-delete-link" onClick={() => onDelete(item)} aria-label={'Delete ' + item.name + ' permanently'}>Delete permanently</button>}
         </div></td>

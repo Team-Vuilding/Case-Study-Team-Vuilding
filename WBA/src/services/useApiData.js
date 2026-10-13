@@ -3,6 +3,7 @@ import { apiRequest } from './api';
 
 export default function useApiData(endpoint) {
   const [data, setData] = useState(null);
+  const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
@@ -16,7 +17,7 @@ export default function useApiData(endpoint) {
       setError('');
       try {
         const result = await apiRequest(endpoint);
-        if (active) setData(result.data);
+        if (active) { setData(result.data); setMeta(result.meta ?? null); }
       } catch (reason) {
         if (active) setError(reason.message);
       } finally {
@@ -30,5 +31,5 @@ export default function useApiData(endpoint) {
     window.addEventListener('wba-data-changed', reload);
     return () => window.removeEventListener('wba-data-changed', reload);
   }, [reload]);
-  return { data, loading: loading && data === null, error, reload };
+  return { data, meta, fetching: loading, loading: loading && data === null, error, reload };
 }

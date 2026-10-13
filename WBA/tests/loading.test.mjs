@@ -16,6 +16,7 @@ const { default: ApiStatus } = await server.ssrLoadModule('/src/components/ApiSt
 const { Skeleton, SkeletonText } = await server.ssrLoadModule('/src/components/SkeletonLoader.jsx');
 const { default: InventoryLedger } = await server.ssrLoadModule('/src/components/dashboard/RealTimeInventoryLedger.jsx');
 const { default: ProductLifecycleDialog } = await server.ssrLoadModule('/src/components/dashboard/ProductLifecycleDialog.jsx');
+const { default: ProductReportsDialog } = await server.ssrLoadModule('/src/components/dashboard/ProductReportsDialog.jsx');
 const { default: DashboardSidebar } = await server.ssrLoadModule('/src/components/dashboard/DashboardSidebar.jsx');
 const { default: AuditLogsSection } = await server.ssrLoadModule('/src/components/dashboard/AuditLogsSection.jsx');
 const { isTabAllowed, hasPermission, PERMISSIONS } = await server.ssrLoadModule('/src/data/rbac.js');
@@ -57,12 +58,33 @@ test('placeholder primitives stay decorative and respect zero dimensions', () =>
 const product = { id: 1, name: 'Test appliance', sku: 'TEST-001', category: 'A', warehouseBin: 'BIN-01', unitPrice: 100,
   physicalOnHand: 0, paperSpreadsheetCount: 0, reserved: 0, allocated: 0, canArchive: true };
 
-test('administrators see archive controls and an explanation for ineligible products', () => {
+test('ledger keeps count status separate from actions and archive descriptions inside the dialog', () => {
   const html = render(InventoryLedger, { items: [product, { ...product, id: 2, name: 'Stocked appliance', physicalOnHand: 1,
     canArchive: false, archiveBlockReason: 'Resolve stock first.' }], currentUser: { accessLevel: 'admin' }, onArchive: () => {} });
   assert.match(html, /aria-label="Archive Test appliance"/);
   assert.doesNotMatch(html, /disabled="" aria-label="Archive Stocked appliance"/);
-  assert.match(html, /id="archive-blocked-2">Resolve stock first\./);
+  assert.doesNotMatch(html, /archive-blocked-|Resolve stock first\.|✓ OK/);
+  assert.match(html, /<th>Count status<\/th>/);
+  assert.match(html, /aria-label="View reports for Test appliance"/);
+});
+
+test('warehouse staff can add product reports while other roles cannot', () => {
+  for (const accessLevel of ['admin', 'warehouse', 'purchasing', 'sales']) {
+    const html = render(InventoryLedger, { items: [product], currentUser: { accessLevel }, onReports: () => {} });
+    assert.equal(html.includes('aria-label="Add report for Test appliance"'), accessLevel === 'warehouse');
+    assert.equal(html.includes('aria-label="View reports for Test appliance"'), ['admin', 'warehouse'].includes(accessLevel));
+  }
+});
+
+test('warehouse report forms require a description while admins can only review history', () => {
+  const warehouse = render(ProductReportsDialog, { item: product, currentUser: { accessLevel: 'warehouse' }, onClose: () => {} });
+  assert.match(warehouse, /Description \(required\)/);
+  assert.match(warehouse, /Info \/ note/);
+  assert.match(warehouse, /Mismatch/);
+  assert.match(warehouse, /does not change stock quantities/);
+  const admin = render(ProductReportsDialog, { item: product, currentUser: { accessLevel: 'admin' }, onClose: () => {} });
+  assert.match(admin, /Report history/);
+  assert.doesNotMatch(admin, /Save report|<textarea/);
 });
 
 test('blocked archive dialogs explain the stock balance without offering a submit action', () => {
