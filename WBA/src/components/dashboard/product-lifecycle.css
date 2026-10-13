@@ -1,0 +1,66 @@
+.wba-product-catalog-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wba-product-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.wba-product-row-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wba-product-action-hint {
+  display: block;
+  max-width: 240px;
+  margin-top: 6px;
+  color: var(--wba-inline-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.wba-product-notice,
+.wba-product-empty {
+  color: var(--wba-inline-accent);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.wba-product-empty { margin-top: 20px; }
+.wba-product-archive-reason { min-width: 180px; max-width: 320px; overflow-wrap: anywhere; }
+
+.wba-product-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 28px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.wba-product-dialog::backdrop { background: rgba(5, 7, 15, 0.7); }
+.wba-product-dialog form { display: grid; gap: 20px; }
+.wba-product-dialog h2 { padding-right: 28px; font-size: 1.25rem; }
+.wba-product-dialog p { color: var(--text-secondary); line-height: 1.55; font-size: 0.875rem; }
+.wba-product-dialog .wba-input-group { margin-bottom: 0; }
+.wba-product-dialog-identity { display: grid; gap: 4px; overflow-wrap: anywhere; }
+.wba-product-dialog-identity span { color: var(--text-secondary); font-size: 0.8rem; }
+.wba-product-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+.wba-product-dialog .wba-product-action-error { color: var(--wba-inline-critical); }
+.wba-product-delete-link { color: var(--wba-inline-critical); }
+.wba-product-delete-btn { background: #b42338; }
+
+@media (max-width: 600px) {
+  .wba-product-dialog { padding: 22px; }
+  .wba-product-dialog-actions > button { flex: 1; }
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import useApiData from '../../services/useApiData';
 import ApiStatus from '../ApiStatus';
@@ -8,19 +8,31 @@ import FifoExpiryQueue from './FifoExpiryQueue';
 import AddProductModal from './AddProductModal';
 import QrInventoryScanner from './QrInventoryScanner';
 import ProductQrGenerator from './ProductQrGenerator';
+import ArchivedProducts from './ArchivedProducts';
+import ProductLifecycleDialog from './ProductLifecycleDialog';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
+import './product-lifecycle.css';
 
 export default function InventorySection({ currentUser }) {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [isQrGeneratorOpen, setIsQrGeneratorOpen] = useState(false);
+  const [catalogView, setCatalogView] = useState('active');
+  const [productAction, setProductAction] = useState(null);
+  const [notice, setNotice] = useState('');
+  const headingRef = useRef(null);
   const { data, loading, error, reload } = useApiData('items');
   const items = data || [];
   const accessLevel = currentUser?.accessLevel || 'admin';
   const canAddProduct = hasPermission(accessLevel, PERMISSIONS.ADD_PRODUCT);
+  const canManageProducts = hasPermission(accessLevel, PERMISSIONS.MANAGE_PRODUCTS);
   const canViewFifo = hasPermission(accessLevel, PERMISSIONS.VIEW_FIFO_QUEUE);
   const isWarehouseStaff = accessLevel === 'warehouse';
   const canGenerateQr = isWarehouseStaff || accessLevel === 'admin';
+
+  useEffect(() => {
+    if (notice && !productAction) headingRef.current?.focus();
+  }, [notice, productAction]);
 
   const handleQrScan = async (scan) => {
     if (!isWarehouseStaff) return;
@@ -38,6 +50,19 @@ export default function InventorySection({ currentUser }) {
     await apiRequest('items', { method: 'POST', body: newProduct });
     refreshData();
     setIsAddProductOpen(false);
+    setCatalogView('active');
+  };
+
+  const openProductAction = (action, item) => {
+    if (!canManageProducts) return;
+    setNotice('');
+    setProductAction({ action, item });
+  };
+
+  const completeProductAction = message => {
+    setProductAction(null);
+    setNotice(message);
+    refreshData();
   };
 
   return (
@@ -45,7 +70,7 @@ export default function InventorySection({ currentUser }) {
       {/* Section Header */}
       <div className="wba-section-page-header">
         <div>
-          <h2 className="wba-section-page-title">
+          <h2 ref={headingRef} tabIndex={-1} className="wba-section-page-title">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
               <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
@@ -70,7 +95,13 @@ export default function InventorySection({ currentUser }) {
         )}
       </div>
 
-      {canGenerateQr && (
+      {notice && <p className="wba-product-notice" role="status">{notice}</p>}
+      {canManageProducts && <div className="wba-product-catalog-toggle" role="group" aria-label="Product catalog view">
+        <button type="button" className={'wba-pill-btn' + (catalogView === 'active' ? ' active' : '')} aria-pressed={catalogView === 'active'} onClick={() => setCatalogView('active')}>Active products</button>
+        <button type="button" className={'wba-pill-btn' + (catalogView === 'archived' ? ' active' : '')} aria-pressed={catalogView === 'archived'} onClick={() => setCatalogView('archived')}>Archived products</button>
+      </div>}
+
+      {canGenerateQr && catalogView === 'active' && (
         <section className="wba-qr-tools" aria-label="Product QR tools">
           <div className="wba-qr-tools-copy">
             <span className="wba-qr-tools-icon" aria-hidden="true">▦</span>
@@ -94,11 +125,12 @@ export default function InventorySection({ currentUser }) {
 
       {/* Real-Time Multi-State Ledger (Full Width) */}
       <section style={{ width: '100%' }}>
-        {loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} />}
+        {canManageProducts && catalogView === 'archived' ? <ArchivedProducts onRestore={item => openProductAction('restore', item)} onDelete={item => openProductAction('delete', item)} />
+          : loading || error ? <ApiStatus loading={loading} error={error} onRetry={reload} loadingLabel="Loading inventory ledger…"><SkeletonTable columns={8} /></ApiStatus> : <RealTimeInventoryLedger items={items} currentUser={currentUser} onArchive={item => openProductAction('archive', item)} />}
       </section>
 
       {/* FIFO / FEFO Expiry Queue (Warehouse & Admin) OR Sales ATP Reservation Summary */}
-      <section style={{ width: '100%' }}>
+      {catalogView === 'active' && <section style={{ width: '100%' }}>
         {canViewFifo ? (
           <FifoExpiryQueue />
         ) : loading || error ? (
@@ -138,7 +170,9 @@ export default function InventorySection({ currentUser }) {
             </div>
           </div>
         )}
-      </section>
+      </section>}
+
+      {canManageProducts && productAction && <ProductLifecycleDialog key={productAction.action + '-' + productAction.item.id} {...productAction} onClose={() => setProductAction(null)} onComplete={completeProductAction} />}
 
       {/* Add Product Modal (Only rendered when permitted) */}
       {canAddProduct && (

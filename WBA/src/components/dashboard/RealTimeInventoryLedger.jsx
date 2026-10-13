@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { apiRequest, refreshData } from '../../services/api';
 import { hasPermission, PERMISSIONS } from '../../data/rbac';
 
-export default function RealTimeInventoryLedger({ items, currentUser }) {
+export default function RealTimeInventoryLedger({ items, currentUser, onArchive }) {
   const [reconcilingId, setReconcilingId] = useState(null);
   const [error, setError] = useState('');
   const accessLevel = currentUser.accessLevel;
   const canFixCount = hasPermission(accessLevel, PERMISSIONS.FIX_COUNT);
+  const canManageProducts = hasPermission(accessLevel, PERMISSIONS.MANAGE_PRODUCTS);
   const handleReconcile = async id => {
     const item = items.find(row => row.id === id);
     setReconcilingId(id); setError('');
@@ -101,6 +102,7 @@ export default function RealTimeInventoryLedger({ items, currentUser }) {
                     )}
                   </td>
                   <td>
+                    <div className="wba-product-row-actions">
                     {hasDiscrepancy && canFixCount ? (
                       <button
                         type="button"
@@ -124,6 +126,9 @@ export default function RealTimeInventoryLedger({ items, currentUser }) {
                     ) : (
                       <span style={{ fontSize: '0.74rem', color: 'var(--wba-inline-accent)' }}>✓ OK</span>
                     )}
+                    {canManageProducts && <button type="button" className="wba-pill-btn" disabled={!item.canArchive || reconcilingId !== null} aria-label={'Archive ' + item.name} aria-describedby={item.archiveBlockReason ? 'archive-blocked-' + item.id : undefined} onClick={() => onArchive(item)}>Archive</button>}
+                    </div>
+                    {canManageProducts && item.archiveBlockReason && <span className="wba-product-action-hint" id={'archive-blocked-' + item.id}>{item.archiveBlockReason}</span>}
                   </td>
                 </tr>
               );
