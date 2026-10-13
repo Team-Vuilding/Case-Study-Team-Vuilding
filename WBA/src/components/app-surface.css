@@ -67,6 +67,12 @@ html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-center::before 
 }
 
 .wba-cursor-glow {
+  --wba-trail-primary: color-mix(in srgb, var(--accent-lavender) 75%, var(--text-primary));
+  --wba-trail-secondary: color-mix(in srgb, var(--accent-pink) 80%, var(--text-primary));
+  --wba-trail-accent: color-mix(in srgb, #a5b4fc 85%, var(--bg-dark));
+  --wba-trail-primary-strength: 28%;
+  --wba-trail-accent-strength: 12%;
+  --wba-trail-secondary-strength: 22%;
   position: fixed;
   inset: 0;
   z-index: 2;
@@ -90,17 +96,22 @@ html[data-theme='light'] .wba-ambient-background .wba-bg-ambient-center::before 
 }
 .wba-cursor-thread::before {
   transform: translateY(-12px);
-  background: radial-gradient(ellipse, rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0.12) 35%, transparent 65%);
+  background: radial-gradient(ellipse,
+    color-mix(in srgb, var(--wba-trail-primary) var(--wba-trail-primary-strength), transparent),
+    color-mix(in srgb, var(--wba-trail-accent) var(--wba-trail-accent-strength), transparent) 35%, transparent 65%);
 }
 .wba-cursor-thread::after {
   transform: translateY(12px);
-  background: radial-gradient(ellipse, rgba(236, 72, 153, 0.22), transparent 65%);
+  background: radial-gradient(ellipse,
+    color-mix(in srgb, var(--wba-trail-secondary) var(--wba-trail-secondary-strength), transparent), transparent 65%);
 }
-html[data-theme='light'] .wba-cursor-thread::before {
-  background: radial-gradient(ellipse, rgba(124, 58, 237, 0.24), rgba(79, 70, 229, 0.1) 35%, transparent 65%);
-}
-html[data-theme='light'] .wba-cursor-thread::after {
-  background: radial-gradient(ellipse, rgba(219, 39, 119, 0.18), transparent 65%);
+html[data-theme='light'] .wba-cursor-glow {
+  --wba-trail-primary: color-mix(in srgb, var(--accent-purple) 70%, var(--text-primary));
+  --wba-trail-secondary: color-mix(in srgb, var(--accent-magenta) 60%, var(--bg-dark));
+  --wba-trail-accent: color-mix(in srgb, #4f46e5 80%, var(--bg-dark));
+  --wba-trail-primary-strength: 24%;
+  --wba-trail-accent-strength: 10%;
+  --wba-trail-secondary-strength: 18%;
 }
 .wba-app-shell[data-ambient-paused='true'] .wba-cursor-glow { opacity: 0; will-change: auto; }
 
