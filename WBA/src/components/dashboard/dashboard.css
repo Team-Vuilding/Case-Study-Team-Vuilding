@@ -2024,6 +2024,9 @@
 }
 
 /* Theme overrides */
+.wba-account-menu-popover { box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4); }
+html[data-theme='light'] .wba-account-menu-popover { box-shadow: 0 12px 30px rgba(35, 42, 70, 0.14); }
+
 html[data-theme='light'] .wba-dashboard-app {
   --wba-bg-deep: #eef0f8;
   --wba-bg-panel: #ffffff;

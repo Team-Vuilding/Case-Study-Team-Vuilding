@@ -164,11 +164,10 @@ export default function DashboardHeader({
                 position: 'absolute',
                 top: 'calc(100% + 10px)',
                 right: 0,
-                width: '260px',
-                background: '#130d24',
-                border: '1px solid rgba(168, 85, 247, 0.35)',
+                width: 'min(260px, calc(100vw - 32px))',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-accent)',
                 borderRadius: '12px',
-                boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
                 padding: '16px',
                 zIndex: 60,
                 display: 'flex',
@@ -176,10 +175,10 @@ export default function DashboardHeader({
                 gap: '12px',
               }}
             >
-              <div style={{ borderBottom: '1px solid rgba(168, 85, 247, 0.18)', paddingBottom: '10px' }}>
-                <strong style={{ display: 'block', color: '#fff', fontSize: '0.9rem' }}>{currentUser?.name}</strong>
-                <span style={{ display: 'block', color: '#a79cb8', fontSize: '0.78rem', marginTop: '2px', wordBreak: 'break-all' }}>{currentUser?.email}</span>
-                <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '0.7rem', color: '#c084fc', background: 'rgba(192, 132, 252, 0.12)', padding: '2px 8px', borderRadius: '6px' }}>
+              <div style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px' }}>
+                <strong style={{ display: 'block', color: 'var(--wba-inline-strong)', fontSize: '0.9rem' }}>{currentUser?.name}</strong>
+                <span style={{ display: 'block', color: 'var(--wba-inline-muted)', fontSize: '0.78rem', marginTop: '2px', overflowWrap: 'anywhere' }}>{currentUser?.email}</span>
+                <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '0.7rem', color: 'var(--wba-inline-accent)', background: 'color-mix(in srgb, var(--wba-inline-accent) 12%, transparent)', padding: '2px 8px', borderRadius: '6px' }}>
                   {currentUser?.role || currentRole}
                 </span>
               </div>
@@ -195,9 +194,9 @@ export default function DashboardHeader({
                     width: '100%',
                     padding: '8px 10px',
                     borderRadius: '8px',
-                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                    background: 'rgba(245, 158, 11, 0.08)',
-                    color: '#fbbf24',
+                    border: '1px solid color-mix(in srgb, var(--wba-inline-warning) 35%, transparent)',
+                    background: 'color-mix(in srgb, var(--wba-inline-warning) 8%, transparent)',
+                    color: 'var(--wba-inline-warning)',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -218,9 +217,9 @@ export default function DashboardHeader({
                     width: '100%',
                     padding: '8px 10px',
                     borderRadius: '8px',
-                    border: '1px solid rgba(168, 85, 247, 0.2)',
+                    border: '1px solid var(--border-subtle)',
                     background: 'transparent',
-                    color: '#e9d5ff',
+                    color: 'var(--wba-inline-accent)',
                     fontSize: '0.8rem',
                     cursor: 'pointer',
                     textAlign: 'left',
