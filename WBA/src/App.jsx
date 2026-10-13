@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
+import BackToTop from './components/BackToTop';
 import Hero from './components/Hero';
 import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
@@ -206,6 +207,8 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <BackToTop onBackToTop={() => setActiveSection('home')} />
 
       {isRolePickerOpen && (
         <WorkspaceAccess
