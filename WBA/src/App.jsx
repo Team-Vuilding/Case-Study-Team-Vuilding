@@ -14,6 +14,7 @@ import WorkspaceAccess from './components/WorkspaceAccess';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import GeneralHelpPage from './components/GeneralHelpPage';
 import PageRefreshLoader from './components/PageRefreshLoader';
+import AppSurface from './components/AppSurface';
 import { authApi, getToken, setToken } from './services/api';
 import { animateNavigation } from './utils/navigationMotion';
 import './App.css';
@@ -174,7 +175,7 @@ function App() {
   />;
 
   const isPublicPage = ['/privacy', '/terms', '/help', '/contact'].includes(location.pathname.replace(/\/$/, ''));
-  const renderPage = content => <PageRefreshLoader pending={checkingSession && !isPublicPage}>{content}</PageRefreshLoader>;
+  const renderPage = content => <PageRefreshLoader pending={checkingSession && !isPublicPage}><AppSurface>{content}</AppSurface></PageRefreshLoader>;
 
   if (isPublicPage) {
     const pageProps = { currentUser, theme, onToggleTheme: toggleTheme };

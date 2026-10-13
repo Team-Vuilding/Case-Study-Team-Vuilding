@@ -18,6 +18,8 @@ for (const [path, title] of [['privacy', 'Privacy Policy'], ['terms', 'Terms of 
       const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [`/${path}`] }, createElement(App)));
       assert.match(html, new RegExp(title));
       assert.match(html, /<h1/);
+      assert.equal((html.match(/class="wba-ambient-background"/g) || []).length, 1);
+      assert.match(html, /class="wba-ambient-background" aria-hidden="true"/);
       assert.doesNotMatch(html, /Checking your session|wba-landing-page/);
       for (const route of ['privacy', 'terms', 'help', 'contact']) assert.ok(html.includes(`href="#/${route}"`));
       if (path === 'contact') {
@@ -36,3 +38,17 @@ test('public FAQ search covers the requested topics', async () => {
   assert.ok(findGeneralHelpArticles({ query: 'mismatch' }).length);
   assert.equal(findGeneralHelpArticles({ query: 'no-such-question' }).length, 0);
 });
+
+for (const role of ['admin', 'warehouse', 'purchasing', 'sales']) {
+  test(`${role} sign-in shares the public-page ambient background`, () => {
+    const previousWindow = globalThis.window;
+    const previousStorage = globalThis.sessionStorage;
+    globalThis.window = { location: { hash: `#/login/${role}` } };
+    globalThis.sessionStorage = { getItem: () => null };
+    try {
+      const html = renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [`/login/${role}`] }, createElement(App)));
+      assert.equal((html.match(/class="wba-ambient-background"/g) || []).length, 1);
+      assert.match(html, /wba-access-page/);
+    } finally { globalThis.window = previousWindow; globalThis.sessionStorage = previousStorage; }
+  });
+}
