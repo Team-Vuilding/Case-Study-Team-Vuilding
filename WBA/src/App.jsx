@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import BackToTop from './components/BackToTop';
+import darkLogo from './assets/wba-logo-dark.png';
+import lightLogo from './assets/wba-logo-light.png';
 import Hero from './components/Hero';
 import AboutSection from './components/AboutSection';
 import FeaturesSection from './components/FeaturesSection';
@@ -84,6 +86,8 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) favicon.href = theme === 'light' ? lightLogo : darkLogo;
     try {
       localStorage.setItem('wba_theme', theme);
     } catch {

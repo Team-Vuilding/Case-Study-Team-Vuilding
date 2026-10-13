@@ -1,0 +1,25 @@
+.wba-logo-image {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.wba-logo-image.wba-nav-logo,
+.wba-logo-image.wba-access-logo {
+  width: 48px;
+  height: 48px;
+}
+
+.wba-access-header .wba-access-home { width: 48px; }
+
+.wba-logo-image.wba-dash-sidebar-logo {
+  width: 42px;
+  height: 42px;
+}
+
+.wba-logo-loader-wrap.size-sm .wba-logo-image.wba-loader-brand-svg { width: 64px; height: 64px; }
+.wba-logo-loader-wrap.size-md .wba-logo-image.wba-loader-brand-svg { width: 96px; height: 96px; }
+.wba-logo-loader-wrap.size-lg .wba-logo-image.wba-loader-brand-svg { width: 128px; height: 128px; }
+.wba-logo-loader-wrap.size-xl .wba-logo-image.wba-loader-brand-svg { width: 160px; height: 160px; }
