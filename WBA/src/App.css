@@ -44,7 +44,7 @@
    Navigation Bar
    ========================================================================== */
 
-.wba-landing-page > .wba-header {
+.wba-landing-page>.wba-header {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -467,11 +467,35 @@
 }
 
 @keyframes wba-check-pulse {
-  0%        { transform: scale(0.75);  opacity: 0.5;  filter: brightness(0.8); }
-  45%       { transform: scale(1.45);  opacity: 1;    filter: brightness(1.5); }
-  65%       { transform: scale(0.95);  opacity: 0.95; filter: brightness(1);   }
-  80%       { transform: scale(1.1);   opacity: 1;    filter: brightness(1.2); }
-  100%      { transform: scale(0.75);  opacity: 0.5;  filter: brightness(0.8); }
+  0% {
+    transform: scale(0.75);
+    opacity: 0.5;
+    filter: brightness(0.8);
+  }
+
+  45% {
+    transform: scale(1.45);
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+
+  65% {
+    transform: scale(0.95);
+    opacity: 0.95;
+    filter: brightness(1);
+  }
+
+  80% {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+
+  100% {
+    transform: scale(0.75);
+    opacity: 0.5;
+    filter: brightness(0.8);
+  }
 }
 
 /* ── Icon 2: bars — slam from flat to full, staggered ── */
@@ -481,17 +505,48 @@
   animation-iteration-count: infinite;
   animation-name: wba-bar-rise;
 }
+
 /* Updated origins match 64px SVG baseline y=52 */
-.wba-bar-1 { animation-delay: 0s;    transform-origin: 18.5px 52px; }
-.wba-bar-2 { animation-delay: 0.2s;  transform-origin: 31.5px 52px; }
-.wba-bar-3 { animation-delay: 0.4s;  transform-origin: 44.5px 52px; }
+.wba-bar-1 {
+  animation-delay: 0s;
+  transform-origin: 18.5px 52px;
+}
+
+.wba-bar-2 {
+  animation-delay: 0.2s;
+  transform-origin: 31.5px 52px;
+}
+
+.wba-bar-3 {
+  animation-delay: 0.4s;
+  transform-origin: 44.5px 52px;
+}
 
 @keyframes wba-bar-rise {
-  0%        { opacity: 0.2;  transform: scaleY(0.15); }
-  55%       { opacity: 1;    transform: scaleY(1.08); }
-  70%       { opacity: 0.9;  transform: scaleY(0.95); }
-  85%       { opacity: 1;    transform: scaleY(1);    }
-  100%      { opacity: 0.2;  transform: scaleY(0.15); }
+  0% {
+    opacity: 0.2;
+    transform: scaleY(0.15);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scaleY(1.08);
+  }
+
+  70% {
+    opacity: 0.9;
+    transform: scaleY(0.95);
+  }
+
+  85% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  100% {
+    opacity: 0.2;
+    transform: scaleY(0.15);
+  }
 }
 
 /* ── Icon 2: trend dot — hard ping expand + snap back ── */
@@ -501,12 +556,35 @@
 }
 
 @keyframes wba-trend-ping {
-  0%   { transform: scale(1);    opacity: 1;   }
-  40%  { transform: scale(2.8);  opacity: 0;   }
-  41%  { transform: scale(0.4);  opacity: 0;   }
-  60%  { transform: scale(1.2);  opacity: 1;   }
-  75%  { transform: scale(0.85); opacity: 0.9; }
-  100% { transform: scale(1);    opacity: 1;   }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  40% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+
+  41% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  75% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Icon 3: clock minute hand — fast spin ── */
@@ -515,8 +593,13 @@
 }
 
 @keyframes wba-clock-spin {
-  from { transform: rotate(0deg);   }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Icon 3: clock ring — slow breathe glow ── */
@@ -526,8 +609,17 @@
 }
 
 @keyframes wba-clock-ring-pulse {
-  0%, 100% { opacity: 0.7;  transform: scale(1);    }
-  50%       { opacity: 1;    transform: scale(1.12); }
+
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
 }
 
 .wba-about-card h3 {
@@ -1162,12 +1254,10 @@ html[data-theme='light'] {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--wba-skeleton-shine) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--wba-skeleton-shine) 50%,
+      transparent 100%);
   transform: translateX(-100%);
   animation: wbaShimmer 2.2s infinite ease-in-out;
 }
@@ -1185,7 +1275,9 @@ html[data-theme='light'] {
   0% {
     transform: translateX(-100%);
   }
-  60%, 100% {
+
+  60%,
+  100% {
     transform: translateX(100%);
   }
 }
@@ -1209,7 +1301,7 @@ html[data-theme='light'] {
   min-width: 0;
 }
 
-.wba-skeleton-hero-left > div:last-child {
+.wba-skeleton-hero-left>div:last-child {
   flex-wrap: wrap;
 }
 
@@ -1387,7 +1479,7 @@ html[data-theme='light'] {
   min-width: 0;
 }
 
-.wba-skeleton-list-row + .wba-skeleton-list-row {
+.wba-skeleton-list-row+.wba-skeleton-list-row {
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -1429,6 +1521,7 @@ html[data-theme='light'] {
 }
 
 @media (max-width: 768px) {
+
   .wba-skeleton-summary,
   .wba-skeleton-grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1451,6 +1544,7 @@ html[data-theme='light'] {
 }
 
 @media (max-width: 600px) {
+
   .wba-skeleton-summary,
   .wba-skeleton-grid-3 {
     grid-template-columns: minmax(0, 1fr);
@@ -1527,6 +1621,7 @@ html[data-theme='light'] {
 .wba-logo-loader-wrap.size-sm .wba-loader-brand-svg {
   width: 140px;
 }
+
 .wba-logo-loader-wrap.size-sm .wba-loader-orbital-wrap {
   width: 160px;
   height: 160px;
@@ -1535,6 +1630,7 @@ html[data-theme='light'] {
 .wba-logo-loader-wrap.size-md .wba-loader-brand-svg {
   width: 220px;
 }
+
 .wba-logo-loader-wrap.size-md .wba-loader-orbital-wrap {
   width: 240px;
   height: 240px;
@@ -1543,6 +1639,7 @@ html[data-theme='light'] {
 .wba-logo-loader-wrap.size-lg .wba-loader-brand-svg {
   width: 300px;
 }
+
 .wba-logo-loader-wrap.size-lg .wba-loader-orbital-wrap {
   width: 320px;
   height: 320px;
@@ -1551,6 +1648,7 @@ html[data-theme='light'] {
 .wba-logo-loader-wrap.size-xl .wba-loader-brand-svg {
   width: 380px;
 }
+
 .wba-logo-loader-wrap.size-xl .wba-loader-orbital-wrap {
   width: 400px;
   height: 400px;
@@ -1587,6 +1685,7 @@ html[data-theme='light'] {
     transform: translate(-50%, -50%) scale(0.85);
     opacity: 0.6;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(1.2);
     opacity: 1;
@@ -1622,6 +1721,7 @@ html[data-theme='light'] {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -1631,6 +1731,7 @@ html[data-theme='light'] {
   from {
     transform: rotate(360deg);
   }
+
   to {
     transform: rotate(0deg);
   }
@@ -1650,6 +1751,7 @@ html[data-theme='light'] {
   0% {
     transform: translateY(0px) scale(0.98);
   }
+
   100% {
     transform: translateY(-4px) scale(1.02);
   }
@@ -1669,6 +1771,7 @@ html[data-theme='light'] {
   0% {
     opacity: 0.6;
   }
+
   100% {
     opacity: 1;
     filter: drop-shadow(0 0 10px #f472b6);
@@ -1683,6 +1786,7 @@ html[data-theme='light'] {
   0% {
     opacity: 0.7;
   }
+
   100% {
     opacity: 1;
     filter: drop-shadow(0 0 8px #c084fc);
@@ -1708,10 +1812,13 @@ html[data-theme='light'] {
 }
 
 @keyframes wbaPulseDot {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
+
   50% {
     transform: scale(1.3);
     opacity: 1;
@@ -1762,6 +1869,7 @@ html[data-theme='light'] {
   0% {
     left: -45%;
   }
+
   100% {
     left: 100%;
   }
@@ -1800,37 +1908,175 @@ html[data-theme='light'] .wba-landing-page {
     radial-gradient(circle at 15% 75%, rgba(192, 132, 252, 0.14) 0%, rgba(248, 247, 253, 0) 50%);
 }
 
-html[data-theme='light'] .wba-landing-page > .wba-header {
+html[data-theme='light'] .wba-landing-page>.wba-header {
   background: rgba(255, 255, 255, 0.84);
   border-bottom-color: rgba(109, 40, 217, 0.16);
 }
 
-html[data-theme='light'] .wba-nav-link { color: #5f5770; }
+html[data-theme='light'] .wba-nav-link {
+  color: #5f5770;
+}
+
 html[data-theme='light'] .wba-nav-link:hover,
-html[data-theme='light'] .wba-nav-link.active { color: #2d164e; }
-html[data-theme='light'] .wba-theme-toggle { color: #5b21b6; background: #f1edff; border-color: #c4b5fd; }
+html[data-theme='light'] .wba-nav-link.active {
+  color: #2d164e;
+}
+
+html[data-theme='light'] .wba-theme-toggle {
+  color: #5b21b6;
+  background: #f1edff;
+  border-color: #c4b5fd;
+}
+
 html[data-theme='light'] .wba-hero-eyebrow,
 html[data-theme='light'] .wba-hero-title span,
-html[data-theme='light'] .wba-cta-secondary { color: #5b21b6; }
+html[data-theme='light'] .wba-cta-secondary {
+  color: #5b21b6;
+}
+
 html[data-theme='light'] .wba-hero-title,
 html[data-theme='light'] .wba-section-title,
 html[data-theme='light'] .wba-about-card h3,
-html[data-theme='light'] .wba-feature-title { color: #24113f; text-shadow: none; }
+html[data-theme='light'] .wba-feature-title {
+  color: #24113f;
+  text-shadow: none;
+}
+
 html[data-theme='light'] .wba-hero-subtitle,
 html[data-theme='light'] .wba-section-desc,
 html[data-theme='light'] .wba-about-card p,
-html[data-theme='light'] .wba-feature-desc { color: #625a72; }
+html[data-theme='light'] .wba-feature-desc {
+  color: #625a72;
+}
+
 html[data-theme='light'] .wba-about-card,
-html[data-theme='light'] .wba-features-container { background: rgba(255, 255, 255, 0.76); border-color: rgba(124, 58, 237, 0.18); box-shadow: 0 10px 28px rgba(76, 29, 149, 0.08); }
-html[data-theme='light'] .wba-about-card:hover { background: #ffffff; box-shadow: 0 12px 30px rgba(76, 29, 149, 0.14); }
-html[data-theme='light'] .wba-feature-display { background: #f5f1ff; border-color: rgba(124, 58, 237, 0.2); }
-html[data-theme='light'] .wba-tab-btn { color: #625a72; border-color: rgba(124, 58, 237, 0.16); }
+html[data-theme='light'] .wba-features-container {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(124, 58, 237, 0.18);
+  box-shadow: 0 10px 28px rgba(76, 29, 149, 0.08);
+}
+
+html[data-theme='light'] .wba-about-card:hover {
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(76, 29, 149, 0.14);
+}
+
+html[data-theme='light'] .wba-feature-display {
+  background: #f5f1ff;
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+html[data-theme='light'] .wba-tab-btn {
+  color: #625a72;
+  border-color: rgba(124, 58, 237, 0.16);
+}
+
 html[data-theme='light'] .wba-tab-btn:hover,
-html[data-theme='light'] .wba-tab-btn.active { color: #2d164e; background: #eee7ff; }
-html[data-theme='light'] .wba-metric-pill { color: #4b3d60; }
-html[data-theme='light'] .wba-footer { background: #f1eef9; border-top-color: rgba(124, 58, 237, 0.15); }
+html[data-theme='light'] .wba-tab-btn.active {
+  color: #2d164e;
+  background: #eee7ff;
+}
+
+html[data-theme='light'] .wba-metric-pill {
+  color: #4b3d60;
+}
+
+html[data-theme='light'] .wba-footer {
+  background: #f1eef9;
+  border-top-color: rgba(124, 58, 237, 0.15);
+}
+
 html[data-theme='light'] .wba-footer,
 html[data-theme='light'] .wba-footer a,
-html[data-theme='light'] .wba-footer-content { color: #5b5269; }
+html[data-theme='light'] .wba-footer-content {
+  color: #5b5269;
+}
 
+/* ==========================================================================
+   Light Mode Overrides for Cards Graphic & Inventory Component
+   ========================================================================== */
 
+/* 1. Hero Graphic Layered Cards */
+html[data-theme='light'] .card-lavender {
+  background: rgba(233, 213, 255, 0.7);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 12px 28px rgba(109, 40, 217, 0.12);
+}
+
+html[data-theme='light'] .card-violet {
+  background: rgba(216, 180, 254, 0.65);
+  border-color: rgba(147, 51, 234, 0.25);
+  box-shadow: 0 12px 28px rgba(109, 40, 217, 0.15);
+}
+
+html[data-theme='light'] .card-purple-front {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 20px 40px rgba(76, 29, 149, 0.18);
+}
+
+/* 2. Inventory Preview Container (.wba-preview) */
+html[data-theme='light'] .wba-preview {
+  background-color: #ffffff;
+  color: #1e1b4b;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  box-shadow: 0 20px 45px rgba(76, 29, 149, 0.12);
+}
+
+html[data-theme='light'] .wba-preview-heading h2 {
+  color: #0f172a;
+}
+
+html[data-theme='light'] .wba-preview-eyebrow {
+  color: #7c3aed;
+}
+
+html[data-theme='light'] .wba-preview-live {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
+}
+
+/* Stat Cards Inside Dashboard */
+html[data-theme='light'] .wba-preview-stat {
+  background-color: #f8f5ff;
+  border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+html[data-theme='light'] .wba-preview-stat span,
+html[data-theme='light'] .wba-preview-stat small,
+html[data-theme='light'] .wba-preview-list-head {
+  color: #64748b;
+}
+
+html[data-theme='light'] .wba-preview-stat strong {
+  color: #0f172a;
+}
+
+/* Table / Stock List */
+html[data-theme='light'] .wba-preview-list {
+  background-color: #f8f5ff;
+  border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+html[data-theme='light'] .wba-preview-row {
+  border-bottom-color: rgba(124, 58, 237, 0.1);
+}
+
+html[data-theme='light'] .wba-preview-row strong {
+  color: #1e293b;
+}
+
+html[data-theme='light'] .wba-preview-row span {
+  color: #0f172a;
+}
+
+html[data-theme='light'] .wba-preview-row small {
+  color: #059669;
+  /* In stock badge */
+}
+
+html[data-theme='light'] .wba-preview-row small.attention {
+  color: #d97706;
+  /* Review count warning badge */
+}
