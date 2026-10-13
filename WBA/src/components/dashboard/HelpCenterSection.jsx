@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ROLE_HELP } from '../../data/helpCenter';
 import HelpGuideBrowser from '../HelpGuideBrowser';
-import SupportTicketForm from './SupportTicketForm';
 import './help-center.css';
 
 export default function HelpCenterSection({ currentUser }) {
@@ -15,10 +14,9 @@ export default function HelpCenterSection({ currentUser }) {
       <div><h2 ref={titleRef} tabIndex={-1} className="wba-section-page-title">{help.title}</h2><p className="wba-section-page-desc">{help.description}</p></div>
       <div className="wba-help-page-actions">
         <a className="wba-pill-btn" href="#/help">General Help Center</a>
-        <a className="wba-pill-btn wba-help-ticket-link" href="#support-ticket" onClick={event => { event.preventDefault(); document.getElementById('ticket-title')?.focus(); document.getElementById('support-ticket')?.scrollIntoView({ block: 'start' }); }}>Send a ticket ↗</a>
+        <a className="wba-pill-btn wba-help-ticket-link" href="#/contact">Contact Support</a>
       </div>
     </header>
     <HelpGuideBrowser key={currentUser.accessLevel} topics={help.topics} articles={help.articles} title="My task guides" searchPlaceholder="Search your role’s tasks" />
-    <SupportTicketForm currentUser={currentUser} />
   </div>;
 }

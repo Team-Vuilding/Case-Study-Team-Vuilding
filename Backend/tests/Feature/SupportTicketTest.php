@@ -144,4 +144,78 @@ class SupportTicketTest extends TestCase
         $this->postJson('/api/support/tickets', $this->ticket())->assertStatus(429);
         Http::assertSentCount(10);
     }
+
+    private function contact(array $overrides = []): array
+    {
+        return [...['name' => 'Visitor', 'email' => 'visitor@example.com', 'category' => 'Technical', 'subject' => 'Inventory question', 'message' => 'Please help me understand the stock count.', 'consent' => true], ...$overrides];
+    }
+
+    public function test_contact_support_accepts_visitors_without_creating_an_account(): void
+    {
+        $this->fakeGmail();
+        $this->postJson('/api/support/contact', $this->contact(['to' => 'attacker@example.com', 'access_level' => 'admin']))
+            ->assertCreated()->assertJsonPath('data.status', 'sent');
+        $this->assertDatabaseCount('users', 0);
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/messages/send')) {
+                return false;
+            }
+            $mime = quoted_printable_decode(base64_decode(strtr($request['raw'], '-_', '+/')));
+            $this->assertStringContainsString('To: vincentjamesguhiling@gmail.com', $mime);
+            $this->assertStringContainsString('visitor@example.com', $mime);
+            $this->assertStringContainsString('visitor (unverified)', $mime);
+            $this->assertStringNotContainsString('attacker@example.com', $mime);
+            $this->assertStringNotContainsString('Role: admin', $mime);
+
+            return true;
+        });
+    }
+
+    public function test_contact_support_validates_input_and_consent_before_delivery(): void
+    {
+        $this->postJson('/api/support/contact', $this->contact(['name' => "Injected\nname", 'email' => 'bad-email', 'category' => 'bad', 'subject' => "Subject\r\nBcc: attacker@example.com", 'message' => 'short', 'consent' => false]))
+            ->assertUnprocessable()->assertJsonValidationErrors(['name', 'email', 'category', 'subject', 'message', 'consent']);
+        Http::assertNothingSent();
+    }
+
+    public function test_contact_support_accepts_all_form_categories(): void
+    {
+        $this->fakeGmail();
+        foreach (['Technical', 'Billing', 'Account', 'Feedback'] as $category) {
+            $this->postJson('/api/support/contact', $this->contact(['category' => $category]))->assertCreated();
+        }
+    }
+
+    public function test_contact_support_does_not_report_success_when_delivery_fails(): void
+    {
+        $this->fakeGmail(403, ['error' => 'private-provider-detail']);
+        $response = $this->postJson('/api/support/contact', $this->contact())->assertStatus(502);
+        $this->assertStringNotContainsString('private-provider-detail', $response->getContent());
+        $this->assertStringNotContainsString('vincentjamesguhiling@gmail.com', $response->getContent());
+    }
+
+    public function test_contact_support_is_limited_per_ip(): void
+    {
+        $this->fakeGmail();
+        for ($index = 0; $index < 5; $index++) {
+            $this->postJson('/api/support/contact', $this->contact())->assertCreated();
+        }
+        $this->postJson('/api/support/contact', $this->contact())->assertStatus(429);
+        Http::assertSentCount(10);
+    }
+
+    public function test_contact_support_reports_unavailable_delivery_without_an_email_fallback(): void
+    {
+        config(['services.gmail.refresh_token' => '']);
+        $response = $this->postJson('/api/support/contact', $this->contact())->assertStatus(503);
+        $this->assertStringNotContainsString('vincentjamesguhiling@gmail.com', $response->getContent());
+        Http::assertNothingSent();
+    }
+
+    public function test_contact_support_rejects_oversized_fields_before_delivery(): void
+    {
+        $this->postJson('/api/support/contact', $this->contact(['name' => str_repeat('x', 101), 'email' => str_repeat('x', 250).'@example.com', 'subject' => str_repeat('x', 121), 'message' => str_repeat('x', 5001)]))
+            ->assertUnprocessable()->assertJsonValidationErrors(['name', 'email', 'subject', 'message']);
+        Http::assertNothingSent();
+    }
 }

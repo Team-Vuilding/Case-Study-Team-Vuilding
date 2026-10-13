@@ -50,12 +50,13 @@ test('a saved session does not block public help behind backend session checks',
   }
 });
 
-test('each workspace shows only its own task collection and keeps support tickets', () => {
+test('each workspace shows its own task collection and directs support to Contact Support', () => {
   for (const [role, title] of [['admin', 'Admin'], ['warehouse', 'Warehouse Staff'], ['purchasing', 'Purchasing Manager'], ['sales', 'Sales Staff']]) {
     const html = render(RoleHelp, { currentUser: { accessLevel: role, email: 'qa@example.com' } });
     assert.match(html, new RegExp(title + ' task guides'));
     assert.match(html, /href="#\/help"/);
-    assert.match(html, /id="ticket-description"/);
+    assert.match(html, /href="#\/contact"/);
+    assert.doesNotMatch(html, /id="ticket-description"|mailto:|Send a ticket/);
     assert.doesNotMatch(html, /Guides for my role|across all roles|What is WBA\?/);
     if (role !== 'admin') assert.doesNotMatch(html, /Create an account or reset a password|Archive, restore, or remove a product/);
     if (role !== 'warehouse') assert.doesNotMatch(html, /Dispatch stock using a SKU/);
@@ -67,4 +68,12 @@ test('general help offers the signed-in user a route back to their task guides',
   assert.match(html, /href="#\/help-center"/);
   assert.match(html, /Sales Staff task guides/);
   assert.doesNotMatch(html, /id="ticket-description"/);
+  assert.match(html, /href="#\/contact"/);
+  assert.doesNotMatch(html, /mailto:|Email support/);
+});
+
+test('public help directs questions to Contact Support without direct email', () => {
+  const html = render(GeneralHelp, { theme: 'light' });
+  assert.match(html, /href="#\/contact"/);
+  assert.doesNotMatch(html, /mailto:|Email support|email support directly/);
 });

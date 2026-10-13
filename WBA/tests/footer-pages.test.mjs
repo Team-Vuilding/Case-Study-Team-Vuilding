@@ -22,8 +22,9 @@ for (const [path, title] of [['privacy', 'Privacy Policy'], ['terms', 'Terms of 
       for (const route of ['privacy', 'terms', 'help', 'contact']) assert.ok(html.includes(`href="#/${route}"`));
       if (path === 'contact') {
         for (const field of ['name', 'email', 'category', 'subject', 'message']) assert.ok(html.includes(`name="${field}"`));
-        assert.match(html, /Open email draft/);
-        assert.match(html, /Live chat is not currently available/);
+        assert.match(html, /Send request/);
+        assert.match(html, /name="consent"/);
+        assert.doesNotMatch(html, /mailto:|email draft|workspace support tickets/);
       }
     } finally { globalThis.window = previousWindow; globalThis.sessionStorage = previousStorage; }
   });
@@ -35,14 +36,3 @@ test('public FAQ search covers the requested topics', async () => {
   assert.ok(findGeneralHelpArticles({ query: 'mismatch' }).length);
   assert.equal(findGeneralHelpArticles({ query: 'no-such-question' }).length, 0);
 });
-
-test('email draft encodes user content without injecting mail headers', async () => {
-  const { createSupportEmail } = await server.ssrLoadModule('/src/data/supportContact.js');
-  const url = createSupportEmail({ name: '  Alex  ', email: 'alex@example.com', category: 'Feedback', subject: 'Question & improvement?\nbcc=someone@example.com', message: 'SKU #123 & quantity +2\nThanks' });
-  const parsed = new URL(url);
-  assert.equal(parsed.pathname, 'vincentjamesguhiling@gmail.com');
-  assert.deepEqual([...parsed.searchParams.keys()], ['subject', 'body']);
-  assert.match(parsed.searchParams.get('body'), /Name: Alex\nEmail: alex@example.com/);
-  assert.match(parsed.searchParams.get('body'), /SKU #123 & quantity \+2\nThanks/);
-});
-

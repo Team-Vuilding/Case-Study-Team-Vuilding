@@ -24,12 +24,11 @@ export default function GeneralHelpPage({ currentUser, theme, onToggleTheme, onS
       <HelpGuideBrowser topics={GENERAL_HELP_TOPICS} articles={GENERAL_HELP_ARTICLES} title="General guides" searchPlaceholder="Try “sign in”, “available stock”, or “support”" />
       <section className="wba-glow-card wba-help-general-support" aria-labelledby="general-support-title">
         <h2 id="general-support-title">Looking for your task instructions?</h2>
-        <p>{currentUser ? 'Your workspace has guides for your assigned role and a support ticket form.' : 'Sign in to see instructions for your assigned role and send a support ticket. If you cannot sign in, email support directly.'}</p>
+        <p>{currentUser ? 'Your workspace has guides for your assigned role. For questions or complaints, use Contact Support.' : 'Sign in to see instructions for your assigned role. For questions or complaints, use Contact Support without signing in.'}</p>
         <div className="wba-help-page-actions">
           {currentUser ? <a className="wba-pill-btn" href="#/help-center">Open {ROLE_NAMES[currentUser.accessLevel]} task guides</a> : <button type="button" className="wba-btn-primary" onClick={onSignIn}>Sign in to your workspace</button>}
-          <a href="mailto:vincentjamesguhiling@gmail.com">Email support</a>
+          <a className="wba-pill-btn" href="#/contact">Contact Support</a>
         </div>
-        <a href="#/contact">Contact Support</a>
       </section>
     </main>
     <PublicFooter />
