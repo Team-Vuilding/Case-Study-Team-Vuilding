@@ -19,7 +19,7 @@ function SkuPreview({ hasShelfLife }) {
 
 function ProductForm({ onClose, onAddProduct }) {
   const dialogRef = useRef(null);
-  const [form, setForm] = useState({ name: '', fsn: 'Normal', unitPrice: '', physicalOnHand: '0', warehouseBin: '', hasShelfLife: false, shelfLifeMonths: '', expiresAt: '', storageCostPerMonth: '0', isSeasonal: false });
+  const [form, setForm] = useState({ name: '', fsn: 'Normal', unitPrice: '', physicalOnHand: '0', warehouseBin: '', hasShelfLife: false, expiresAt: '', storageCostPerMonth: '0', isSeasonal: false });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   useEffect(() => {
@@ -37,7 +37,7 @@ function ProductForm({ onClose, onAddProduct }) {
     if (saving) return;
     setSaving(true); setError('');
     try {
-      await onAddProduct({ ...form, unitPrice: Number(form.unitPrice), physicalOnHand: Number(form.physicalOnHand), storageCostPerMonth: Number(form.storageCostPerMonth), shelfLifeMonths: form.hasShelfLife ? Number(form.shelfLifeMonths) : null, expiresAt: form.hasShelfLife && Number(form.physicalOnHand) > 0 ? form.expiresAt : null });
+      await onAddProduct({ ...form, unitPrice: Number(form.unitPrice), physicalOnHand: Number(form.physicalOnHand), storageCostPerMonth: Number(form.storageCostPerMonth), expiresAt: form.hasShelfLife && Number(form.physicalOnHand) > 0 ? form.expiresAt : null });
       onClose();
     } catch (reason) { setError(reason.message); } finally { setSaving(false); }
   };
@@ -52,10 +52,7 @@ function ProductForm({ onClose, onAddProduct }) {
             <label className="wba-input-group" key={name}><span className="wba-input-label">{label}</span><input className="wba-input-field" name={name} type={type} required value={form[name]} onChange={update} min={type === 'number' ? 0 : undefined} step={name === 'physicalOnHand' ? 1 : type === 'number' ? '0.01' : undefined} /></label>)}
           <label className="wba-input-group wba-form-wide"><span className="wba-input-label">Movement rate</span><select className="wba-input-field" name="fsn" value={form.fsn} onChange={update}>{['Fast', 'Normal', 'Slow', 'Non-moving'].map(value => <option key={value}>{value}</option>)}</select></label>
           <label className="wba-expiry-toggle wba-form-wide"><input name="hasShelfLife" type="checkbox" checked={form.hasShelfLife} onChange={update} /> Track batches and expiry</label>
-          {form.hasShelfLife && <>
-            <label className="wba-input-group"><span className="wba-input-label">Shelf life (months)</span><input className="wba-input-field" name="shelfLifeMonths" type="number" min="1" max="120" required value={form.shelfLifeMonths} onChange={update} /></label>
-            {Number(form.physicalOnHand) > 0 && <label className="wba-input-group"><span className="wba-input-label">Initial batch expiry date</span><input className="wba-input-field" name="expiresAt" type="date" required value={form.expiresAt} onChange={update} /></label>}
-          </>}
+          {form.hasShelfLife && Number(form.physicalOnHand) > 0 && <label className="wba-input-group wba-form-wide"><span className="wba-input-label">Expiry date</span><input className="wba-input-field" name="expiresAt" type="date" required value={form.expiresAt} onChange={update} /></label>}
         </div>
         {error && <p role="alert" className="wba-modal-error">{error}</p>}
         <div className="wba-accounts-form-actions"><button type="button" className="wba-pill-btn" disabled={saving} onClick={onClose}>Cancel</button><button className="wba-btn-primary" disabled={saving}>{saving ? 'Saving…' : 'Add to catalog'}</button></div>

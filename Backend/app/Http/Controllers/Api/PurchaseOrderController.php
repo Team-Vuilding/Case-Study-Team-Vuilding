@@ -69,7 +69,7 @@ class PurchaseOrderController extends ApiController
                 foreach (DB::table('purchase_order_items')->where('purchase_order_id', $id)->orderBy('item_id')->get() as $line) {
                     $item = Item::whereKey($line->item_id)->lockForUpdate()->firstOrFail();
                     abort_if($item->archived_at, 422, 'Restore this product before receiving its delivery.');
-                    abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'An actual expiry date is required for perishable deliveries.');
+                    abort_if($item->tracksExpiry() && empty($data['expiresAt']), 422, 'An actual expiry date is required for perishable deliveries.');
                     $quantity = $line->quantity_ordered - $line->quantity_received;
                     abort_if(max($item->physical_on_hand, $item->paper_spreadsheet_count) + $quantity > 2147483647, 422, 'Receipt exceeds the supported stock quantity.');
                     $item->increment('physical_on_hand', $quantity);

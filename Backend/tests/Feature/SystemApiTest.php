@@ -101,7 +101,7 @@ class SystemApiTest extends TestCase
     public function test_perishable_dispatch_consumes_earliest_unexpired_batch(): void
     {
         $this->signIn();
-        $this->postJson('/api/items', $this->product(['hasShelfLife' => true, 'shelfLifeMonths' => 9, 'physicalOnHand' => 0]))->assertCreated();
+        $this->postJson('/api/items', $this->product(['hasShelfLife' => true, 'physicalOnHand' => 0]))->assertCreated();
         $this->signIn('warehouse');
         $this->postJson('/api/warehouse/movements', ['code' => 'TEST-001', 'quantity' => 3])->assertUnprocessable();
         foreach ([['LATER', 5, today()->addDays(90)->toDateString()], ['FIRST', 3, today()->addDays(10)->toDateString()]] as [$lot, $quantity, $expiry]) {

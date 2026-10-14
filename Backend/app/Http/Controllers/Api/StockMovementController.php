@@ -22,7 +22,7 @@ class StockMovementController extends ApiController
             $quantity = (int) $data['quantity'];
             if ($type === 'stock_out') {
                 abort_if($quantity > $item->physical_on_hand - $item->reserved - $item->allocated, 422, 'Insufficient available stock.');
-                if ($item->shelf_life_months) {
+                if ($item->tracksExpiry()) {
                     $batches = DB::table('batches')->where('item_id', $item->id)->where('quantity', '>', 0)
                         ->where('expires_at', '>=', today()->toDateString())->orderBy('expires_at')->orderBy('received_at')->get();
                     abort_if($batches->sum('quantity') < $quantity, 422, 'Insufficient unexpired batch stock.');
@@ -38,7 +38,7 @@ class StockMovementController extends ApiController
                 }
             } else {
                 abort_if(max($item->physical_on_hand, $item->paper_spreadsheet_count) + $quantity > 2147483647, 422, 'Receipt exceeds the supported stock quantity.');
-                abort_if($item->shelf_life_months && empty($data['expiresAt']), 422, 'Enter the actual batch expiry date.');
+                abort_if($item->tracksExpiry() && empty($data['expiresAt']), 422, 'Enter the actual batch expiry date.');
                 $this->receiveBatch($item, $quantity, $data['expiresAt'] ?? null, $data['lot'] ?? null);
             }
             $delta = $type === 'stock_in' ? $quantity : -$quantity;

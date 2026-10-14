@@ -16,6 +16,7 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan, products }
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const product = products.find(item => item.sku.toLowerCase() === code.trim().toLowerCase());
+  const tracksExpiry = product?.hasShelfLife ?? Boolean(product?.shelfLifeMonths);
   const scannedProduct = products.find(item => item.sku.toLowerCase() === scannedCode.toLowerCase());
   const stop = () => {
     generation.current++;
@@ -68,7 +69,7 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan, products }
     if (!product) return setError('This SKU is not in the catalog. Ask an administrator to add the product first.');
     setSaving(true); setError('');
     try {
-      await onScan({ code: product.sku, quantity: Number(quantity), type, expiresAt: type === 'stock_in' && product.shelfLifeMonths ? expiresAt : null, lot: lot.trim() || null });
+      await onScan({ code: product.sku, quantity: Number(quantity), type, expiresAt: type === 'stock_in' && tracksExpiry ? expiresAt : null, lot: lot.trim() || null });
       stop(); setCode(''); setScannedCode(''); setQuantity(1); setExpiresAt(''); setLot(''); onClose();
     } catch (reason) { setError(reason.message); } finally { setSaving(false); }
   };
@@ -92,7 +93,7 @@ export default function QrInventoryScanner({ isOpen, onClose, onScan, products }
       {product && <p>{product.name} · {product.physicalOnHand} units on hand</p>}
       <label className="wba-input-group"><span className="wba-input-label">Operation</span><select className="wba-input-field" value={type} onChange={event => setType(event.target.value)}><option value="stock_in">Receive stock</option><option value="stock_out">Dispatch stock</option></select></label>
       <label className="wba-input-group"><span className="wba-input-label">Quantity</span><input className="wba-input-field" type="number" min="1" step="1" required value={quantity} onChange={event => setQuantity(event.target.value)} /></label>
-      {product?.shelfLifeMonths && type === 'stock_in' && <>
+      {tracksExpiry && type === 'stock_in' && <>
         <label className="wba-input-group"><span className="wba-input-label">Batch expiry date</span><input className="wba-input-field" type="date" required value={expiresAt} onChange={event => setExpiresAt(event.target.value)} /></label>
         <label className="wba-input-group"><span className="wba-input-label">Lot number (optional)</span><input className="wba-input-field" value={lot} onChange={event => setLot(event.target.value)} /></label>
       </>}

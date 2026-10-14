@@ -41,7 +41,7 @@ class ItemController extends ApiController
             'category' => ['sometimes', Rule::in(['A', 'B', 'C', 'U'])], 'fsn' => ['required', Rule::in(['Fast', 'Normal', 'Slow', 'Non-moving'])],
             'unitPrice' => 'required|numeric|min:0|max:9999999999', 'warehouseBin' => 'required|string|max:120',
             'physicalOnHand' => $item ? 'prohibited' : 'required|integer|min:0|max:100000000',
-            'hasShelfLife' => 'required|boolean', 'shelfLifeMonths' => 'nullable|required_if:hasShelfLife,true|integer|min:1|max:120',
+            'hasShelfLife' => 'required|boolean', 'shelfLifeMonths' => 'nullable|integer|min:1|max:120',
             'isSeasonal' => 'sometimes|boolean', 'storageCostPerMonth' => 'sometimes|numeric|min:0|max:99999999.99',
             'expiresAt' => 'nullable|date|after_or_equal:today']);
         if (isset($data['sku'])) {
@@ -56,7 +56,8 @@ class ItemController extends ApiController
             $sku = $item ? ($data['sku'] ?? $saved->sku) : ($data['sku'] ?? app(ProductSku::class)->allocate($data['hasShelfLife']));
             $saved->fill(['name' => trim($data['name']), 'sku' => $sku, 'category_classification' => $data['category'] ?? $saved->category_classification ?? 'U',
                 'fsn' => $data['fsn'], 'unit_price' => $data['unitPrice'], 'warehouse_bin' => trim($data['warehouseBin']),
-                'shelf_life_months' => $data['hasShelfLife'] ? $data['shelfLifeMonths'] : null,
+                'tracks_expiry' => $data['hasShelfLife'],
+                'shelf_life_months' => $data['hasShelfLife'] ? ($data['shelfLifeMonths'] ?? $saved->shelf_life_months) : null,
                 'is_seasonal' => $data['isSeasonal'] ?? false, 'storage_cost_per_month' => $data['storageCostPerMonth'] ?? 0]);
             if (! $item) {
                 $saved->physical_on_hand = $saved->paper_spreadsheet_count = $data['physicalOnHand'];

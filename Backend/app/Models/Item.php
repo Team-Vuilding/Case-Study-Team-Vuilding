@@ -48,6 +48,7 @@ class Item extends Model
         'allocated',
         'paper_spreadsheet_count',
         'shelf_life_months',
+        'tracks_expiry',
         'warehouse_bin',
         'status',
         'status_severity',
@@ -60,6 +61,7 @@ class Item extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'tracks_expiry' => 'boolean',
         'is_seasonal' => 'boolean',
         'season_months' => 'array',
         'unit_price' => 'decimal:2',
@@ -74,6 +76,11 @@ class Item extends Model
         'report_count' => 'integer',
         'lead_time_days' => 'integer',
     ];
+
+    public function tracksExpiry(): bool
+    {
+        return $this->tracks_expiry ?? (bool) $this->shelf_life_months;
+    }
 
     public function scopeActive(Builder $query): void
     {

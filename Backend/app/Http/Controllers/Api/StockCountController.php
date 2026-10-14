@@ -17,7 +17,7 @@ class StockCountController extends ApiController
             $item = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
             abort_if($item->archived_at, 422, 'Restore this product before recording a stock count.');
             abort_if($data['quantity'] < $item->reserved + $item->allocated, 422, 'Count is below committed stock. Resolve reservations first.');
-            abort_if($item->shelf_life_months && $data['quantity'] !== $item->physical_on_hand, 422, 'Perishable quantity changes require batch-level adjustments.');
+            abort_if($item->tracksExpiry() && $data['quantity'] !== $item->physical_on_hand, 422, 'Perishable quantity changes require batch-level adjustments.');
             $previous = $item->physical_on_hand;
             $id = DB::table('stock_counts')->insertGetId(['count_reference' => 'COUNT-'.Str::uuid(), 'user_id' => $request->user()->id,
                 'status' => 'reconciled', 'started_at' => now(), 'completed_at' => now(), 'notes' => $data['reason'], 'created_at' => now(), 'updated_at' => now()]);
