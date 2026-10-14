@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { apiRequest } from './api';
+import { apiRequest, getCachedApiData } from './api';
 
 export default function useApiData(endpoint) {
-  const [data, setData] = useState(null);
-  const [meta, setMeta] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(() => getCachedApiData(endpoint)?.data ?? null);
+  const [meta, setMeta] = useState(() => getCachedApiData(endpoint)?.meta ?? null);
+  const [loading, setLoading] = useState(() => !getCachedApiData(endpoint));
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const reload = useCallback(() => setRevision(value => value + 1), []);
@@ -16,7 +16,7 @@ export default function useApiData(endpoint) {
       setLoading(true);
       setError('');
       try {
-        const result = await apiRequest(endpoint);
+        const result = await apiRequest(endpoint, { cache: revision > 0 ? 'reload' : 'default' });
         if (active) { setData(result.data); setMeta(result.meta ?? null); }
       } catch (reason) {
         if (active) setError(reason.message);
