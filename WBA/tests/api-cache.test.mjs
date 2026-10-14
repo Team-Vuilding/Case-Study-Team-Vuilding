@@ -13,7 +13,7 @@ test('repeated and concurrent reads reuse one successful request until expiry', 
   assert.equal(calls, 1);
   assert.deepEqual(cache.peek('items'), { data: 1 });
   now = 15000;
-  assert.equal(cache.peek('items'), undefined);
+  assert.deepEqual(cache.peek('items'), { data: 1 });
   assert.deepEqual(await cache.load('items', load), { data: 2 });
 });
 
@@ -36,11 +36,42 @@ test('clearing cache prevents old in-flight responses from replacing fresh data'
   assert.deepEqual(cache.peek('items'), { data: 'fresh' });
 });
 
-test('manual reload bypasses cached data and supersedes an older request', async () => {
+test('manual reload bypasses cached data', async () => {
   const cache = createResponseCache();
   await cache.load('items', async () => ({ data: 'cached' }));
   assert.deepEqual(await cache.load('items', async () => ({ data: 'fresh' }), true), { data: 'fresh' });
   assert.deepEqual(cache.peek('items'), { data: 'fresh' });
+});
+
+test('expired fresh data stays visible while one background refresh supplies the new value', async () => {
+  let now = 0;
+  const cache = createResponseCache(() => now);
+  await cache.load('items', async () => ({ data: 'previous' }));
+  now = 16000;
+  let finish;
+  let calls = 0;
+  const load = () => { calls++; return new Promise(resolve => { finish = resolve; }); };
+  const first = cache.load('items', load);
+  const second = cache.load('items', load, true);
+  await Promise.resolve();
+  assert.equal(calls, 1);
+  assert.deepEqual(cache.peek('items'), { data: 'previous' });
+  finish({ data: 'updated' });
+  await Promise.all([first, second]);
+  assert.deepEqual(cache.peek('items'), { data: 'updated' });
+  now = 76000;
+  assert.equal(cache.peek('items'), undefined);
+});
+
+test('recently used pages stay cached when new pages reach the memory limit', async () => {
+  const cache = createResponseCache();
+  await cache.load('items', async () => ({ data: 'inventory' }));
+  for (let page = 0; page < 50; page++) {
+    cache.peek('items');
+    await cache.load('reports?page=' + page, async () => ({ data: page }));
+  }
+  assert.deepEqual(cache.peek('items'), { data: 'inventory' });
+  assert.equal(cache.peek('reports?page=0'), undefined);
 });
 
 test('cache remains bounded as report pages and query strings change', async () => {
