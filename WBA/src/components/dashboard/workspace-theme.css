@@ -144,6 +144,8 @@ html .wba-workspace-dialog button:disabled { opacity: .5; cursor: not-allowed; }
 html .wba-dashboard-app .wba-purchase-table .wba-order-identity { display: block; overflow-wrap: anywhere; }
 html .wba-dashboard-app .wba-detail-table { min-width: 0; }
 html .wba-dashboard-app .wba-purchase-table .wba-order-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+html .wba-dashboard-app .wba-purchase-history-card > .wba-card-heading { margin: 0 0 16px; }
+.wba-purchase-summary { margin: 16px 0 0; color: var(--wba-inline-muted); font-size: .8125rem; line-height: 1.5; font-variant-numeric: tabular-nums; }
 html .wba-dashboard-app .wba-inventory-ledger .wba-table { min-width: 0; }
 html .wba-dashboard-app .wba-inventory-ledger .wba-table th { padding-inline: 10px; }
 html .wba-dashboard-app .wba-kpi-icon-pill { padding: 0; border: 0; background: transparent; color: var(--wba-inline-accent); }
