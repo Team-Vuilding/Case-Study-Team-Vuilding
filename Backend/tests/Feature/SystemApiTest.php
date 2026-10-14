@@ -149,13 +149,52 @@ class SystemApiTest extends TestCase
         $this->assertDatabaseCount('audit_events', 3);
     }
 
+    public function test_order_requests_approval_and_receipt_are_limited_to_their_assigned_roles(): void
+    {
+        $this->signIn();
+        $item = $this->postJson('/api/items', $this->product(['physicalOnHand' => 0]))->assertCreated()->json('data.id');
+        $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Role test supplier'])->assertOk()->json('data.id');
+        $request = ['supplier_id' => $supplier, 'items' => [['item_id' => $item, 'quantity' => 5, 'unit_price' => 50]]];
+
+        foreach (['admin', 'warehouse', 'sales'] as $role) {
+            $this->signIn($role);
+            $this->postJson('/api/purchasing/purchase-orders', $request)->assertForbidden();
+            $this->assertDatabaseCount('purchase_orders', 0);
+            $this->assertDatabaseCount('purchase_order_items', 0);
+        }
+
+        $purchasing = $this->signIn('purchasing');
+        $order = $this->postJson('/api/purchasing/purchase-orders', $request)->assertCreated()->json('id');
+        $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'user_id' => $purchasing->id, 'status' => 'pending_approval']);
+        $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'approved'])->assertForbidden();
+        $approver = $this->signIn('admin');
+        $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'approved'])->assertOk();
+        $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'approved_by_id' => $approver->id]);
+
+        foreach (['admin', 'purchasing', 'sales'] as $role) {
+            $this->signIn($role);
+            $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'received'])->assertForbidden();
+            $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'status' => 'approved']);
+            $this->assertDatabaseHas('items', ['id' => $item, 'physical_on_hand' => 0, 'paper_spreadsheet_count' => 0]);
+            $this->assertDatabaseCount('stock_movements', 0);
+        }
+
+        $this->signIn('warehouse');
+        $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'received'])->assertOk();
+        $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'status' => 'received']);
+        $this->assertDatabaseHas('items', ['id' => $item, 'physical_on_hand' => 5, 'paper_spreadsheet_count' => 5]);
+    }
+
     public function test_order_workflow_receives_stock_only_once_and_hides_costs_from_warehouse(): void
     {
         $admin = $this->signIn();
         $item = $this->postJson('/api/items', $this->product(['physicalOnHand' => 0]))->assertCreated()->json('data.id');
         $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Actual supplier'])->assertOk()->json('data.id');
+        $this->signIn('purchasing');
         $order = $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier, 'items' => [['item_id' => $item, 'quantity' => 5, 'unit_price' => 50]]])->assertCreated()->json('id');
+        $this->signIn('warehouse');
         $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'received'])->assertUnprocessable();
+        $this->signIn('admin');
         $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'approved'])->assertOk();
         $this->signIn('warehouse');
         $this->getJson('/api/purchasing/purchase-orders')->assertOk()->assertJsonPath('data.0.totalCost', null)->assertJsonPath('data.0.lines.0.unitCost', null);
@@ -198,6 +237,7 @@ class SystemApiTest extends TestCase
         $this->signIn();
         $item = $this->postJson('/api/items', $this->product())->assertCreated()->json('data.id');
         $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Test supplier'])->assertOk()->json('data.id');
+        $this->signIn('purchasing');
         $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier,
             'items' => [['item_id' => $item, 'quantity' => 1000000, 'unit_price' => 100000000]]])->assertUnprocessable();
         $this->assertDatabaseCount('purchase_orders', 0);
@@ -218,9 +258,12 @@ class SystemApiTest extends TestCase
         $item = $this->postJson('/api/items', $this->product(['physicalOnHand' => 0]))->assertCreated()->json('data.id');
         DB::table('items')->where('id', $item)->update(['physical_on_hand' => 2147483647, 'paper_spreadsheet_count' => 2147483647]);
         $supplier = $this->postJson('/api/purchasing/suppliers', ['name' => 'Test supplier'])->assertOk()->json('data.id');
+        $this->signIn('purchasing');
         $order = $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier,
             'items' => [['item_id' => $item, 'quantity' => 1, 'unit_price' => 50]]])->assertCreated()->json('id');
+        $this->signIn('admin');
         $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'approved'])->assertOk();
+        $this->signIn('warehouse');
         $this->putJson('/api/purchasing/purchase-orders/'.$order.'/status', ['status' => 'received'])->assertUnprocessable();
         $this->assertDatabaseHas('purchase_orders', ['id' => $order, 'status' => 'approved']);
         $this->signIn('warehouse');

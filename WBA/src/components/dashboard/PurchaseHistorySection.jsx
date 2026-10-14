@@ -56,8 +56,9 @@ export default function PurchaseHistorySection({ currentUser }) {
   const [cancellation, setCancellation] = useState(null);
   const [expiry, setExpiry] = useState('');
   const role = currentUser.accessLevel;
-  const canCreate = ['admin', 'purchasing'].includes(role);
-  const costs = canCreate;
+  const canCreate = role === 'purchasing';
+  const costs = ['admin', 'purchasing'].includes(role);
+  const canCancel = ['admin', 'purchasing'].includes(role);
   const changeStatus = async (order, status, expiresAt = null) => {
     if (pending) return;
     setPending(order.id); setError('');
@@ -78,8 +79,8 @@ export default function PurchaseHistorySection({ currentUser }) {
       <div className="wba-table-container" tabIndex={0} role="region" aria-label="Purchase orders"><table className="wba-table wba-purchase-table"><thead><tr><th>Order / supplier</th><th>Products</th><th>Delivery</th>{costs && <th>Amount</th>}<th>Status</th><th>Actions</th></tr></thead><tbody>{filtered.map(order => <tr key={order.id}>
         <td><strong className="wba-order-identity">{order.number}</strong><span className="wba-sku-code">{order.supplier}</span></td><td data-label="Products">{order.lines.map(line => <div key={line.id}>{line.product} · {line.quantity} units{costs ? ' × ₱' + line.unitCost.toLocaleString() : ''}</div>)}</td><td data-label="Delivery">{order.expectedDelivery || 'Not scheduled'}</td>{costs && <td data-label="Amount">₱{order.totalCost.toLocaleString()}</td>}<td data-label="Status">{order.status.replaceAll('_', ' ')}</td><td><div className="wba-order-actions">
           {role === 'admin' && order.status === 'pending_approval' && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => changeStatus(order, 'approved')}>Approve</button>}
-          {['admin', 'warehouse'].includes(role) && order.status === 'approved' && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => setDelivery(order)}>Receive delivery</button>}
-          {canCreate && ['pending_approval', 'approved'].includes(order.status) && <button type="button" className="wba-pill-btn wba-action-danger" disabled={Boolean(pending)} onClick={() => { setError(''); setCancellation(order); }}>Cancel order</button>}
+          {role === 'warehouse' && order.status === 'approved' && <button type="button" className="wba-pill-btn" disabled={Boolean(pending)} onClick={() => setDelivery(order)}>Receive delivery</button>}
+          {canCancel && ['pending_approval', 'approved'].includes(order.status) && <button type="button" className="wba-pill-btn wba-action-danger" disabled={Boolean(pending)} onClick={() => { setError(''); setCancellation(order); }}>Cancel order</button>}
         </div></td></tr>)}</tbody></table></div>
       <p className="wba-purchase-summary">{filtered.length} {filtered.length === 1 ? 'order' : 'orders'}{costs ? ' · ₱' + filtered.reduce((sum, order) => sum + order.totalCost, 0).toLocaleString() + ' total' : ''}</p>
     </section>

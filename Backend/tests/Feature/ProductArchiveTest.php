@@ -141,7 +141,9 @@ class ProductArchiveTest extends TestCase
         $item = $this->product();
         $this->postJson('/api/items/'.$item->id.'/archive', ['reason' => 'Discontinued'])->assertOk();
         $supplier = DB::table('suppliers')->insertGetId(['name' => 'Test supplier']);
+        $this->signIn('purchasing');
         $this->postJson('/api/purchasing/purchase-orders', ['supplier_id' => $supplier, 'items' => [['item_id' => $item->id, 'quantity' => 1, 'unit_price' => 100]]])->assertUnprocessable();
+        $this->signIn();
         $this->putJson('/api/items/'.$item->id, ['name' => 'Edited'])->assertUnprocessable()->assertJsonPath('message', 'Restore this product before editing it.');
         $this->postJson('/api/items', ['name' => 'Duplicate SKU', 'sku' => $item->sku, 'category' => 'A', 'fsn' => 'Normal', 'unitPrice' => 100, 'physicalOnHand' => 0, 'warehouseBin' => 'BIN-02', 'hasShelfLife' => false])->assertJsonValidationErrors('sku');
         $this->signIn('warehouse');

@@ -69,5 +69,5 @@ Route::middleware('access:admin,purchasing')->group(function () {
     Route::post('purchasing/suppliers', [ReferenceController::class, 'saveReference'])->defaults('kind', 'suppliers');
     Route::put('purchasing/suppliers/{id}', [ReferenceController::class, 'saveReference'])->defaults('kind', 'suppliers')->whereNumber('id');
     Route::delete('purchasing/suppliers/{id}', [ReferenceController::class, 'deleteReference'])->defaults('kind', 'suppliers')->whereNumber('id');
-    Route::post('purchasing/purchase-orders', [PurchaseOrderController::class, 'createOrder']);
 });
+Route::post('purchasing/purchase-orders', [PurchaseOrderController::class, 'createOrder'])->middleware('access:purchasing');

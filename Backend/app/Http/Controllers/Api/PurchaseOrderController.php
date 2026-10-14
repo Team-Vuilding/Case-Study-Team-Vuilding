@@ -61,7 +61,7 @@ class PurchaseOrderController extends ApiController
             abort_unless($order, 404);
             $status = $data['status'];
             $role = $request->user()->access_level;
-            abort_if(($status === 'approved' && $role !== 'admin') || ($status === 'received' && ! in_array($role, ['admin', 'warehouse'], true))
+            abort_if(($status === 'approved' && $role !== 'admin') || ($status === 'received' && $role !== 'warehouse')
                 || ($status === 'cancelled' && ! in_array($role, ['admin', 'purchasing'], true)), 403);
             abort_if(($status === 'approved' && $order->status !== 'pending_approval') || ($status === 'received' && $order->status !== 'approved')
                 || ($status === 'cancelled' && ! in_array($order->status, ['draft', 'pending_approval', 'approved'], true)), 422, 'Invalid order status transition.');
