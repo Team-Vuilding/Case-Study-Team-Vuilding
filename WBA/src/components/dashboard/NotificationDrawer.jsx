@@ -19,10 +19,13 @@ function expiryLabel(value) {
 const formatDate = value => new Date(value.slice(0, 10) + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 function AlertCard({ alert }) {
-  return <article className="wba-alert-card">
+  return <article className={'wba-alert-card ' + (alert.isRead ? 'is-viewed' : 'is-unread')}>
     <div className="wba-alert-meta">
-      <span className={'wba-alert-severity ' + (['critical', 'warning'].includes(alert.severity) ? alert.severity : 'info')}>{alert.severity === 'critical' ? 'Critical' : alert.severity === 'warning' ? 'Warning' : 'Info'}</span>
-      <span>{alert.type === 'expiry' ? 'Batch expiry' : alert.type === 'stock' ? 'Low stock' : 'Operational update'}</span>
+      <div className="wba-alert-kind">
+        <span className={'wba-alert-severity ' + (['critical', 'warning'].includes(alert.severity) ? alert.severity : 'info')}>{alert.severity === 'critical' ? 'Critical' : alert.severity === 'warning' ? 'Warning' : 'Info'}</span>
+        <span>{alert.type === 'expiry' ? 'Batch expiry' : alert.type === 'stock' ? 'Low stock' : 'Operational update'}</span>
+      </div>
+      <span className="wba-alert-read-state">{alert.isRead ? 'Viewed' : 'Unread'}</span>
     </div>
     <h3>{alert.product || alert.title}</h3>
     {alert.sku && <p className="wba-alert-sku">{alert.sku}</p>}
@@ -41,7 +44,6 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
   const dialogRef = useRef(null);
   const backdropPointer = useRef(false);
   const attempted = useRef('');
-  const [shownThisVisit, setShownThisVisit] = useState(() => new Set(notifications.filter(alert => !alert.isRead).map(alertKey)));
   const [readError, setReadError] = useState('');
   const [marking, setMarking] = useState(false);
 
@@ -57,7 +59,6 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
 
   const markViewed = useCallback(async unread => {
     setMarking(true); setReadError('');
-    setShownThisVisit(previous => new Set([...previous, ...unread.map(alertKey)]));
     try {
       for (let offset = 0; offset < unread.length; offset += 500) {
         await apiRequest('dashboard/alerts/viewed', { method: 'POST', body: {
@@ -66,7 +67,7 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
       }
       onViewed();
     } catch {
-      setReadError('Could not mark notifications as viewed. Please retry.');
+      setReadError('Could not save viewed status.');
     } finally {
       setMarking(false);
     }
@@ -81,8 +82,6 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
     void markViewed(unread);
   }, [notifications, loading, error, markViewed]);
 
-  const current = notifications.filter(alert => !alert.isRead || shownThisVisit.has(alertKey(alert)));
-  const viewed = notifications.filter(alert => alert.isRead && !shownThisVisit.has(alertKey(alert)));
   return <dialog ref={dialogRef} className="wba-drawer-panel wba-alert-drawer" aria-labelledby="alerts-title"
     onPointerDown={event => { backdropPointer.current = isDialogBackdrop(event); }}
     onClick={event => {
@@ -97,10 +96,8 @@ function AlertsPanel({ onClose, notifications, loading, error, onRetry, onViewed
     </header>
     <div className="wba-alert-scroll">
       {loading || error ? <ApiStatus loading={loading} error={error} onRetry={onRetry} loadingLabel="Loading notifications…"><SkeletonList /></ApiStatus> : <>
+        {notifications.length > 0 ? <section aria-label="Notification list" className="wba-alert-list">{notifications.map(alert => <AlertCard key={alertKey(alert)} alert={alert} />)}</section> : <div className="wba-alert-empty"><p>No notifications.</p></div>}
         {readError && <div role="alert" className="wba-alert-read-error">{readError} <button type="button" className="wba-pill-btn" disabled={marking} onClick={() => markViewed(notifications.filter(alert => !alert.isRead && alert.version))}>Retry</button></div>}
-        {current.length > 0 ? <section aria-label="New notifications" className="wba-alert-list">{current.map(alert => <AlertCard key={alertKey(alert)} alert={alert} />)}</section> : <div className="wba-alert-empty"><h3>You're all caught up</h3><p>No new notifications.</p></div>}
-        {viewed.length > 0 && <details className="wba-viewed-alerts"><summary>Viewed alerts <span>{viewed.length}</span></summary><div className="wba-alert-list">{viewed.map(alert => <AlertCard key={alertKey(alert)} alert={alert} />)}</div></details>}
-        {(marking || readError) && <p className="wba-alert-footer" role="status">{marking ? 'Marking notifications as viewed…' : 'Unread notifications are still highlighted.'}</p>}
       </>}
     </div>
   </dialog>;

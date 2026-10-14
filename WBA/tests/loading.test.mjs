@@ -92,15 +92,20 @@ test('product entry keeps the SKU preview read-only and labels concise', () => {
   assert.doesNotMatch(html, /generated automatically|Based on expiry tracking|How quickly stock|Enter the product details|Storage cost per unit|movement-rate-help|name="sku"|name="category"|Classification/);
 });
 
-test('notification cards separate severity and expiry details and retain viewed alerts', () => {
+test('notifications keep viewed and unread cards in their original order with compact indicators', () => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const expiry = [tomorrow.getFullYear(), String(tomorrow.getMonth() + 1).padStart(2, '0'), String(tomorrow.getDate()).padStart(2, '0')].join('-');
   const html = render(NotificationDrawer, { isOpen: true, notifications: [{ id: 'expiry-1', version: 'one', isRead: true,
     type: 'expiry', product: 'Air Conditioner', sku: 'WBA-EXP-001', severity: 'critical', lot: 'LOT-long-identifier',
-    expiresAt: expiry, daysLeft: 1, quantity: 5 }], onClose: () => {}, onViewed: () => {} });
-  assert.match(html, /No new notifications/);
-  assert.match(html, /<details[^>]*><summary>Viewed alerts/);
+    expiresAt: expiry, daysLeft: 1, quantity: 5 }, { id: 'stock-2', version: 'two', isRead: false,
+    type: 'stock', product: 'Desk fan', severity: 'warning', quantity: 1, safetyStock: 3 }], onClose: () => {}, onViewed: () => {} });
+  assert.match(html, /wba-alert-card is-viewed/);
+  assert.match(html, /wba-alert-card is-unread/);
+  assert.match(html, /wba-alert-read-state">Viewed<\/span>/);
+  assert.match(html, /wba-alert-read-state">Unread<\/span>/);
+  assert.ok(html.indexOf('Air Conditioner') < html.indexOf('Desk fan'));
+  assert.doesNotMatch(html, /<details|Viewed alerts|No new notifications|Marking notifications as viewed|Unread notifications are still highlighted/);
   assert.match(html, /Critical/);
   assert.match(html, /Expires tomorrow · 5 units/);
   assert.match(html, /<dt>Batch<\/dt><dd>LOT-long-identifier<\/dd>/);
