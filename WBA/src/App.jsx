@@ -15,7 +15,7 @@ import AdminDashboard from './components/dashboard/AdminDashboard';
 import GeneralHelpPage from './components/GeneralHelpPage';
 import PageRefreshLoader from './components/PageRefreshLoader';
 import AppSurface from './components/AppSurface';
-import { authApi, getToken, setToken } from './services/api';
+import { authApi, hasSession, setToken, SESSION_HINT_KEY } from './services/api';
 import { animateNavigation } from './utils/navigationMotion';
 import './App.css';
 import './landing-modern.css';
@@ -40,7 +40,7 @@ function App() {
     }
   });
   const [currentUser, setCurrentUser] = useState(null);
-  const [checkingSession, setCheckingSession] = useState(Boolean(getToken()));
+  const [checkingSession, setCheckingSession] = useState(hasSession());
   const [sessionError, setSessionError] = useState('');
 
   const [currentView, setCurrentView] = useState(() => getAccessRoute().view);
@@ -76,7 +76,7 @@ function App() {
         return;
       }
       // Login stores the token before React removes this public-route listener.
-      if (getToken()) return;
+      if (hasSession()) return;
       setCurrentView(route.view);
       setSelectedRole(route.role);
     };
@@ -86,11 +86,11 @@ function App() {
 
   useEffect(() => {
     let active = true;
-    if (getToken()) {
+    if (hasSession()) {
       authApi.me().then(user => {
         if (active) { setCurrentUser(user); setCurrentView(getAccessRoute().view === 'general-help' ? 'general-help' : 'dashboard'); }
       }).catch(error => {
-        if (active && getToken()) setSessionError(error.message);
+        if (active && hasSession()) setSessionError(error.message);
       }).finally(() => { if (active) setCheckingSession(false); });
     }
     const expired = () => {
@@ -100,6 +100,17 @@ function App() {
     };
     window.addEventListener('wba-auth-expired', expired);
     return () => { active = false; window.removeEventListener('wba-auth-expired', expired); };
+  }, []);
+
+  useEffect(() => {
+    const sessionChanged = event => {
+      if (event.key === SESSION_HINT_KEY) {
+        sessionStorage.removeItem('wba_api_token');
+        window.location.reload();
+      }
+    };
+    window.addEventListener('storage', sessionChanged);
+    return () => window.removeEventListener('storage', sessionChanged);
   }, []);
 
   useEffect(() => {
@@ -155,7 +166,7 @@ function App() {
   };
 
   const handleLogout = async () => {
-    try { await authApi.logout(); } catch (error) { if (getToken()) { setSessionError(error.message); return; } }
+    try { await authApi.logout(); } catch (error) { if (hasSession()) { setSessionError(error.message); return; } }
     setToken(null);
     setIsRolePickerOpen(false);
     setCurrentUser(null);

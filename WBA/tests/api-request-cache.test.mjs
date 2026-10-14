@@ -3,7 +3,7 @@ import { after, beforeEach, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 
-const original = { fetch: globalThis.fetch, window: globalThis.window, sessionStorage: globalThis.sessionStorage };
+const original = { fetch: globalThis.fetch, window: globalThis.window, sessionStorage: globalThis.sessionStorage, localStorage: globalThis.localStorage };
 const server = await createServer({ root: fileURLToPath(new URL('../', import.meta.url)), server: { middlewareMode: true, ws: false }, appType: 'custom' });
 const api = await server.ssrLoadModule('/src/services/api.js');
 const response = (data, status = 200) => ({ ok: status < 400, status, json: async () => data });
@@ -11,6 +11,8 @@ let calls;
 beforeEach(() => {
   const storage = new Map();
   globalThis.sessionStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
+  const local = new Map();
+  globalThis.localStorage = { getItem: key => local.get(key) ?? null, setItem: (key, value) => local.set(key, value), removeItem: key => local.delete(key) };
   globalThis.window = new EventTarget();
   calls = [];
   globalThis.fetch = async (url, options) => { calls.push({ url, options }); return response({ data: calls.length }); };
@@ -68,4 +70,28 @@ test('a previous session failing after login cannot sign out the new user', asyn
   await assert.rejects(old, /Unauthenticated/);
   assert.equal(api.getToken(), 'fixture-new-session');
   assert.equal(api.getCachedApiData('items'), undefined);
+});
+
+test('cookie sign-in stores only a non-secret hint and sends cookies without a bearer token', async () => {
+  globalThis.fetch = async (url, options) => { calls.push({ url, options }); return response({ user: { id: 1 } }); };
+  await api.authApi.login({ email: 'fixture@example.test', password: 'fixture-password', accessLevel: 'admin' });
+  assert.equal(JSON.parse(calls[0].options.body).useSessionCookie, true);
+  assert.equal(api.getToken(), null);
+  assert.equal(api.hasSession(), true);
+  await api.apiRequest('items');
+  assert.equal(calls[1].url, '/api/items');
+  assert.equal(calls[1].options.credentials, 'same-origin');
+  assert.equal(calls[1].options.headers.Authorization, undefined);
+  api.setToken(null);
+  assert.equal(api.hasSession(), false);
+});
+
+test('a changed cookie-session hint cannot reuse the previous users cached responses', async () => {
+  api.setToken(null);
+  localStorage.setItem(api.SESSION_HINT_KEY, 'fixture-cookie-admin');
+  await api.apiRequest('items');
+  localStorage.setItem(api.SESSION_HINT_KEY, 'fixture-cookie-warehouse');
+  assert.equal(api.getCachedApiData('items'), undefined);
+  await api.apiRequest('items');
+  assert.equal(calls.length, 2);
 });

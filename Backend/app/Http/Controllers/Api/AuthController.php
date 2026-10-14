@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Middleware\ApiCookieSession;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class AuthController extends ApiController
 
     public function login(Request $request): JsonResponse
     {
-        $data = $request->validate(['email' => 'required|email|max:254', 'password' => 'required|string|max:128', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))]]);
+        $data = $request->validate(['email' => 'required|email|max:254', 'password' => 'required|string|max:128', 'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))], 'useSessionCookie' => 'sometimes|boolean']);
         $attemptKey = $this->authAttemptKey($request, $data['email']);
         $retryAfter = RateLimiter::availableIn($attemptKey.':cooldown');
         if ($retryAfter > 0) {
@@ -67,7 +68,7 @@ class AuthController extends ApiController
         $request->setUserResolver(fn () => $user);
         $this->audit($request, 'Signed in', 'Signed in to the workspace.', $user->email);
 
-        return response()->json(['user' => $this->account($user), 'token' => $token]);
+        return $this->signInResponse($request, ['user' => $this->account($user)], $token);
     }
 
     public function reactivate(Request $request): JsonResponse
@@ -76,6 +77,7 @@ class AuthController extends ApiController
             'email' => 'required|email|max:254',
             'password' => 'required|string|max:128',
             'accessLevel' => ['required', Rule::in(array_keys(self::ROLES))],
+            'useSessionCookie' => 'sometimes|boolean',
         ]);
 
         $attemptKey = $this->authAttemptKey($request, $data['email']);
@@ -111,11 +113,10 @@ class AuthController extends ApiController
         $request->setUserResolver(fn () => $user);
         $this->audit($request, 'Reactivated account', 'Account reactivated by user within 30-day recovery window.', $user->email);
 
-        return response()->json([
+        return $this->signInResponse($request, [
             'message' => 'Account successfully reactivated. Welcome back!',
             'user' => $this->account($user->fresh()),
-            'token' => $token,
-        ]);
+        ], $token);
     }
 
     public function deactivate(Request $request): JsonResponse
@@ -144,7 +145,7 @@ class AuthController extends ApiController
             'deactivatedAt' => $user->deactivated_at?->toISOString(),
             'deletionAt' => $user->deletion_at?->toISOString(),
             'remainingDays' => 30,
-        ]);
+        ])->withCookie(ApiCookieSession::sessionCookie($request));
     }
 
     public function me(Request $request): JsonResponse
@@ -156,7 +157,16 @@ class AuthController extends ApiController
     {
         DB::table('api_tokens')->where('id', $request->attributes->get('token_id'))->delete();
 
-        return response()->json(['message' => 'Signed out.']);
+        return response()->json(['message' => 'Signed out.'])->withCookie(ApiCookieSession::sessionCookie($request));
+    }
+
+    private function signInResponse(Request $request, array $data, string $token): JsonResponse
+    {
+        if ($request->boolean('useSessionCookie')) {
+            return response()->json($data)->withCookie(ApiCookieSession::sessionCookie($request, $token));
+        }
+
+        return response()->json([...$data, 'token' => $token]);
     }
 
     private function authAttemptKey(Request $request, string $email): string
