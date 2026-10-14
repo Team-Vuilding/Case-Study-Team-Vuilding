@@ -93,13 +93,13 @@ export default function DashboardSidebar({
           {!collapsed && <span className="wba-dash-nav-label">Inventory</span>}
         </button>
 
-        {/* Purchase history */}
+        {/* Purchasing */}
         {isTabAllowed(accessLevel, 'purchase-history') && (
           <button
             type="button"
             className={`wba-dash-nav-item ${activeTab === 'purchase-history' ? 'active' : ''}`}
             onClick={() => onSelectTab && onSelectTab('purchase-history')}
-            title="Purchase history"
+            title="Purchasing"
           >
             <svg
               className="wba-dash-nav-svg"
@@ -114,7 +114,7 @@ export default function DashboardSidebar({
               <path d="M3 3v5h5" />
               <polyline points="12 7 12 12 15 15" />
             </svg>
-            {!collapsed && <span className="wba-dash-nav-label">Purchase history</span>}
+            {!collapsed && <span className="wba-dash-nav-label">Purchasing</span>}
           </button>
         )}
 

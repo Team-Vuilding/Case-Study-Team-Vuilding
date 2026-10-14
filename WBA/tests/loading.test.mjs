@@ -31,7 +31,7 @@ test('mobile navigation retains permitted labels after the desktop sidebar was c
     const html = render(DashboardSidebar, { currentUser: { accessLevel: role }, isCollapsed: true, isMobileOpen: true });
     assert.match(html, /Workspace navigation/);
     assert.doesNotMatch(html, /wba-dash-sidebar collapsed/);
-    for (const [tab, label] of [['dashboard', 'Dashboard'], ['inventory', 'Inventory'], ['purchase-history', 'Purchase history'], ['audit-logs', 'Audit logs'], ['manage-accounts', 'Manage Accounts'], ['help-center', 'Help center']]) {
+    for (const [tab, label] of [['dashboard', 'Dashboard'], ['inventory', 'Inventory'], ['purchase-history', 'Purchasing'], ['audit-logs', 'Audit logs'], ['manage-accounts', 'Manage Accounts'], ['help-center', 'Help center']]) {
       const visibleLabel = `class="wba-dash-nav-label">${label}</span>`;
       assert.equal(html.includes(visibleLabel), isTabAllowed(role, tab));
     }

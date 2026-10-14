@@ -110,7 +110,7 @@ export default function AdminDashboard({ currentUser, onLogout, theme, onToggleT
   const PAGE_TITLES = {
     dashboard: 'Dashboard',
     inventory: 'Inventory',
-    'purchase-history': 'Purchase History',
+    'purchase-history': 'Purchasing',
     'audit-logs': 'Audit Logs',
     'manage-accounts': 'Manage Accounts',
     'help-center': 'Help Center',
